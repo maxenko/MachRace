@@ -33,6 +33,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System")
 	ARaceGameStateBase* State;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	bool IsAutoAimTarget = false;
+
 	ARaceGameStateBase* GetState();
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Remember Transform", Keywords = "Records transform of given object at the time of calling this function."), Category = "MachRace|Engine")

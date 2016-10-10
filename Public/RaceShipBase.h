@@ -5,9 +5,9 @@
 #include "ShipBase.h"
 #include "RaceShipBase.generated.h"
 
-/**
- * 
- */
+
+
+
 UCLASS()
 class MACHRACE_API ARaceShipBase : public AShipBase {
 	GENERATED_BODY()

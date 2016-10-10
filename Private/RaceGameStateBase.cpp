@@ -20,9 +20,21 @@ void ARaceGameStateBase::BeginPlay() {
 
 void ARaceGameStateBase::MaintainState() {
 	
+	auto shipOk = false;
+	auto ship = GetRaceShip(shipOk);
+
+	if (!shipOk) {
+		return;
+	}
+
+	float speed = ship->GetTheoreticalSpeed();
+
 	// level 1  rules
-
-
+	if (Stage == GameStage::Desert && speed >= 2600) {
+		Stage = GameStage::DesertBoss;
+		OnSpawnLevel1Boss.Broadcast();
+	}
+	
 }
 
 // Called every frame
@@ -49,6 +61,8 @@ void ARaceGameStateBase::Tick(float DeltaTime) {
 			TopSpeed = speed;
 		}
 	}
+
+	MaintainState();
 }
 
 void ARaceGameStateBase::ResetXYZGrid(float xOffset) {

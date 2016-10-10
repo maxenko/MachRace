@@ -3,6 +3,7 @@
 #include "MachRace.h"
 #include "RaceLaser.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 // Sets default values
@@ -28,7 +29,45 @@ bool ARaceLaser::traceAhead() {
 	auto from = actorLoc + From;
 	auto to = from + To;
 
-	auto block = w->LineTraceSingleByChannel(hit, from, to, channel);
+	bool block;
+
+	if (EnableAutoaim) {
+
+		TArray<TEnumAsByte<EObjectTypeQuery>> channels;
+		//channels.Add(EObjectTypeQuery::)
+		TArray<AActor*> ignore;
+		TArray<FHitResult> hits;
+		UKismetSystemLibrary::SphereTraceMultiForObjects(this, from, to, 600, channels, false, ignore, EDrawDebugTrace::ForOneFrame, hits, true);
+
+		// find the closest
+		FHitResult closest;
+		float lastClosestDist = 999999;
+
+		for (auto h : hits) {
+
+			auto dist = FVector::Dist(h.Location, GetActorLocation());
+
+			// are we hitting a target that can be autoaimed?
+			if (h.Actor.Get()->IsA(ARaceActorBase::StaticClass())) {
+				
+				auto target = Cast<ARaceActorBase>(h.Actor.Get());
+
+				// only process autoaim targets
+				if (!target->IsAutoAimTarget) {
+					continue;
+				}
+
+			}
+
+			if (lastClosestDist < dist) {
+				lastClosestDist = dist;
+				closest = h;
+			}
+		}
+
+	} else {
+		block = w->LineTraceSingleByChannel(hit, from, to, channel);
+	}
 
 	//DrawDebugLine(w, from, to, FColor::Red, false, 0.0, 0, 5);
 
@@ -41,7 +80,7 @@ bool ARaceLaser::traceAhead() {
 
 	if (block && IsFiring) {
 		LastHit = hit;
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, hit.Actor->GetName());
+
 		OnLaserHit(hit);
 		isHitting = true;
 	} else {

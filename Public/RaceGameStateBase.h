@@ -10,6 +10,8 @@
 
 class ARacePlayerBase;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpawnLevel1Boss);
+
 UCLASS()
 class MACHRACE_API ARaceGameStateBase : public AGameState
 {
@@ -48,6 +50,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool DisableDecorativeGeometry = false;
 
+	UPROPERTY(BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool DisableAccelerators = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	GameStage Stage;
 
@@ -56,6 +61,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Grid")
 	int32 Level1Index = 0;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnSpawnLevel1Boss OnSpawnLevel1Boss;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Maintain State", Keywords = "Observe and maintain rules of the game."), Category = "MachRace|Gameplay")
 	void MaintainState();

@@ -25,7 +25,7 @@ void AShipBase::Tick( float DeltaTime ){
 }
 
 void AShipBase::SetShipSpeed(float speed) {
-	UPrimitiveComponent* root = Cast<UPrimitiveComponent*>(GetRootComponent());
+	UPrimitiveComponent* root = Cast<UPrimitiveComponent>(GetRootComponent());
 
 	if (root && GetState() ) {
 
