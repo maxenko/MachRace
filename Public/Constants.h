@@ -1,0 +1,3 @@
+#pragma once
+#define MACH_SPEED 730;
+#define THEORETICAL_SPEED_MULTIPLIER .25;
