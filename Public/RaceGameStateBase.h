@@ -53,6 +53,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool DisableAccelerators = false;
 
+	UPROPERTY(BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool EnableAutoaim = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	GameStage Stage;
 

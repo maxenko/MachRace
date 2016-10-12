@@ -22,6 +22,11 @@ bool ARaceLaser::traceAhead() {
 		return false;
 	}
 
+	auto state = GetState();
+	if (!state) {
+		return false;
+	}
+
 	FHitResult hit;
 	ECollisionChannel channel = ECollisionChannel::ECC_Visibility;
 
@@ -31,46 +36,67 @@ bool ARaceLaser::traceAhead() {
 
 	bool block;
 
-	if (EnableAutoaim) {
+	// handle autoaim logic (sphere trace, and closest IsAutomAimTarget of RaceActorBase
+	if (state->EnableAutoaim) {
 
+		// sphere trace
 		TArray<TEnumAsByte<EObjectTypeQuery>> channels;
-		//channels.Add(EObjectTypeQuery::)
 		TArray<AActor*> ignore;
 		TArray<FHitResult> hits;
-		UKismetSystemLibrary::SphereTraceMultiForObjects(this, from, to, 600, channels, false, ignore, EDrawDebugTrace::ForOneFrame, hits, true);
+		UKismetSystemLibrary::SphereTraceMultiForObjects(this, from, to, 600, AutoAimQueryParams, false, ignore, EDrawDebugTrace::ForOneFrame, hits, true);
 
-		// find the closest
-		FHitResult closest;
-		float lastClosestDist = 999999;
 
-		for (auto h : hits) {
+		DrawDebugLine(w, from, to, FColor::Green, false, 0.0, 0, 5);
 
-			auto dist = FVector::Dist(h.Location, GetActorLocation());
+		if (hits.Num() <= 0) {
 
-			// are we hitting a target that can be autoaimed?
-			if (h.Actor.Get()->IsA(ARaceActorBase::StaticClass())) {
-				
-				auto target = Cast<ARaceActorBase>(h.Actor.Get());
+			block = false;
 
-				// only process autoaim targets
-				if (!target->IsAutoAimTarget) {
-					continue;
+		} else {
+
+			// find the closest
+			FHitResult lastClosest;
+			float lastClosestDist = 999999;
+
+			bool hitFound = false;
+
+			for (auto h : hits) {
+
+				auto dist = FVector::Dist(h.Location, GetActorLocation());
+
+				// are we hitting a target that can be autoaimed?
+				if (h.Actor.Get()->IsA(ARaceActorBase::StaticClass())) {
+
+					auto target = Cast<ARaceActorBase>(h.Actor.Get());
+
+					// only process autoaim targets
+					if (!target->IsAutoAimTarget) {
+						continue;
+					}
+
+					if (lastClosestDist > dist) {
+						lastClosestDist = dist;
+						lastClosest = h;
+						hitFound = true;
+					}
 				}
-
 			}
 
-			if (lastClosestDist < dist) {
-				lastClosestDist = dist;
-				closest = h;
+			// if we got something
+			if (hitFound) {
+				hit = lastClosest;
+				block = true;
 			}
 		}
 
+	// handle standard (aim straight) logic
 	} else {
 		block = w->LineTraceSingleByChannel(hit, from, to, channel);
 	}
 
 	//DrawDebugLine(w, from, to, FColor::Red, false, 0.0, 0, 5);
 
+	// 
 	if (IsFiring == false && previousIsFiring == true) {
 		OnLaserEndFiring();
 	} else if (IsFiring == true && previousIsFiring == false) {

@@ -49,8 +49,8 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FEndFireDelegate EndFire;
 
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	bool EnableAutoaim;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	TArray<TEnumAsByte<EObjectTypeQuery>> AutoAimQueryParams;
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Laser Hit"), Category = "MachRace|Gameplay")
 	void OnLaserHit(FHitResult hit);
