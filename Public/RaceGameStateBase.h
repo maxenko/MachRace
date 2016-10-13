@@ -18,12 +18,12 @@ class MACHRACE_API ARaceGameStateBase : public AGameState
 	GENERATED_BODY()
 	
 private:
+
 	void transitionAtmosphere(AExponentialHeightFog* fog, FAtmosphereSettings to, float speed);
 	GameStage previousStage;
 	FAtmosphereSettings atmosphereSettings;
 	void SetAtmosphereByStage();
 	
-
 public:
 
 	ARaceGameStateBase();
@@ -33,7 +33,9 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
-
+	
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System")
+	TArray<AActor*> IgnoredByLaserTrace;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	bool IsInGame = false;
@@ -67,6 +69,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnSpawnLevel1Boss OnSpawnLevel1Boss;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add to Ignore By Laser", Keywords = "Add actor to registry of actors ignored by laser traces."), Category = "MachRace|System")
+	void AddIgnoredByLaserTrace(AActor* actorToIgnore);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Actors Ignored By Laser Trace", Keywords = "Gets actors ignored by laser traces."), Category = "MachRace|System")
+	TArray<AActor*> GetActorsIgnoredByLaserTrace(bool doCleanUp = true);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Maintain State", Keywords = "Observe and maintain rules of the game."), Category = "MachRace|Gameplay")
 	void MaintainState();

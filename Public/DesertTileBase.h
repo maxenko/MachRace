@@ -2,19 +2,21 @@
 
 #pragma once
 
-#include "BasicRaceActor.h"
+#include "RaceActorBase.h"
 #include "DesertTileBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MACHRACE_API ADesertTileBase : public ABasicRaceActor {
+class MACHRACE_API ADesertTileBase : public ARaceActorBase {
 	GENERATED_BODY()
 
 public:
 
 	ADesertTileBase();
+
+	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Instancer", Keywords = "Gets MachRace instancer, same as Sate->GetInstancer."), Category = "MachRace|Utility")
 	ARaceContentInstancer* GetInstancer(bool& success);

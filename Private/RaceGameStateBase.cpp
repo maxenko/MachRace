@@ -3,6 +3,7 @@
 #include "MachRace.h"
 #include "RaceGameStateBase.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "RacePlayerBase.h"
 #include "CustomExtensions.h"
 
@@ -63,6 +64,22 @@ void ARaceGameStateBase::Tick(float DeltaTime) {
 	}
 
 	MaintainState();
+}
+
+void ARaceGameStateBase::AddIgnoredByLaserTrace(AActor* actorToIgnore) {
+	IgnoredByLaserTrace.Add(actorToIgnore);	
+}
+
+
+TArray<AActor*> ARaceGameStateBase::GetActorsIgnoredByLaserTrace(bool doCleanUp) {
+
+	if (doCleanUp) {
+		IgnoredByLaserTrace.RemoveAll([](const AActor* a) {
+			return !UKismetSystemLibrary::IsValid(a);
+		});
+	}
+
+	return IgnoredByLaserTrace;
 }
 
 void ARaceGameStateBase::ResetXYZGrid(float xOffset) {

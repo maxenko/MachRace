@@ -1,8 +1,8 @@
 // Copyright 2015 - Max Enko
 
 #include "MachRace.h"
-#include "DesertTileBase.h"
 #include "RaceShipBase.h"
+#include "DesertTileBase.h"
 
 
 // Sets default values
@@ -13,11 +13,17 @@ ADesertTileBase::ADesertTileBase() {
 }
 
 
-ARaceContentInstancer* ADesertTileBase::GetInstancer(bool& success) {
-	auto stateOK = false;
-	auto state = GetState(stateOK);
+void ADesertTileBase::BeginPlay() {
+	Super::BeginPlay();
 
-	if (!stateOK) {
+	//add self to states ignored actors here...
+}
+
+
+ARaceContentInstancer* ADesertTileBase::GetInstancer(bool& success) {
+	auto state = GetState();
+
+	if (state) {
 		success = false;
 		return NULL;
 	}
@@ -28,9 +34,8 @@ ARaceContentInstancer* ADesertTileBase::GetInstancer(bool& success) {
 
 int32 ADesertTileBase::GetObstacleCount() {
 
-	bool stateOk = false;
-	auto state = GetState(stateOk);
-	if (stateOk) {
+	auto state = GetState();
+	if (state) {
 
 		// check if override is on
 		if (state->DisableObstacles) {
