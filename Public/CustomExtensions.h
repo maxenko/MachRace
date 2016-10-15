@@ -165,4 +165,5 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Trace Single", Keywords = "Traces single trace by channel.", AutoCreateRefTerm = "ignored"), Category = "MachRace|Utility")
 	static FHitResult TraceSingle(UWorld* w, FVector from, FVector to, TArray<AActor*> ignored);
+
 };

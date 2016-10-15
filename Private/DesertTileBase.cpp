@@ -16,7 +16,7 @@ ADesertTileBase::ADesertTileBase() {
 void ADesertTileBase::BeginPlay() {
 	Super::BeginPlay();
 
-	//add self to states ignored actors here...
+	GetState()->AddIgnoredByLaserTrace(this);
 }
 
 

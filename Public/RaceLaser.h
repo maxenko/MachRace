@@ -9,6 +9,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFireDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEndFireDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHitDelegate, FHitResult, hit);
+
 
 UCLASS()
 class MACHRACE_API ARaceLaser : public ARaceActorBase
@@ -47,25 +49,22 @@ public:
 	FFireDelegate Fire;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
-	FEndFireDelegate EndFire;
+	FHitDelegate HasHit;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
+	FFireDelegate HitEnded;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
+	FFireDelegate NoHit;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
+	FFireDelegate StartFiring;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
+	FFireDelegate EndFiring;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	TArray<TEnumAsByte<EObjectTypeQuery>> AutoAimQueryParams;
-
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Laser Hit"), Category = "MachRace|Gameplay")
-	void OnLaserHit(FHitResult hit);
-
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Laser End Hit"), Category = "MachRace|Gameplay")
-	void OnLaserEndHit();
-
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Laser No Hit"), Category = "MachRace|Gameplay")
-	void OnLaserNoHit();
-
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Laser Start Firing"), Category = "MachRace|Gameplay")
-	void OnLaserStartFiring();
-
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Laser End Firing"), Category = "MachRace|Gameplay")
-	void OnLaserEndFiring();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

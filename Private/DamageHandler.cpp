@@ -89,7 +89,7 @@ void UDamageHandler::InitializeComponent() {
 	HandleDamage.BindUFunction(this, TEXT("TakeDamage"));
 
 	AActor* a = GetOwner();
-	//a->OnTakePointDamage.Add(HandleDamage);
+	a->OnTakePointDamage.Add(HandleDamage);
 }
 
 

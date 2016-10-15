@@ -4,6 +4,7 @@
 #include "RaceLaser.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -41,7 +42,7 @@ bool ARaceLaser::traceAhead() {
 
 		// sphere trace
 		TArray<TEnumAsByte<EObjectTypeQuery>> channels;
-		TArray<AActor*> ignore;
+		TArray<AActor*> ignore = GetState()->GetActorsIgnoredByLaserTrace();
 		TArray<FHitResult> hits;
 		UKismetSystemLibrary::SphereTraceMultiForObjects(this, from, to, 600, AutoAimQueryParams, false, ignore, EDrawDebugTrace::ForOneFrame, hits, true);
 
@@ -74,6 +75,17 @@ bool ARaceLaser::traceAhead() {
 						continue;
 					}
 
+					// calc angle between forward and hit vector
+					auto hitVector = (from - to);
+					auto straightVector = (from - (from + FVector(-10000, 0, 0)));
+					hitVector.Normalize();
+					straightVector.Normalize();
+
+					auto angle = FVector::DotProduct(hitVector, straightVector);
+					auto deg = UKismetMathLibrary::DegCos(angle);
+
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Angle: %f"), deg));
+
 					if (lastClosestDist > dist) {
 						lastClosestDist = dist;
 						lastClosest = h;
@@ -98,25 +110,26 @@ bool ARaceLaser::traceAhead() {
 
 	// 
 	if (IsFiring == false && previousIsFiring == true) {
-		OnLaserEndFiring();
+		EndFiring.Broadcast();
 	} else if (IsFiring == true && previousIsFiring == false) {
-		OnLaserStartFiring();
+		StartFiring.Broadcast();
 	}
 	previousIsFiring = IsFiring;
 
 	if (block && IsFiring) {
 		LastHit = hit;
 
-		OnLaserHit(hit);
+		//OnLaserHit(hit);
+		HasHit.Broadcast(hit);
 		isHitting = true;
 	} else {
 		if (isHitting == true) {
 			isHitting = false;
-			OnLaserEndHit();
+			HitEnded.Broadcast();
 		}
 
 		if (IsFiring) {
-			OnLaserNoHit();
+			NoHit.Broadcast();
 		}
 	}
 
