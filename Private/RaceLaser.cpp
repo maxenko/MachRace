@@ -84,7 +84,7 @@ bool ARaceLaser::traceAhead() {
 					auto angle = FVector::DotProduct(hitVector, straightVector);
 					auto deg = UKismetMathLibrary::DegCos(angle);
 
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Angle: %f"), deg));
+					//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Angle: %f"), deg));
 
 					if (lastClosestDist > dist) {
 						lastClosestDist = dist;
@@ -106,9 +106,6 @@ bool ARaceLaser::traceAhead() {
 		block = w->LineTraceSingleByChannel(hit, from, to, channel);
 	}
 
-	//DrawDebugLine(w, from, to, FColor::Red, false, 0.0, 0, 5);
-
-	// 
 	if (IsFiring == false && previousIsFiring == true) {
 		EndFiring.Broadcast();
 	} else if (IsFiring == true && previousIsFiring == false) {

@@ -9,6 +9,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnComponentDestroyedSignature, USceneComponent*, component);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorDestroyedSignature, AActor*, actor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnComponentDamageSignature, USceneComponent*, component, float, health);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorDamageSignature, float, HealthLeft);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -39,6 +40,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnActorDestroyedSignature OnActorDestroyed;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnActorDamageSignature OnActorDamage;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Take Damage", Keywords = "Take Damage and subtract it from Health."), Category = "MachRace|Gameplay")
 	float TakeDamage(AActor* DamagedActor, float Damage, const FVector& HitFromDirection, const FHitResult& HitInfo, AController* EventInstigator, AActor* DamageCauser, TSubclassOf<class UDamageType> DamageTypeClass);

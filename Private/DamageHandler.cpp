@@ -47,6 +47,9 @@ float UDamageHandler::TakeDamage(AActor* DamagedActor, float Damage, const FVect
 		// if at zero, call actor destroyed event
 		if (Health <= 0) {
 			OnActorDestroyed.Broadcast(GetOwner());
+			return 0;
+		} else {
+			OnActorDamage.Broadcast(Health);
 		}
 		return Health;
 	}
@@ -62,11 +65,7 @@ float UDamageHandler::AddHealth(float amount) {
 }
 
 void UDamageHandler::SetHealth(float amount){
-	if (MaxHealth <= 0) {
-		Health = FMath::Clamp(amount, 0.f, 999999.f);
-	} else {
-		Health = FMath::Clamp(amount, 0.0f, MaxHealth);
-	}
+	Health = MaxHealth = FMath::Clamp(amount, 0.f, 999999.f);
 }
 
 
