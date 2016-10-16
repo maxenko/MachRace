@@ -68,19 +68,16 @@ void UDamageHandler::SetHealth(float amount){
 	Health = MaxHealth = FMath::Clamp(amount, 0.f, 999999.f);
 }
 
-
 // Called when the game starts
 void UDamageHandler::BeginPlay() {
 	Super::BeginPlay();
 
 }
 
-
 // Called every frame
 void UDamageHandler::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 }
-
 
 void UDamageHandler::InitializeComponent() {
 
@@ -90,7 +87,6 @@ void UDamageHandler::InitializeComponent() {
 	AActor* a = GetOwner();
 	a->OnTakePointDamage.Add(HandleDamage);
 }
-
 
 void UDamageHandler::RegisterComponentForDamage(USceneComponent* c, float initialHealth) {
 	FComponentDamageRecord r;

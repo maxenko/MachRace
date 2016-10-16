@@ -11,6 +11,7 @@
 class ARacePlayerBase;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpawnLevel1Boss);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathLevel1Boss);
 
 UCLASS()
 class MACHRACE_API ARaceGameStateBase : public AGameState
@@ -61,6 +62,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	GameStage Stage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	GameStage PreviousStage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Grid")
 	TArray<FVector> Level2Index;
 
@@ -69,6 +73,18 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnSpawnLevel1Boss OnSpawnLevel1Boss;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnDeathLevel1Boss OnDeathLevel1Boss;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool Level1BossDefeated = false;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Level 1 Boss as Defeated", Keywords = "Sets level one boss as defeated, affecting related state conditions."), Category = "MachRace|System")
+	void SetLevelOneBossDeafeated();
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Game Stage", Keywords = "Sets game stage, forces if necessary."), Category = "MachRace|System")
+	void SetStage(GameStage newStage, bool force = false);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add to Ignore By Laser", Keywords = "Add actor to registry of actors ignored by laser traces."), Category = "MachRace|System")
 	void AddIgnoredByLaserTrace(AActor* actorToIgnore);

@@ -14,6 +14,47 @@ ARaceGameStateBase::ARaceGameStateBase() {
 	SetAtmosphereByStage();
 }
 
+void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
+	PreviousStage = Stage;
+	Stage = newStage;
+
+	if (force) {
+		if (newStage == GameStage::DesertBoss) {
+			// force to 2600
+			bool shipOk = false;
+			auto ship = GetRaceShip(shipOk);
+			if (shipOk && ship->GetSpeed() < 2600) {
+				ship->SetShipSpeed(2600);
+			}
+
+			DisableAccelerators =
+			DisableDecorativeGeometry =
+			DisableObstacles = true;
+			
+
+		} else if(newStage == GameStage::InfiniteHex){
+			// force 2600 + set lvl1 boss death to true
+
+			Level1BossDefeated = true;
+
+			bool shipOk = false;
+			auto ship = GetRaceShip(shipOk);
+			if (shipOk && ship->GetSpeed() < 2600) {
+				ship->SetShipSpeed(2600);
+			}
+
+			OnDeathLevel1Boss.Broadcast();
+		}
+	}
+}
+
+void  ARaceGameStateBase::SetLevelOneBossDeafeated() {
+	Level1BossDefeated = true;
+	OnDeathLevel1Boss.Broadcast();
+
+	SetStage(GameStage::InfiniteHex);
+}
+
 // Called when the game starts or when spawned
 void ARaceGameStateBase::BeginPlay() {
 	Super::BeginPlay();
@@ -32,6 +73,7 @@ void ARaceGameStateBase::MaintainState() {
 
 	// level 1  rules
 	if (Stage == GameStage::Desert && speed >= 2600) {
+		PreviousStage = GameStage::Desert;
 		Stage = GameStage::DesertBoss;
 		OnSpawnLevel1Boss.Broadcast();
 	}
