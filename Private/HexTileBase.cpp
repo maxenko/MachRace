@@ -51,6 +51,17 @@ bool AHexTileBase::isWithinThreshold(FVector v) {
 	}
 
 	auto cm = UGameplayStatics::GetPlayerCameraManager(this, 0);
+
+	if (!cm) {
+		return false;
+	}
+
+	auto dist = FVector::Dist(v, cm->GetCameraLocation());
+	
+	// if we are too far from the point, no needs to calculate anything further
+	if (dist > DistanceThreshold) {
+		return false;
+	}
 	
 	auto forward = cm->GetCameraRotation().Vector(); // look at normal
 	FVector directional = Target->GetActorLocation() - v; // to target normal
@@ -65,7 +76,7 @@ bool AHexTileBase::isWithinThreshold(FVector v) {
 
 void AHexTileBase::drawDebug() {
 	for (FTransform t : Grid) {
-		if (isWithinThreshold(t.GetLocation())) {
+		if (isWithinThreshold(t.GetLocation()+GetActorLocation())) {
 			DrawDebugPoint(GetWorld(), t.GetLocation(), 30, FColor::Red, false, .08, 0);
 		}
 	}

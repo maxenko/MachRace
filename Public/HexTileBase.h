@@ -39,6 +39,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float VisibleAngleThreshold = 40;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	float DistanceThreshold = 500;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Utility")
 	bool DrawDebug = false;
 
