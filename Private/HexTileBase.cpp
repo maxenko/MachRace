@@ -8,9 +8,7 @@
 void AHexTileBase::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 
-	if (DrawDebug) {
-		drawDebug();
-	}
+	ScanVisibleGrid(EnableSpawns);
 }
 
 void AHexTileBase::projectGrid() {
@@ -38,17 +36,11 @@ void AHexTileBase::projectGrid() {
 
 			// generate a cell transform
 			this->Grid.Add(generateCellT(r,c));
-
 		}
 	}
 }
 
-
 bool AHexTileBase::isWithinThreshold(FVector v) {
-	
-	if (!Target) {
-		return false;
-	}
 
 	auto cm = UGameplayStatics::GetPlayerCameraManager(this, 0);
 
@@ -64,42 +56,60 @@ bool AHexTileBase::isWithinThreshold(FVector v) {
 	}
 	
 	auto forward = cm->GetCameraRotation().Vector(); // look at normal
-	FVector directional = Target->GetActorLocation() - v; // to target normal
+	FVector directional = UGameplayStatics::GetPlayerPawn(this,0)->GetActorLocation() - v; // to target normal
 
 	forward.Normalize();
 	directional.Normalize();
 	
+	// angle between vectors (we're concerned whether or not vector falls inside the visible cone & dist
 	float dProductAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(forward, directional))); // angle to target
 
-	return FMath::Abs(VisibleAngleThreshold) > FMath::Abs(180-dProductAngle);
-}
-
-void AHexTileBase::drawDebug() {
-	for (FTransform t : Grid) {
-		if (isWithinThreshold(t.GetLocation()+GetActorLocation())) {
-			DrawDebugPoint(GetWorld(), t.GetLocation(), 30, FColor::Red, false, .08, 0);
-		}
-	}
+	return FMath::Abs(VisibleAngleThreshold) > FMath::Abs(180-dProductAngle); 
 }
 
 void AHexTileBase::GenerateCoordinateGrid() {
 	this->projectGrid();
 }
 
-TArray<float> AHexTileBase::CalcDistancesToTarget() {
-
-	if (!Target || Grid.Num() == 0) {
-		return TArray<float>();
-	}
-
-	TArray<float> distances;
-
-	FVector targetWorldPos = Target->GetActorLocation();
-
+void AHexTileBase::ScanVisibleGrid(bool triggerSpawns) {
 	for (FTransform t : Grid) {
-		distances.Add(FVector::Dist(targetWorldPos, t.GetLocation()));
-		//isWithinThreshold(t.GetLocation());
+		if (isWithinThreshold(t.GetLocation() + GetActorLocation())) {
+
+			
+
+			// if index isn't in SpawnIndex and we can trigger spawn, notify subscriber(s)
+			if (triggerSpawns && !IndexTaken(t)) {
+				OnAvailableIndex.Broadcast(t, t * GetActorTransform());
+			}
+
+			if (DrawDebug) {
+				FColor debugDrawColor = FColor::Green;
+				if (IndexTaken(t)) {
+					debugDrawColor = FColor::Red;
+				}
+				DrawDebugPoint(GetWorld(), t.GetLocation(), 30, debugDrawColor, false, .08, 0);
+			}
+		}
+	}
+}
+
+void AHexTileBase::TakeIndex(FTransform localT) {
+	SpawnIndex.Add(localT);
+}
+
+bool AHexTileBase::IndexTaken(FTransform localT) {
+
+	for (auto t : SpawnIndex) {
+		if (
+				t.GetLocation() == localT.GetLocation()
+			&&	t.GetRotation() == localT.GetRotation()
+			&&	t.GetScale3D()	== localT.GetScale3D()
+
+			) {
+			return true;
+		}
 	}
 
-	return distances;
+	return false;
 }
+
