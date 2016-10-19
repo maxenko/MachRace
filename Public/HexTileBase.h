@@ -15,7 +15,8 @@ class MACHRACE_API AHexTileBase : public ARaceActorBase {
 private:
 	void projectGrid();
 	bool isWithinThreshold(FVector v); // checks to see if two coordinates are within threshold specified by SpawnThreshold
-	void drawDebug();
+	FVector cameraLoc;
+	FVector cameraDir;
 
 public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Grid")

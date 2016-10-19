@@ -8,7 +8,15 @@
 void AHexTileBase::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 
-	ScanVisibleGrid(EnableSpawns);
+	// pull some stuff we're going to need every frame
+	auto cm = UGameplayStatics::GetPlayerCameraManager(this, 0);
+
+	if (cm) {
+		cameraLoc = cm->GetCameraLocation();
+		cameraDir = cm->GetCameraRotation().Vector();
+		cameraDir.Normalize();
+		ScanVisibleGrid(EnableSpawns);
+	}
 }
 
 void AHexTileBase::projectGrid() {
@@ -19,6 +27,7 @@ void AHexTileBase::projectGrid() {
 	int32 rows = FMath::FloorToInt(VerticalRange / cellHeight);
 	int32 cols = FMath::FloorToInt(HorisontalRange / cellWidth);
 	float yOffset = cols * cellWidth/2; // offset grid to make origin in the middle
+	float xOffset = rows * cellHeight;
 
 	auto generateCellT = [&](int32 r, int32 c) {
 
@@ -26,7 +35,7 @@ void AHexTileBase::projectGrid() {
 		float y = c * cellWidth + (r % 2 == 1 ? cellWidth/2 : 0); // offset each odd row
 
 		return FTransform(
-			FVector(x, y - yOffset, 0)
+			FVector(x - xOffset, y - yOffset, 0)
 		);
 	};
 
@@ -42,13 +51,6 @@ void AHexTileBase::projectGrid() {
 
 bool AHexTileBase::isWithinThreshold(FVector v) {
 
-	auto cm = UGameplayStatics::GetPlayerCameraManager(this, 0);
-
-	if (!cm) {
-		return false;
-	}
-
-	auto cameraLoc = cm->GetCameraLocation();
 	auto dist = FVector::Dist(v, cameraLoc );
 	
 	// if we are too far from the point, no needs to calculate anything further
@@ -56,14 +58,11 @@ bool AHexTileBase::isWithinThreshold(FVector v) {
 		return false;
 	}
 	
-	auto forward = cm->GetCameraRotation().Vector(); // look at normal
 	FVector directional = cameraLoc - v; // to target normal
-
-	forward.Normalize();
 	directional.Normalize();
 	
 	// angle between vectors (we're concerned whether or not vector falls inside the visible cone & dist
-	float dProductAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(forward, directional))); // angle to target
+	float dProductAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(cameraDir, directional))); // angle to target
 
 	return FMath::Abs(VisibleAngleThreshold) > FMath::Abs(180-dProductAngle);
 }
