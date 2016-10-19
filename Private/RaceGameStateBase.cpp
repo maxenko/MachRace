@@ -72,7 +72,7 @@ void ARaceGameStateBase::MaintainState() {
 	float speed = ship->GetTheoreticalSpeed();
 
 	// level 1  rules
-	if (Stage == GameStage::Desert && speed >= 2600) {
+	if (Stage == GameStage::Desert && speed >= 2600 && !Level1BossDefeated) {
 		PreviousStage = GameStage::Desert;
 		Stage = GameStage::DesertBoss;
 		OnSpawnLevel1Boss.Broadcast();

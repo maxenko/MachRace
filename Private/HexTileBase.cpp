@@ -48,7 +48,8 @@ bool AHexTileBase::isWithinThreshold(FVector v) {
 		return false;
 	}
 
-	auto dist = FVector::Dist(v, cm->GetCameraLocation());
+	auto cameraLoc = cm->GetCameraLocation();
+	auto dist = FVector::Dist(v, cameraLoc );
 	
 	// if we are too far from the point, no needs to calculate anything further
 	if (dist > DistanceThreshold) {
@@ -56,7 +57,7 @@ bool AHexTileBase::isWithinThreshold(FVector v) {
 	}
 	
 	auto forward = cm->GetCameraRotation().Vector(); // look at normal
-	FVector directional = UGameplayStatics::GetPlayerPawn(this,0)->GetActorLocation() - v; // to target normal
+	FVector directional = cameraLoc - v; // to target normal
 
 	forward.Normalize();
 	directional.Normalize();
@@ -64,7 +65,7 @@ bool AHexTileBase::isWithinThreshold(FVector v) {
 	// angle between vectors (we're concerned whether or not vector falls inside the visible cone & dist
 	float dProductAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(forward, directional))); // angle to target
 
-	return FMath::Abs(VisibleAngleThreshold) > FMath::Abs(180-dProductAngle); 
+	return FMath::Abs(VisibleAngleThreshold) > FMath::Abs(180-dProductAngle);
 }
 
 void AHexTileBase::GenerateCoordinateGrid() {
@@ -73,9 +74,8 @@ void AHexTileBase::GenerateCoordinateGrid() {
 
 void AHexTileBase::ScanVisibleGrid(bool triggerSpawns) {
 	for (FTransform t : Grid) {
-		if (isWithinThreshold(t.GetLocation() + GetActorLocation())) {
-
-			
+		auto worldLoc = t.GetLocation() + GetActorLocation();
+		if ( isWithinThreshold(worldLoc) ) {
 
 			// if index isn't in SpawnIndex and we can trigger spawn, notify subscriber(s)
 			if (triggerSpawns && !IndexTaken(t)) {
@@ -87,7 +87,11 @@ void AHexTileBase::ScanVisibleGrid(bool triggerSpawns) {
 				if (IndexTaken(t)) {
 					debugDrawColor = FColor::Red;
 				}
-				DrawDebugPoint(GetWorld(), t.GetLocation(), 30, debugDrawColor, false, .08, 0);
+				DrawDebugPoint(GetWorld(), worldLoc, 10, debugDrawColor, false, .08, 0);
+			}
+		} else {
+			if (DrawDebug) {
+				DrawDebugPoint(GetWorld(), worldLoc, 3, FColor::Black, false, .08, 0);
 			}
 		}
 	}
