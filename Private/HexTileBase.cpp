@@ -78,6 +78,8 @@ void AHexTileBase::projectGrid() {
 			this->Grid.Add(generateCellT(r,c));
 		}
 	}
+
+
 }
 
 bool AHexTileBase::isWithinThreshold(FVector v) {
@@ -226,4 +228,26 @@ void AHexTileBase::HexTileChanceSpawn(EHexTileChance& Branches) {
 	int32 pick = FMath::RandRange(0, chances.Num() - 1);
 
 	Branches = chances[pick];
+}
+
+FVector AHexTileBase::GetNextTileSpawnPos() {
+
+	auto state = GetState();
+	if (!state) {
+		return FVector::ZeroVector;
+	}
+
+	bool shipOk;
+	auto ship = state->GetRaceShip(shipOk);
+
+	if (!shipOk) {
+		return FVector::ZeroVector;
+	}
+
+	float cellHeight = CellSize * 2;
+	int32 rows = FMath::FloorToInt(VerticalRange / cellHeight);
+	float xOffset = (rows) * -cellHeight;
+
+	return FVector( xOffset + GetActorLocation().X, ship->GetActorLocation().Y, GetActorLocation().Z );
+
 }

@@ -75,6 +75,7 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Chance Hex Spawn", ExpandEnumAsExecs = "Branches"), Category = "MachRace|Gameplay")
 	void HexTileChanceSpawn(EHexTileChance& Branches);
 
-
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Next Tile Spawn Pos", Keywords = "Gets next tiles spawn position based on "), Category = "MachRace|System")
+	FVector GetNextTileSpawnPos();
 
 };
