@@ -21,6 +21,35 @@ void AHexTileBase::Tick(float DeltaSeconds) {
 	}
 }
 
+void AHexTileBase::BeginPlay() {
+	Super::BeginPlay();
+
+	weights = GenerateDistributionMap();
+	auto d = normilizeDistribution(weights);
+	int32 mapSize = 1000;
+	chances.Reserve(mapSize);
+
+	// add specific enum selection N amount of times depending on the weight derived out of mapSize
+	auto distribute = [&](EHexTileChance t, float weight) {
+
+		int32 chunkSize = UKismetMathLibrary::FTrunc(weight * (float)mapSize);
+
+		for (int i = 0; i < chunkSize; ++i) {
+			chances.Add(t);
+		}
+	};
+
+	// distribute chances (fills the array for random pick)
+	distribute(EHexTileChance::Accelerator, d.Accelerators);
+	distribute(EHexTileChance::Collectable, d.Collectables);
+	distribute(EHexTileChance::Decelerator, d.Decelerators);
+	distribute(EHexTileChance::ICBM, d.ICBM);
+	distribute(EHexTileChance::Standard, d.Standard);
+	distribute(EHexTileChance::Column, d.Column);
+
+}
+
+
 void AHexTileBase::projectGrid() {
 
 	float cellHeight = CellSize * 2;
@@ -144,11 +173,11 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 
 	if (ship->GetSpeed() < 2700) {
 
-		d.Decelerators = .1;
-		d.Accelerators = .1;
+		d.Decelerators = .05;
+		d.Accelerators = .025;
 		d.Collectables = .01;
 		d.ICBM = .02;
-		d.Column = .01;
+		d.Column = .005;
 
 		return adjust(d);
 
@@ -156,6 +185,7 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 
 		d.Decelerators = .15;
 		d.Accelerators = .15;
+		d.Collectables = .01;
 
 		return adjust(d);
 
@@ -188,31 +218,9 @@ FHexTileDistribuition AHexTileBase::normilizeDistribution(FHexTileDistribuition 
 	}
 }
 
-void AHexTileBase::HexTileChanceSpawn(FHexTileDistribuition d, EHexTileChance& Branches) {
+void AHexTileBase::HexTileChanceSpawn(EHexTileChance& Branches) {
 
-	d = normilizeDistribution(d);
 
-	TArray<EHexTileChance> chances;
-	int32 mapSize = 1000;
-	chances.Reserve(mapSize);
-
-	// add specific enum selection N amount of times depending on the weight derived out of mapSize
-	auto distribute = [&](EHexTileChance t, float weight) {
-
-		int32 chunkSize = UKismetMathLibrary::FTrunc( weight * (float)mapSize );
-
-		for (int i = 0; i < chunkSize; ++i) {
-			chances.Add(t);
-		}
-	};
-
-	// distribute chances (fills the array for random pick)
-	distribute(EHexTileChance::Accelerator, d.Accelerators);
-	distribute(EHexTileChance::Collectable, d.Collectables);
-	distribute(EHexTileChance::Decelerator, d.Decelerators);
-	distribute(EHexTileChance::ICBM, d.ICBM);
-	distribute(EHexTileChance::Standard, d.Standard);
-	distribute(EHexTileChance::Column, d.Column);
 
 	// random index!
 	int32 pick = FMath::RandRange(0, chances.Num() - 1);

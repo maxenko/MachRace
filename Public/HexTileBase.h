@@ -19,6 +19,8 @@ private:
 	FVector cameraLoc;
 	FVector cameraDir;
 	static FHexTileDistribuition normilizeDistribution(FHexTileDistribuition d);
+	TArray<EHexTileChance> chances;
+	FHexTileDistribuition weights;
 
 public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Grid")
@@ -53,6 +55,8 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
+	virtual void BeginPlay() override;
+
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Generate Grid Coordinates", Keywords = "Generate hexagonal grid transforms."), Category = "MachRace|Grid")
 	void GenerateCoordinateGrid();
 
@@ -69,7 +73,7 @@ public:
 	FHexTileDistribuition GenerateDistributionMap();
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Chance Hex Spawn", ExpandEnumAsExecs = "Branches"), Category = "MachRace|Gameplay")
-	void HexTileChanceSpawn(FHexTileDistribuition d, EHexTileChance& Branches);
+	void HexTileChanceSpawn(EHexTileChance& Branches);
 
 
 
