@@ -136,6 +136,33 @@ public:
 
 
 USTRUCT(BlueprintType)
+struct FHexTileDistribuition {
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Accelerators = .01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Decelerators = .01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Collectables = .005;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float ICBM = .01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Column = .01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Standard = .955;
+};
+
+
+
+USTRUCT(BlueprintType)
 struct FAtmosphereSettings {
 	GENERATED_BODY()
 
@@ -201,4 +228,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
 	FTransform Transform;
 
+};
+
+
+UENUM(BlueprintType)
+enum class EHexTileChance : uint8
+{
+	Standard,
+	Accelerator,
+	Decelerator,
+	Column,
+	Collectable,
+	ICBM
 };

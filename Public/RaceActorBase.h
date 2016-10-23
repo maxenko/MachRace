@@ -49,5 +49,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Destroy Children", Keywords = "Destroys any actors in Children array."), Category = "MachRace|Engine")
 	int32 DestroyChildren(bool buffered = false);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add Child", Keywords = "Adds to internal Children array, which can be cleaned up by calling Destroy Children"), Category = "MachRace|Engine")
+	void AddChild(AActor* a);
 	
 };

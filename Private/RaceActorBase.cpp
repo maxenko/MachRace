@@ -67,6 +67,10 @@ bool ARaceActorBase::RecallTransform(UObject* obj, FTransform& transform) {
 	return false;
 }
 
+void ARaceActorBase::AddChild(AActor* a) {
+	Children.Add(a);
+}
+
 int32 ARaceActorBase::DestroyChildren(bool buffered) {
 	auto count = this->Children.Num();
 

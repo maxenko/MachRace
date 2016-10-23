@@ -2,7 +2,9 @@
 
 #include "MachRace.h"
 #include "DrawDebugHelpers.h"
+#include "RaceShipBase.h"
 #include "HexTileBase.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 void AHexTileBase::Tick(float DeltaSeconds) {
@@ -57,14 +59,16 @@ bool AHexTileBase::isWithinThreshold(FVector v) {
 	if (dist > DistanceThreshold) {
 		return false;
 	}
-	
+
 	FVector directional = cameraLoc - v; // to target normal
 	directional.Normalize();
 	
 	// angle between vectors (we're concerned whether or not vector falls inside the visible cone & dist
 	float dProductAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(cameraDir, directional))); // angle to target
 
-	return FMath::Abs(VisibleAngleThreshold) > FMath::Abs(180-dProductAngle);
+	auto trigger = FMath::Abs(VisibleAngleThreshold) > FMath::Abs(180 - dProductAngle);
+
+	return trigger;
 }
 
 void AHexTileBase::GenerateCoordinateGrid() {
@@ -116,3 +120,102 @@ bool AHexTileBase::IndexTaken(FTransform localT) {
 	return false;
 }
 
+FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
+
+	FHexTileDistribuition d;
+
+	auto state = GetState();
+	if (!state) {
+		return d;
+	}
+
+	bool shipOk;
+	auto ship = state->GetRaceShip(shipOk);
+
+	if (!shipOk) {
+		return d;
+	}
+
+	auto adjust = [](FHexTileDistribuition d) {
+		// always update the standard weight based on all other weights
+		d.Standard = 1.0f - (d.Decelerators + d.Accelerators + d.Collectables + d.ICBM + d.Column);
+		return d;
+	};
+
+	if (ship->GetSpeed() < 2700) {
+
+		d.Decelerators = .1;
+		d.Accelerators = .1;
+		d.Collectables = .01;
+		d.ICBM = .02;
+		d.Column = .01;
+
+		return adjust(d);
+
+	} else if (ship->GetSpeed() < 3000) {
+
+		d.Decelerators = .15;
+		d.Accelerators = .15;
+
+		return adjust(d);
+
+	}
+
+	return d;
+}
+
+FHexTileDistribuition AHexTileBase::normilizeDistribution(FHexTileDistribuition d) {
+
+	float sum = d.Accelerators + d.Collectables + d.Column + d.Decelerators + d.ICBM + d.Standard;
+
+	if (sum == 1.0) {
+
+		return d;
+	
+	} else {
+
+		auto a = FVector2D(0, sum);
+		auto b = FVector2D(0, 1);
+
+		d.Accelerators		= FMath::GetMappedRangeValue(a, b, d.Accelerators);
+		d.Collectables		= FMath::GetMappedRangeValue(a, b, d.Collectables);
+		d.Column			= FMath::GetMappedRangeValue(a, b, d.Column);
+		d.Decelerators		= FMath::GetMappedRangeValue(a, b, d.Decelerators);
+		d.ICBM				= FMath::GetMappedRangeValue(a, b, d.ICBM);
+		d.Standard			= FMath::GetMappedRangeValue(a, b, d.Standard);
+
+		return d;
+	}
+}
+
+void AHexTileBase::HexTileChanceSpawn(FHexTileDistribuition d, EHexTileChance& Branches) {
+
+	d = normilizeDistribution(d);
+
+	TArray<EHexTileChance> chances;
+	int32 mapSize = 1000;
+	chances.Reserve(mapSize);
+
+	// add specific enum selection N amount of times depending on the weight derived out of mapSize
+	auto distribute = [&](EHexTileChance t, float weight) {
+
+		int32 chunkSize = UKismetMathLibrary::FTrunc( weight * (float)mapSize );
+
+		for (int i = 0; i < chunkSize; ++i) {
+			chances.Add(t);
+		}
+	};
+
+	// distribute chances (fills the array for random pick)
+	distribute(EHexTileChance::Accelerator, d.Accelerators);
+	distribute(EHexTileChance::Collectable, d.Collectables);
+	distribute(EHexTileChance::Decelerator, d.Decelerators);
+	distribute(EHexTileChance::ICBM, d.ICBM);
+	distribute(EHexTileChance::Standard, d.Standard);
+	distribute(EHexTileChance::Column, d.Column);
+
+	// random index!
+	int32 pick = FMath::RandRange(0, chances.Num() - 1);
+
+	Branches = chances[pick];
+}

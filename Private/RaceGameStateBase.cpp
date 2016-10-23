@@ -332,7 +332,7 @@ void ARaceGameStateBase::SetAtmosphereByStage() {
 
 	} else if (Stage == GameStage::InfiniteHex) {
 
-		settings.FogDensity = .23;
+		settings.FogDensity = 1.3;
 		settings.FogHeightFaloff = .0001;
 		settings.FogMaxOpacity = 1;
 		settings.FogStartDist = 1850;

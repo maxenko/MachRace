@@ -3,6 +3,7 @@
 #pragma once
 
 #include "RaceActorBase.h"
+#include "CommonTypes.h"
 #include "HexTileBase.generated.h"
 
 
@@ -17,6 +18,7 @@ private:
 	bool isWithinThreshold(FVector v); // checks to see if two coordinates are within threshold specified by SpawnThreshold
 	FVector cameraLoc;
 	FVector cameraDir;
+	static FHexTileDistribuition normilizeDistribution(FHexTileDistribuition d);
 
 public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Grid")
@@ -38,7 +40,7 @@ public:
 	float VisibleAngleThreshold = 40;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	float DistanceThreshold = 500;
+	float DistanceThreshold = 1000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Utility")
 	bool DrawDebug = false;
@@ -62,5 +64,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Is Taken", Keywords = "Checks wether existing transform has been taken."), Category = "MachRace|Grid")
 	bool IndexTaken(FTransform localT);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Distribution Map", Keywords = "Generates hexagon geometry distribution map based on various state conditions."), Category = "MachRace|Gameplay")
+	FHexTileDistribuition GenerateDistributionMap();
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Chance Hex Spawn", ExpandEnumAsExecs = "Branches"), Category = "MachRace|Gameplay")
+	void HexTileChanceSpawn(FHexTileDistribuition d, EHexTileChance& Branches);
+
+
 
 };

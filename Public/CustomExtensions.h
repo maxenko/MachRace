@@ -166,4 +166,9 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Trace Single", Keywords = "Traces single trace by channel.", AutoCreateRefTerm = "ignored"), Category = "MachRace|Utility")
 	static FHitResult TraceSingle(UWorld* w, FVector from, FVector to, TArray<AActor*> ignored);
 
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Weighted Chance", Keywords = "Returns true or false based on chance within 0-1 range."), Category = "MachRace|Utility")
+		static bool WeightedChance(float chance) {
+		return( FMath::RandRange(0.0f,1.0f) < FMath::Clamp(chance,0.0f,1.0f) ) ? false : true;
+	}
+
 };
