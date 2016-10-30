@@ -167,8 +167,8 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 		return d;
 	}
 
+	// always update the standard weight based on all other weights
 	auto adjust = [](FHexTileDistribuition d) {
-		// always update the standard weight based on all other weights
 		d.Standard = 1.0f - (d.Decelerators + d.Accelerators + d.Collectables + d.ICBM + d.Column);
 		return d;
 	};
@@ -177,7 +177,7 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 
 		d.Decelerators = .05;
 		d.Accelerators = .025;
-		d.Collectables = .01;
+		d.Collectables = .004;
 		d.ICBM = .02;
 		d.Column = .005;
 
@@ -187,7 +187,7 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 
 		d.Decelerators = .15;
 		d.Accelerators = .15;
-		d.Collectables = .01;
+		d.Collectables = .005;
 
 		return adjust(d);
 

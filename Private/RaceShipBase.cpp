@@ -10,6 +10,7 @@ ARaceShipBase::ARaceShipBase() {
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+
 void ARaceShipBase::decayLateralMovement(float delta) {
 	bool rootOk = false;
 	auto physVol = getRootAsPrimitive(rootOk);
@@ -22,7 +23,9 @@ void ARaceShipBase::decayLateralMovement(float delta) {
 	auto newLaterSpeed	= FMath::FInterpTo(velocity.Y, 0, delta, 5);
 	velocity.Y			= newLaterSpeed;
 	physVol->SetPhysicsLinearVelocity(velocity);
+	OnBank.Broadcast(0);
 }
+
 
 void ARaceShipBase::decayRotationToZero(float delta) {
 
@@ -41,10 +44,12 @@ void ARaceShipBase::decayRotationToZero(float delta) {
 	physVol->SetWorldRotation(FMath::RInterpTo(physVol->GetComponentRotation(), FRotator(0, 0, 0), delta, 5));
 }
 
+
 // Called when the game starts or when spawned
 void ARaceShipBase::BeginPlay() {
 	Super::BeginPlay();
 }
+
 
 // Called every frame
 void ARaceShipBase::Tick(float DeltaSeconds) {
@@ -64,13 +69,21 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 		}
 	}
 
-	recordFloorTraceToHistory();
 
 	// float over the ground softly
-	auto avgPos = UKismetMathLibrary::GetVectorArrayAverage(FloorTraceHistory);
-	auto currentLoc = GetActorLocation();
-	SetActorLocation(FVector(currentLoc.X, currentLoc.Y, avgPos.Z + MinDistFromGround));
+
+	// only if game is not in prelaunch stage (no floor)
+	auto state = GetState();
+	if(state && state->Stage != GameStage::Prelaunch ){
+
+		FHitResult hit;
+		CheckGroundDist(hit);
+		FVector actorLoc = GetActorLocation();
+		FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGround);
+		SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, 100));
+	}
 }
+
 
 UPrimitiveComponent* ARaceShipBase::getRootAsPrimitive(bool& success) {
 
@@ -101,18 +114,21 @@ void ARaceShipBase::Accelerate(float forwardVelocity) {
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Unable to accelerate ship, physics volume not found."));
 	}
 
+	OnAccelerate.Broadcast(forwardVelocity);
 }
 
-void ARaceShipBase::CheckGroundDist() {
+
+float ARaceShipBase::CheckGroundDist(FHitResult& hit) {
 
 	auto from = GetActorLocation();
 	auto to = FVector(from.X, from.Y, -100000);
 	auto collisionParams = new FCollisionParameters();
 
-	FHitResult hit;
 	GetWorld()->LineTraceSingleByChannel(hit, from, to, ECollisionChannel::ECC_Visibility);
-	
+
+	return FVector::Dist(from,hit.Location);
 }
+
 
 void ARaceShipBase::Bank(FVector impulse) {
 
@@ -124,10 +140,19 @@ void ARaceShipBase::Bank(FVector impulse) {
 		// add lateral impulse
 		physVol->AddImpulse(impulse,NAME_None,true);
 
+		if (impulse.Y > 0) {
+			OnBank.Broadcast(1);
+		} else if (impulse.Y < 0) {
+			OnBank.Broadcast(-1);
+		} else {
+			OnBank.Broadcast(0);
+		}
+
 	} else {
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Unable to bank ship, physics volume not found."));
 	}
 }
+
 
 float ARaceShipBase::Yaw(bool direction) {
 
@@ -153,6 +178,7 @@ float ARaceShipBase::Yaw(bool direction) {
 	return GetActorRotation().Yaw;
 }
 
+
 FVector ARaceShipBase::Spin(FVector impulse, float maxX) {
 	bool rootOk = false;
 	auto physVol = getRootAsPrimitive(rootOk);
@@ -171,6 +197,7 @@ FVector ARaceShipBase::Spin(FVector impulse, float maxX) {
 	return finalImpulse;
 }
 
+
 float ARaceShipBase::GetTheoreticalSpeed() {
 
 	bool rootOk = false;
@@ -185,6 +212,7 @@ float ARaceShipBase::GetTheoreticalSpeed() {
 
 	return 0;
 }
+
 
 float ARaceShipBase::GetTheoreticalBankingSpeed() {
 
@@ -201,6 +229,7 @@ float ARaceShipBase::GetTheoreticalBankingSpeed() {
 	return 0;
 }
 
+
 float ARaceShipBase::GetSpeed() {
 	bool rootOk = false;
 	auto physVol = getRootAsPrimitive(rootOk);
@@ -214,6 +243,7 @@ float ARaceShipBase::GetSpeed() {
 
 	return 0;
 }
+
 
 float ARaceShipBase::GetBankingSpeed() {
 
@@ -230,6 +260,7 @@ float ARaceShipBase::GetBankingSpeed() {
 	return 0;
 }
 
+
 FVector ARaceShipBase::GetFuselageAngularImpulse() {
 	bool rootOk = false;
 	auto physVol = getRootAsPrimitive(rootOk);
@@ -239,22 +270,4 @@ FVector ARaceShipBase::GetFuselageAngularImpulse() {
 	}
 
 	return FVector::ZeroVector;
-}
-
-// records position directly under the ship to history
-void ARaceShipBase::recordFloorTraceToHistory() {
-
-	auto from = this->GetActorLocation();
-	auto to = FVector(from.X, from.Y, -999999);
-	TArray<AActor*> ignored;
-	ignored.Add(this);
-
-	auto hit = UCustomExtensions::TraceSingle(GetWorld(), from, to, ignored);
-
-	if(hit.IsValidBlockingHit()){
-		if (FloorTraceHistory.Num() >= FloorTraceHistorySize) {
-			FloorTraceHistory.RemoveAt(FloorTraceHistorySize-1, 1);
-		}
-		FloorTraceHistory.Add(hit.Location);
-	}
 }

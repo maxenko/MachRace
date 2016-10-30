@@ -6,7 +6,9 @@
 #include "RaceShipBase.generated.h"
 
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAccelerate, float, SpeedIncrease);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMachSpeedChange, int32, MachSpeed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBank, int32, Direction);
 
 UCLASS()
 class MACHRACE_API ARaceShipBase : public AShipBase {
@@ -16,7 +18,7 @@ private:
 	UPrimitiveComponent* getRootAsPrimitive(bool& success);
 	void decayLateralMovement(float delta);
 	void decayRotationToZero(float delta);
-	void recordFloorTraceToHistory();
+	int32 previousMach = 0;
 
 public:
 
@@ -40,17 +42,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float MaxBankingYawSpeed = 10;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	int32 FloorTraceHistorySize = 10;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	TArray<FVector> FloorTraceHistory;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
 	bool EnableLateralDecay = false;
 
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnAccelerate OnAccelerate;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnMachSpeedChange OnMachSpeedChange;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnBank OnBank;
+
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Check Ground Dist", Keywords = "Check and record gorund distance to history."), Category = "MachRace|System")
-	void CheckGroundDist();
+	float CheckGroundDist(FHitResult& hit);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Bank", Keywords = "Banks ship."), Category = "MachRace|System")
 	void Bank(FVector impulse);
