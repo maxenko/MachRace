@@ -78,9 +78,23 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 
 		FHitResult hit;
 		CheckGroundDist(hit);
-		FVector actorLoc = GetActorLocation();
-		FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGround);
-		SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, 100));
+
+		// non hex ground
+		if( state->Stage != GameStage::InfiniteHex ){
+
+			FVector actorLoc = GetActorLocation();
+			FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGround);
+			SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
+
+		// hex ground - will have gaps, so we ignore non-hits
+		} else if( hit.IsValidBlockingHit() ) {
+
+			FVector actorLoc = GetActorLocation();
+			FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGround);
+			SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
+		}
+
+
 	}
 }
 
