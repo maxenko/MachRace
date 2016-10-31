@@ -93,8 +93,6 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 			FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGround);
 			SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
 		}
-
-
 	}
 }
 
