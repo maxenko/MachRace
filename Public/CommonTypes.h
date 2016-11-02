@@ -41,7 +41,6 @@ public:
 			&& Type == Other.Type;
 
 	}
-	
 };
 
 USTRUCT(BlueprintType)
@@ -76,8 +75,6 @@ public:
 			&& Health == Other.Health;
 
 	}
-
-
 };
 
 
