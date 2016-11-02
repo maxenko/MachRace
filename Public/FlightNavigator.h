@@ -24,6 +24,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
 	float Distance = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
+	FHitResult Hit;
 };
 
 
@@ -58,6 +61,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float ScanDistance = 3000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	bool DrawDebug = true;
 
 	UFUNCTION(BlueprintCallable, Category = "MachRace|Gameplay")
 	TArray<FVector> DetectObstacles();

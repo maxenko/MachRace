@@ -46,52 +46,59 @@ TArray<float> UFlightNavigator::getIntervals() {
 }
 
 TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
+	
+	auto w = GetWorld();
+	if (!w) {
+		return TArray<FFlightNavigationRay>();
+	}
+
 	auto intervals = getIntervals();
+	TArray<FFlightNavigationRay> scan;
+	scan.SetNum(DetectionRays);
+	FTransform wT =  GetOwner()->GetActorTransform();
+
+	TArray<FVector> collisions;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(GetOwner());
+
+	// generate scan
+	for (int32 i = 0; i < DetectionRays; ++i) {
+		scan[i].From = wT.TransformPosition(FVector(0, intervals[i], 0));
+		scan[i].To = wT.TransformPosition(FVector(-ScanDistance, intervals[i], 0));
+
+		FHitResult hit;
+		w->LineTraceSingleByChannel(hit, scan[i].From, scan[i].To, ECollisionChannel::ECC_Visibility, params);
+		if (hit.IsValidBlockingHit()) {
+			collisions.Add(hit.Location);
+			scan[i].Distance = FVector::Dist(hit.Location,scan[i].From);
+		} else {
+			scan[i].Distance = ScanDistance;
+		}
+		scan[i].Hit = hit;		
+	}
+
+	// calculate weights
+	for (auto ray : scan) {
+		float pctOfDist = ray.Distance / ScanDistance;
+	
+		// add weights of nearby rays, decreasing value added by distance from current ray
+
+	}
+
+	// visualize
+	if (DrawDebug) {
+		for (auto ray : scan) {
+			DrawDebugLine(w, ray.From, ray.Hit.IsValidBlockingHit() ? ray.Hit.Location : ray.To, FColor::Purple, false, .08, 0, 2.0);
+		}
+	}
+
+	return scan;
 }
 
 
 TArray<FVector> UFlightNavigator::DetectObstacles() {
 
-	auto intervals = getIntervals();
-	TArray<FVector> froms;
-	TArray<FVector> tos;
-	froms.SetNum(DetectionRays);
-	tos.SetNum(DetectionRays);
-	FTransform wT = GetOwner()->GetActorTransform();
+	auto scan = getScan();
 
-
-	// generate ray cast locations
-	int32 count = 0;
-	for (float y : intervals) {
-
-		FVector wFrom = wT.TransformPosition(FVector(0, y, 0));
-		FVector wTo = wT.TransformPosition(FVector(-ScanDistance, y, 0));
-
-		froms[count] = wFrom;
-		tos[count] = wTo;
-
-		++count;
-	}
-
-	TArray<FVector> collisions;
-	auto w = GetWorld();
-	if (w) {
-
-		for (int32 i = 0; i < DetectionRays; ++i) {
-			FHitResult hit;
-			FCollisionQueryParams params;
-			params.AddIgnoredActor(GetOwner());
-
-			w->LineTraceSingleByChannel(hit, froms[i], tos[i], ECollisionChannel::ECC_Visibility, params);
-
-			if (hit.IsValidBlockingHit()) {
-				collisions.Add(hit.Location);
-			}
-
-			DrawDebugLine(w, froms[i], hit.IsValidBlockingHit() ? hit.Location : tos[i], FColor::Purple, false, .08, 0, 2.0);
-		}
-	}
-
-	// cast rays
-	return collisions;
+	return TArray<FVector>();
 }
