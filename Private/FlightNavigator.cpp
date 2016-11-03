@@ -24,9 +24,6 @@ void UFlightNavigator::BeginPlay(){
 // Called every frame
 void UFlightNavigator::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ){
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
-
-	DetectObstacles();
-
 }
 
 
@@ -78,17 +75,34 @@ TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 	}
 
 	// calculate weights
-	for (auto ray : scan) {
-		float pctOfDist = ray.Distance / ScanDistance;
-	
-		// add weights of nearby rays, decreasing value added by distance from current ray
+	for(int32 i = 0; i < scan.Num(); ++i){
+		for (int32 n = 0; n < scan.Num(); ++n) {
+			int32 indexDist = FMath::Abs(i - n);
+			scan[n].Weight += scan[i].Distance / (indexDist + 1);
+		}
+	}
 
+	// normalize weights
+		// find max and min values
+	float max = 0, min = FLT_MAX;
+	for (auto& ray : scan) {
+		if (ray.Weight > max) {
+			max = ray.Weight;
+		}
+
+		if (ray.Weight < min) {
+			min = ray.Weight;
+		}
+	}
+		// normalize
+	for (auto& ray : scan) {
+		ray.Weight = FMath::GetMappedRangeValue(FVector2D(min, max), FVector2D(0, 1), ray.Weight);
 	}
 
 	// visualize
 	if (DrawDebug) {
-		for (auto ray : scan) {
-			DrawDebugLine(w, ray.From, ray.Hit.IsValidBlockingHit() ? ray.Hit.Location : ray.To, FColor::Purple, false, .08, 0, 2.0);
+		for (auto& ray : scan) {
+			DrawDebugLine(w, ray.From, ray.Hit.IsValidBlockingHit() ? ray.Hit.Location : ray.To, FColor::Purple, false, .04, 0, ray.Weight*2.0);
 		}
 	}
 
@@ -96,9 +110,19 @@ TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 }
 
 
-TArray<FVector> UFlightNavigator::DetectObstacles() {
+FVector UFlightNavigator::GetToLoc() {
 
 	auto scan = getScan();
 
-	return TArray<FVector>();
+	FFlightNavigationRay maxRay;
+	for (auto& ray : scan) {
+		if (ray.Weight == 1) {
+			maxRay = ray;
+		}
+	}
+
+	FVector actorLoc = GetOwner()->GetActorLocation();
+	FVector targetLoc = FVector(actorLoc.X, maxRay.From.Y, actorLoc.Z);
+
+	return targetLoc;
 }

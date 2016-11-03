@@ -66,7 +66,7 @@ public:
 	bool DrawDebug = true;
 
 	UFUNCTION(BlueprintCallable, Category = "MachRace|Gameplay")
-	TArray<FVector> DetectObstacles();
+	FVector GetToLoc();
 
 	// Sets default values for this component's properties
 	UFlightNavigator();
