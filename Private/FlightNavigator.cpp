@@ -82,7 +82,6 @@ TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 		}
 	}
 
-	// normalize weights
 		// find max and min values
 	float max = 0, min = FLT_MAX;
 	for (auto& ray : scan) {
@@ -99,7 +98,7 @@ TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 		ray.Weight = FMath::GetMappedRangeValue(FVector2D(min, max), FVector2D(0, 1), ray.Weight);
 	}
 
-	// visualize
+	// visualize ?
 	if (DrawDebug) {
 		for (auto& ray : scan) {
 			DrawDebugLine(w, ray.From, ray.Hit.IsValidBlockingHit() ? ray.Hit.Location : ray.To, FColor::Purple, false, .04, 0, ray.Weight*2.0);
@@ -114,13 +113,17 @@ FVector UFlightNavigator::GetToLoc() {
 
 	auto scan = getScan();
 
+	// we are moving in -x as forward direction so, we are looking for Y value with highest weight
 	FFlightNavigationRay maxRay;
+	float max = FLT_MIN;
 	for (auto& ray : scan) {
-		if (ray.Weight == 1) {
+		if (ray.Weight > max) { 
+			max = ray.Weight;
 			maxRay = ray;
 		}
 	}
 
+	// compose target from existing actor location, and heaviest ray
 	FVector actorLoc = GetOwner()->GetActorLocation();
 	FVector targetLoc = FVector(actorLoc.X, maxRay.From.Y, actorLoc.Z);
 
