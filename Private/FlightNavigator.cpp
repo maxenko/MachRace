@@ -54,6 +54,11 @@ TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 	scan.SetNum(DetectionRays);
 	FTransform wT =  GetOwner()->GetActorTransform();
 
+	// reset roll (otherwise we get rotation on scan, and we want it parallel to the ground)
+	auto wR = wT.GetRotation();
+	wR.X = 0;
+	wT.SetRotation(wR);
+
 	TArray<FVector> collisions;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(GetOwner());
