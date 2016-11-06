@@ -41,6 +41,8 @@ private:
 	// generate scan field intervals
 	TArray<float> getIntervals();
 	TArray<FFlightNavigationRay> getScan();
+	FFlightNavigationRay noHitRay;
+	void drawDebug(TArray<FFlightNavigationRay> rays);
 
 public:	
 
