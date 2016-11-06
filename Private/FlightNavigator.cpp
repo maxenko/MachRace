@@ -42,6 +42,19 @@ TArray<float> UFlightNavigator::getIntervals() {
 	return intervals;
 }
 
+void UFlightNavigator::drawDebug(TArray<FFlightNavigationRay> rays) {
+	// visualize ?
+	if (DrawDebug) {
+		for (auto& ray : rays) {
+			if (ray.Weight == 1.0) {
+				DrawDebugLine(GetWorld(), ray.From, ray.Hit.IsValidBlockingHit() ? ray.Hit.Location : ray.To, FColor::Red, false, .04, 0, ray.Weight*2.0);
+			}else{
+				DrawDebugLine(GetWorld(), ray.From, ray.Hit.IsValidBlockingHit() ? ray.Hit.Location : ray.To, FColor::Turquoise, false, .04, 0, ray.Weight*2.0);
+			}
+		}
+	}
+}
+
 TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 	
 	auto w = GetWorld();
@@ -63,8 +76,11 @@ TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(GetOwner());
 
+	auto hasObstacle = false;
+
 	// generate scan
 	for (int32 i = 0; i < DetectionRays; ++i) {
+
 		scan[i].From = wT.TransformPosition(FVector(0, intervals[i], 0));
 		scan[i].To = wT.TransformPosition(FVector(-ScanDistance, intervals[i], 0));
 
@@ -73,17 +89,35 @@ TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 		if (hit.IsValidBlockingHit()) {
 			collisions.Add(hit.Location);
 			scan[i].Distance = FVector::Dist(hit.Location,scan[i].From);
+			hasObstacle = true;
 		} else {
 			scan[i].Distance = ScanDistance;
 		}
 		scan[i].Hit = hit;		
 	}
 
+	if (!hasObstacle) {
+		// no hit result
+		noHitRay.From = GetOwner()->GetActorLocation();
+		noHitRay.To = noHitRay.From + FVector(-ScanDistance,0,0);
+		noHitRay.Weight = 1;
+		noHitRay.Distance = ScanDistance;
+
+		TArray<FFlightNavigationRay> noHitResult = { noHitRay };
+		drawDebug(noHitResult);
+		return noHitResult;
+	}
+
 	// calculate weights
 	for(int32 i = 0; i < scan.Num(); ++i){
 		for (int32 n = 0; n < scan.Num(); ++n) {
-			int32 indexDist = FMath::Abs(i - n);
-			scan[n].Weight += scan[i].Distance / (indexDist + 1);
+
+			if (n == i) {
+				continue;
+			}
+
+			float fractionOfMaxDist = scan[n].Distance / ScanDistance;
+			scan[i].Weight += fractionOfMaxDist/FMath::Abs(n-i);
 		}
 	}
 
@@ -103,12 +137,7 @@ TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 		ray.Weight = FMath::GetMappedRangeValue(FVector2D(min, max), FVector2D(0, 1), ray.Weight);
 	}
 
-	// visualize ?
-	if (DrawDebug) {
-		for (auto& ray : scan) {
-			DrawDebugLine(w, ray.From, ray.Hit.IsValidBlockingHit() ? ray.Hit.Location : ray.To, FColor::Purple, false, .04, 0, ray.Weight*2.0);
-		}
-	}
+	drawDebug(scan);
 
 	return scan;
 }
