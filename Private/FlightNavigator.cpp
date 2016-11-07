@@ -10,14 +10,12 @@ UFlightNavigator::UFlightNavigator(){
 	// off to improve performance if you don't need them.
 	bWantsBeginPlay = true;
 	PrimaryComponentTick.bCanEverTick = true;
-
 }
 
 
 // Called when the game starts
 void UFlightNavigator::BeginPlay(){
 	Super::BeginPlay();
-
 }
 
 
@@ -27,7 +25,7 @@ void UFlightNavigator::TickComponent( float DeltaTime, ELevelTick TickType, FAct
 }
 
 
-
+// creates the scan intervals, centered
 TArray<float> UFlightNavigator::getIntervals() {
 
 	float half = (DetectionRays*DetectionRayInterval) / 2.0f;
@@ -47,6 +45,7 @@ void UFlightNavigator::drawDebug(TArray<FFlightNavigationRay> rays) {
 	if (DrawDebug) {
 		for (auto& ray : rays) {
 			if (ray.Weight == 1.0) {
+				// show heaviest ray in red
 				DrawDebugLine(GetWorld(), ray.From, ray.Hit.IsValidBlockingHit() ? ray.Hit.Location : ray.To, FColor::Red, false, .04, 0, ray.Weight*2.0);
 			}else{
 				DrawDebugLine(GetWorld(), ray.From, ray.Hit.IsValidBlockingHit() ? ray.Hit.Location : ray.To, FColor::Turquoise, false, .04, 0, ray.Weight*2.0);
@@ -55,7 +54,19 @@ void UFlightNavigator::drawDebug(TArray<FFlightNavigationRay> rays) {
 	}
 }
 
-TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
+TArray<FFlightNavigationRay> UFlightNavigator::generateNoHitResult() {
+	// no hit result
+	noHitRay.From = GetOwner()->GetActorLocation();
+	noHitRay.To = noHitRay.From + FVector(-ScanDistance, 0, 0);
+	noHitRay.Weight = 1;
+	noHitRay.Distance = ScanDistance;
+
+	TArray<FFlightNavigationRay> noHitResult = { noHitRay };
+	drawDebug(noHitResult);
+	return noHitResult;
+}
+
+TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 	
 	auto w = GetWorld();
 	if (!w) {
@@ -97,28 +108,29 @@ TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 	}
 
 	if (!hasObstacle) {
-		// no hit result
-		noHitRay.From = GetOwner()->GetActorLocation();
-		noHitRay.To = noHitRay.From + FVector(-ScanDistance,0,0);
-		noHitRay.Weight = 1;
-		noHitRay.Distance = ScanDistance;
-
-		TArray<FFlightNavigationRay> noHitResult = { noHitRay };
-		drawDebug(noHitResult);
-		return noHitResult;
+		return generateNoHitResult();
 	}
 
-	// calculate weights
+	// calculate weights, - assigns heaviest weight to a ray that is surrounded by most rays that either didn't hit anything or hit something farthest.
 	for(int32 i = 0; i < scan.Num(); ++i){
 		for (int32 n = 0; n < scan.Num(); ++n) {
 
 			if (n == i) {
-				continue;
+				continue; // don't calculate against itself
 			}
 
 			float fractionOfMaxDist = scan[n].Distance / ScanDistance;
-			scan[i].Weight += fractionOfMaxDist/FMath::Abs(n-i);
+			scan[i].Weight += fractionOfMaxDist/FMath::Abs(n-i); // divide fraction by [n] rays distance from current [i] ray 
+																 // (note: this is not actual 3D world dist, its just placement in array distance.)
 		}
+	}
+
+	// perform side scans
+	bool rightHasObstacles = hasSideObstable(1);
+	bool leftHasObstacles = hasSideObstable(-1);
+
+	if (rightHasObstacles || leftHasObstacles) {
+		return generateNoHitResult();
 	}
 
 		// find max and min values
@@ -142,10 +154,55 @@ TArray<FFlightNavigationRay> UFlightNavigator::getScan() {
 	return scan;
 }
 
+// here we check whether there is an object to the side of the owner based on its physics bounds
+bool UFlightNavigator::hasSideObstable(int32 dir) {
+	auto w = GetWorld();
+
+	if (!w) {
+		return false;
+	}
+
+	// get collision bounds
+	FVector o = FVector(0, 0, 0);
+	FVector b = FVector(0, 0, 0);
+	auto owner = GetOwner();
+	owner->GetActorBounds(true,o,b);
+
+	float scanDist = LateralScanDistance;
+	bool debug = DrawDebug;
+
+	auto checkTrace = [&w, &dir, &o, &b, &scanDist, &owner, &debug](FVector from) {
+
+		FHitResult hit;
+		FCollisionQueryParams params;
+		params.AddIgnoredActor(owner);
+		auto to = from + FVector(0, (scanDist+o.Y)*dir, 0);
+
+		w->LineTraceSingleByChannel(hit, from, to, ECollisionChannel::ECC_Visibility, params);
+
+		if (debug) {
+			DrawDebugLine(w, from, hit.IsValidBlockingHit() ? hit.Location : to, hit.IsValidBlockingHit() ? FColor::Red : FColor::Blue, false, .04, 0, hit.IsValidBlockingHit() ? 2.0 : 1.0);
+		}
+
+		return hit.IsValidBlockingHit();
+	};
+
+	// cast fill rays (variant)
+	for (int32 i = 0; i < SideDetectionRays+1; ++i) {
+		auto posX = FMath::GetMappedRangeValue(FVector2D(0, SideDetectionRays), FVector2D(-b.X, b.X), i);
+		bool isBlocked = checkTrace(o + FVector(posX, 0, 0));
+		if (isBlocked) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 
 FVector UFlightNavigator::GetToLoc() {
 
-	auto scan = getScan();
+	auto scan = getForwardScan();
 
 	// we are moving in -x as forward direction so, we are looking for Y value with highest weight
 	FFlightNavigationRay maxRay;

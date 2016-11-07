@@ -40,9 +40,11 @@ private:
 
 	// generate scan field intervals
 	TArray<float> getIntervals();
-	TArray<FFlightNavigationRay> getScan();
+	TArray<FFlightNavigationRay> getForwardScan();
+	bool hasSideObstable(int32 dir); // -1/1 for direction
 	FFlightNavigationRay noHitRay;
 	void drawDebug(TArray<FFlightNavigationRay> rays);
+	TArray<FFlightNavigationRay> generateNoHitResult();
 
 public:	
 
@@ -59,10 +61,16 @@ public:
 	int32 DetectionRays = 7;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	int32 SideDetectionRays = 5;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float DetectionRayInterval = 20.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float ScanDistance = 3000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	float LateralScanDistance = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	bool DrawDebug = true;
