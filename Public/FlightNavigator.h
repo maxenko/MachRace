@@ -61,7 +61,7 @@ public:
 	int32 DetectionRays = 7;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	int32 SideDetectionRays = 5;
+	int32 SideDetectionRays = 7;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float DetectionRayInterval = 20.0f;

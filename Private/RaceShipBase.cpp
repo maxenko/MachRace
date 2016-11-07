@@ -72,7 +72,7 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 
 	// float over the ground softly
 
-	// only if game is not in prelaunch stage (no floor)
+	// only if game is not in pre-launch stage (no floor)
 	auto state = GetState();
 	if(state && state->Stage != GameStage::Prelaunch ){
 
@@ -80,14 +80,7 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 		CheckGroundDist(hit);
 
 		// non hex ground
-		if( state->Stage != GameStage::InfiniteHex ){
-
-			FVector actorLoc = GetActorLocation();
-			FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGround);
-			SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
-
-		// hex ground - will have gaps, so we ignore non-hits
-		} else if( hit.IsValidBlockingHit() ) {
+		if( hit.IsValidBlockingHit() ) {
 
 			FVector actorLoc = GetActorLocation();
 			FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGround);
