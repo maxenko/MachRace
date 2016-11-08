@@ -45,11 +45,22 @@ private:
 	FFlightNavigationRay noHitRay;
 	void drawDebug(TArray<FFlightNavigationRay> rays);
 	TArray<FFlightNavigationRay> generateNoHitResult();
+	void followTargetVelocity();
+	void moveInFrontOfTarget(float delta);
 
 public:	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	AActor* Target;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool FollowTargetVelocity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool MoveInFrontOfTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float MoveInTargetVelocity = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	FVector FollowOffset;

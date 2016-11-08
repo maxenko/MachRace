@@ -5,25 +5,30 @@
 
 
 // Sets default values for this component's properties
-UFlightNavigator::UFlightNavigator(){
+UFlightNavigator::UFlightNavigator() {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	bWantsBeginPlay = true;
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-
 // Called when the game starts
 void UFlightNavigator::BeginPlay(){
 	Super::BeginPlay();
 }
 
-
 // Called every frame
-void UFlightNavigator::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ){
+void UFlightNavigator::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
-}
 
+	if (FollowTargetVelocity) {
+		followTargetVelocity();
+	}
+
+	if (MoveInFrontOfTarget) {
+		moveInFrontOfTarget(DeltaTime);
+	}
+}
 
 // creates the scan intervals, centered
 TArray<float> UFlightNavigator::getIntervals() {
@@ -199,7 +204,6 @@ bool UFlightNavigator::hasSideObstable(int32 dir) {
 	return false;
 }
 
-
 FVector UFlightNavigator::GetToLoc() {
 
 	auto scan = getForwardScan();
@@ -219,4 +223,33 @@ FVector UFlightNavigator::GetToLoc() {
 	FVector targetLoc = FVector(actorLoc.X, maxRay.From.Y, actorLoc.Z);
 
 	return targetLoc;
+}
+
+void UFlightNavigator::followTargetVelocity() {
+
+	if (!Target) {
+		return;
+	}
+
+	auto targetRoot = Cast<UStaticMeshComponent>(Target->GetRootComponent());
+	if (!targetRoot) { return; }
+	auto targetVelocity = targetRoot->GetPhysicsLinearVelocity();
+
+	auto ownerRoot = Cast<UStaticMeshComponent>(GetOwner()->GetRootComponent());
+	if (!ownerRoot) { return; }
+	auto ownerVelocity = ownerRoot->GetPhysicsLinearVelocity();
+
+	if (FMath::Abs(targetVelocity.X) > FMath::Abs(ownerVelocity.X)) {
+		targetRoot->SetPhysicsLinearVelocity(FVector(targetVelocity.X, ownerVelocity.Y, ownerVelocity.Z));
+	}
+}
+
+void UFlightNavigator::moveInFrontOfTarget(float delta) {
+
+	if (!Target) {
+		return;
+	}
+
+	auto t = FMath::VInterpTo(GetOwner()->GetActorLocation(), Target->GetActorLocation(), delta, MoveInTargetVelocity);
+	GetOwner()->SetActorLocation(t);
 }
