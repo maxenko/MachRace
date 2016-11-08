@@ -9,4 +9,11 @@ FVector UX::GetRootLinearVelocity(AActor* target) {
 	return targetRoot->GetPhysicsLinearVelocity();
 }
 
+void UX::SetRootLinearVelocity(AActor* target, FVector v) {
+	auto targetRoot = Cast<UStaticMeshComponent>(target->GetRootComponent());
+	if (!targetRoot) { return; }
+	targetRoot->SetPhysicsLinearVelocity(v);
+}
+
+
 

@@ -2,7 +2,7 @@
 
 #include "MachRace.h"
 #include "FlightNavigator.h"
-
+#include "X.h"
 
 // Sets default values for this component's properties
 UFlightNavigator::UFlightNavigator() {
@@ -231,16 +231,11 @@ void UFlightNavigator::followTargetVelocity() {
 		return;
 	}
 
-	auto targetRoot = Cast<UStaticMeshComponent>(Target->GetRootComponent());
-	if (!targetRoot) { return; }
-	auto targetVelocity = targetRoot->GetPhysicsLinearVelocity();
-
-	auto ownerRoot = Cast<UStaticMeshComponent>(GetOwner()->GetRootComponent());
-	if (!ownerRoot) { return; }
-	auto ownerVelocity = ownerRoot->GetPhysicsLinearVelocity();
+	auto targetVelocity = UX::GetRootLinearVelocity(Target);
+	auto ownerVelocity = UX::GetRootLinearVelocity(GetOwner());
 
 	if (FMath::Abs(targetVelocity.X) > FMath::Abs(ownerVelocity.X)) {
-		targetRoot->SetPhysicsLinearVelocity(FVector(targetVelocity.X, ownerVelocity.Y, ownerVelocity.Z));
+		UX::SetRootLinearVelocity(GetOwner(), FVector(targetVelocity.X, ownerVelocity.Y, ownerVelocity.Z));
 	}
 }
 
