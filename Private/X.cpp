@@ -14,6 +14,3 @@ void UX::SetRootLinearVelocity(AActor* target, FVector v) {
 	if (!targetRoot) { return; }
 	targetRoot->SetPhysicsLinearVelocity(v);
 }
-
-
-

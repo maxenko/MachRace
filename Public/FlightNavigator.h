@@ -6,6 +6,10 @@
 #include "FlightNavigator.generated.h"
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FObstacleFoundAhead);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FObstacleFoundSide);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FClearAhead);
+
 
 USTRUCT(BlueprintType)
 struct FFlightNavigationRay {
@@ -28,7 +32,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
 	FHitResult Hit;
 };
-
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -85,6 +88,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	bool DrawDebug = true;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
+	FObstacleFoundAhead ObstacleFoundAhead;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
+	FObstacleFoundAhead ObstacleFoundSide;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
+	FObstacleFoundAhead ClearAhead;
 
 	UFUNCTION(BlueprintCallable, Category = "MachRace|Gameplay")
 	FVector GetToLoc();
