@@ -44,23 +44,33 @@ private:
 	// generate scan field intervals
 	TArray<float> getIntervals();
 	TArray<FFlightNavigationRay> getForwardScan();
-	bool hasSideObstable(int32 dir); // -1/1 for direction
+	bool hasSideObstacle(int32 dir); // -1/1 for direction
 	FFlightNavigationRay noHitRay;
 	void drawDebug(TArray<FFlightNavigationRay> rays);
 	TArray<FFlightNavigationRay> generateNoHitResult();
-	void followTargetVelocity();
-	void moveInFrontOfTarget(float delta);
+	void dodge(float delta);
+	void followTarget();
+	void moveInFrontOfTarget(float delta, FVector& aggregate);
+
+	bool hasObstacle = false;
+	bool isDecayingY = true;
+
+	FVector aggregateWorldLocation;
+
+	// physics ops
+	void nudge(EAxisList::Type axis, FVector from, FVector to);
+	void decay(EAxisList::Type axis, float delta);
 
 public:	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	AActor* Target;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	bool FollowTargetVelocity;
+	bool FollowTarget = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	bool MoveInFrontOfTarget;
+	bool MoveInFrontOfTarget = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float MoveInTargetVelocity = 5;
@@ -69,16 +79,25 @@ public:
 	FVector FollowOffset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	bool DodgeObstacles;
+	bool DodgeObstacles = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float DodgeSpeedDecay = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	int32 DetectionRays = 7;
+	int32 DetectionRays = 8;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	int32 SideDetectionRays = 7;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float DetectionRayInterval = 20.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	float FollowDistance = 1000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float DodgeSpeed = 4.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float ScanDistance = 3000.0f;

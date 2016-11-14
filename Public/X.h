@@ -16,6 +16,5 @@ class MACHRACE_API UX : public UBlueprintFunctionLibrary
 public:
 
 	static FVector GetRootLinearVelocity(AActor* target);
-	static void SetRootLinearVelocity(AActor* target, FVector v);
-	
+	static void SetRootLinearVelocity(AActor* target, FVector v, bool addTo = false);
 };

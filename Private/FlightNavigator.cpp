@@ -17,17 +17,58 @@ void UFlightNavigator::BeginPlay(){
 	Super::BeginPlay();
 }
 
-// Called every frame
+void UFlightNavigator::nudge(EAxisList::Type axis, FVector from, FVector to) {
+
+	auto currentLoc = GetOwner()->GetActorLocation();
+
+	switch (axis) {
+
+		case EAxisList::Y :
+			
+			auto fromY = FVector(currentLoc.X, from.Y, currentLoc.Z);
+			auto toY = FVector(currentLoc.X, to.Y, currentLoc.Z);
+			auto dist = FVector::Dist(fromY, toY) * (from.Y > to.Y ? -1 : 1);
+
+			UX::SetRootLinearVelocity(GetOwner(), FVector(0, dist*100, 0), true);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, "Dodge velocity: " + FVector(0, dist, 0).ToString());
+
+			break;
+	}
+}
+
+void UFlightNavigator::decay(EAxisList::Type axis, float delta) {
+
+	if (isDecayingY) {
+		
+		auto currentVelocity = UX::GetRootLinearVelocity(GetOwner());
+		FVector newVel = FMath::VInterpTo(currentVelocity, FVector(currentVelocity.X, 0, currentVelocity.Z),delta,DodgeSpeedDecay);
+		UX::SetRootLinearVelocity(GetOwner(), newVel);
+
+	}
+
+}
+
+// Ca0lled every frame
 void UFlightNavigator::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	if (FollowTargetVelocity) {
-		followTargetVelocity();
+	if (FollowTarget) {
+		followTarget();
+	}
+
+	if ( DodgeObstacles ) {
+		dodge(DeltaTime);
 	}
 
 	if (MoveInFrontOfTarget) {
-		moveInFrontOfTarget(DeltaTime);
+		//moveInFrontOfTarget(DeltaTime, aggregateWorldLocation);
 	}
+}
+
+void UFlightNavigator::dodge(float delta) {
+
+	FVector to = GetToLoc();
+	nudge(EAxisList::Y, GetOwner()->GetActorLocation(), to);
 }
 
 // creates the scan intervals, centered
@@ -46,6 +87,7 @@ TArray<float> UFlightNavigator::getIntervals() {
 }
 
 void UFlightNavigator::drawDebug(TArray<FFlightNavigationRay> rays) {
+
 	// visualize ?
 	if (DrawDebug) {
 		for (auto& ray : rays) {
@@ -60,14 +102,16 @@ void UFlightNavigator::drawDebug(TArray<FFlightNavigationRay> rays) {
 }
 
 TArray<FFlightNavigationRay> UFlightNavigator::generateNoHitResult() {
+
 	// no hit result
-	noHitRay.From = GetOwner()->GetActorLocation();
+	noHitRay.From = aggregateWorldLocation;
 	noHitRay.To = noHitRay.From + FVector(-ScanDistance, 0, 0);
 	noHitRay.Weight = 1;
 	noHitRay.Distance = ScanDistance;
 
 	TArray<FFlightNavigationRay> noHitResult = { noHitRay };
 	drawDebug(noHitResult);
+
 	return noHitResult;
 }
 
@@ -92,8 +136,6 @@ TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(GetOwner());
 
-	auto hasObstacle = false;
-
 	// generate scan
 	for (int32 i = 0; i < DetectionRays; ++i) {
 
@@ -109,7 +151,7 @@ TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 		} else {
 			scan[i].Distance = ScanDistance;
 		}
-		scan[i].Hit = hit;		
+		scan[i].Hit = hit;
 	}
 
 	if (!hasObstacle) {
@@ -131,8 +173,8 @@ TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 	}
 
 	// perform side scans
-	bool rightHasObstacles = hasSideObstable(1);
-	bool leftHasObstacles = hasSideObstable(-1);
+	bool rightHasObstacles = hasSideObstacle(1);
+	bool leftHasObstacles = hasSideObstacle(-1);
 
 	if (rightHasObstacles || leftHasObstacles) {
 		return generateNoHitResult();
@@ -160,7 +202,7 @@ TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 }
 
 // here we check whether there is an object to the side of the owner based on its physics bounds
-bool UFlightNavigator::hasSideObstable(int32 dir) {
+bool UFlightNavigator::hasSideObstacle(int32 dir) {
 	auto w = GetWorld();
 
 	if (!w) {
@@ -211,40 +253,49 @@ FVector UFlightNavigator::GetToLoc() {
 	// we are moving in -x as forward direction so, we are looking for Y value with highest weight
 	FFlightNavigationRay maxRay;
 	float max = FLT_MIN;
+
 	for (auto& ray : scan) {
-		if (ray.Weight > max) { 
+		if (ray.Weight >= max) { 
 			max = ray.Weight;
 			maxRay = ray;
 		}
 	}
 
 	// compose target from existing actor location, and heaviest ray
-	FVector actorLoc = GetOwner()->GetActorLocation();
-	FVector targetLoc = FVector(actorLoc.X, maxRay.From.Y, actorLoc.Z);
+	FVector targetLoc = FVector(aggregateWorldLocation.X, maxRay.From.Y, aggregateWorldLocation.Z);
 
 	return targetLoc;
 }
 
-void UFlightNavigator::followTargetVelocity() {
+void UFlightNavigator::followTarget() {
 
 	if (!Target) {
 		return;
 	}
 
-	auto targetVelocity = UX::GetRootLinearVelocity(Target);
-	auto ownerVelocity = UX::GetRootLinearVelocity(GetOwner());
-
-	if (FMath::Abs(targetVelocity.X) > FMath::Abs(ownerVelocity.X)) {
-		UX::SetRootLinearVelocity(GetOwner(), FVector(targetVelocity.X, ownerVelocity.Y, ownerVelocity.Z));
-	}
+	FVector targetVelocity = UX::GetRootLinearVelocity(Target);
+	FVector ownerVelocity = UX::GetRootLinearVelocity(GetOwner());
+	UX::SetRootLinearVelocity(GetOwner(), FVector(targetVelocity.X, ownerVelocity.Y, ownerVelocity.Z));
 }
 
-void UFlightNavigator::moveInFrontOfTarget(float delta) {
+void UFlightNavigator::moveInFrontOfTarget(float delta, FVector& aggregate) {
 
-	if (!Target) {
+	if (!Target && !hasObstacle) {
 		return;
 	}
 
-	auto t = FMath::VInterpTo(GetOwner()->GetActorLocation(), Target->GetActorLocation(), delta, MoveInTargetVelocity);
-	GetOwner()->SetActorLocation(t);
+	auto ownerLoc = GetOwner()->GetActorLocation();
+
+	FVector targetLocation = FVector(ownerLoc.X, Target->GetActorLocation().Y, ownerLoc.Z);
+
+	FVector targetVelocity = UX::GetRootLinearVelocity(Target);
+	FVector ownerVelocity = UX::GetRootLinearVelocity(GetOwner());
+
+	aggregateWorldLocation = FMath::VInterpTo(aggregate, targetLocation, delta, MoveInTargetVelocity);
+
+	this->followTarget();
+
+	if (FollowTarget) {
+		UX::SetRootLinearVelocity(GetOwner(), FVector(targetVelocity.X, ownerVelocity.Y, ownerVelocity.Z));
+	}
 }
