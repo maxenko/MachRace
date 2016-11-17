@@ -32,7 +32,6 @@ void UFlightNavigator::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	if (FollowTarget) {
 		followTarget(DeltaTime);
 	}
-
 }
 
 void UFlightNavigator::nudge(EAxisList::Type axis, FVector from, FVector to) {
@@ -48,7 +47,6 @@ void UFlightNavigator::nudge(EAxisList::Type axis, FVector from, FVector to) {
 			auto dist = FVector::Dist(fromY, toY) * (from.Y > to.Y ? -1 : 1);
 
 			UX::SetRootLinearVelocity(GetOwner(), FVector(0, dist*100, 0), true);
-			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, "Dodge velocity: " + FVector(0, dist, 0).ToString());
 
 			break;
 	}
@@ -63,7 +61,6 @@ void UFlightNavigator::decay(EAxisList::Type axis, float delta) {
 		UX::SetRootLinearVelocity(GetOwner(), newVel);
 
 	}
-
 }
 
 
@@ -304,7 +301,7 @@ void UFlightNavigator::moveInFrontOfTarget(float delta, FVector to) {
 	auto direction	= (ownerLoc - desiredLoc).GetSafeNormal();
 	auto dist		= FVector::Dist(ownerLoc, desiredLoc);
 
-	FVector velocity = dist*-direction;
+	FVector velocity = dist*-direction*BankingSpeedMultiplier;
 	if (dist < 10) {
 		velocity = UX::NullifyY(velocity);
 	}

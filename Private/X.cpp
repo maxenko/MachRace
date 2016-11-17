@@ -11,8 +11,6 @@ FVector UX::GetRootLinearVelocity(AActor* target) {
 
 void UX::SetRootLinearVelocity(AActor* target, FVector v, bool addTo) {
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, v.ToString());
-
 	auto targetRoot = Cast<UStaticMeshComponent>(target->GetRootComponent());
 	if (!targetRoot) { return; }
 
