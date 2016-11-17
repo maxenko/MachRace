@@ -57,10 +57,6 @@ private:
 
 	FVector aggregateWorldLocation;
 
-	// physics ops
-	void nudge(EAxisList::Type axis, FVector from, FVector to);
-	void decay(EAxisList::Type axis, float delta);
-
 public:	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")

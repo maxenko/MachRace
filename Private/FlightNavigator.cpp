@@ -34,37 +34,6 @@ void UFlightNavigator::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 }
 
-void UFlightNavigator::nudge(EAxisList::Type axis, FVector from, FVector to) {
-
-	auto currentLoc = GetOwner()->GetActorLocation();
-
-	switch (axis) {
-
-		case EAxisList::Y :
-			
-			auto fromY = FVector(currentLoc.X, from.Y, currentLoc.Z);
-			auto toY = FVector(currentLoc.X, to.Y, currentLoc.Z);
-			auto dist = FVector::Dist(fromY, toY) * (from.Y > to.Y ? -1 : 1);
-
-			UX::SetRootLinearVelocity(GetOwner(), FVector(0, dist*100, 0), true);
-
-			break;
-	}
-}
-
-void UFlightNavigator::decay(EAxisList::Type axis, float delta) {
-
-	if (isDecayingY) {
-		
-		auto currentVelocity = UX::GetRootLinearVelocity(GetOwner());
-		FVector newVel = FMath::VInterpTo(currentVelocity, FVector(currentVelocity.X, 0, currentVelocity.Z),delta,DodgeSpeedDecay);
-		UX::SetRootLinearVelocity(GetOwner(), newVel);
-
-	}
-}
-
-
-
 bool UFlightNavigator::dodge(float delta) {
 
 	FVector to = GetToLoc();
@@ -280,11 +249,6 @@ void UFlightNavigator::followTarget(float delta) {
 
 	FVector targetVelocity	= UX::GetRootLinearVelocity(Target);
 	FVector ownerVelocity	= UX::GetRootLinearVelocity(GetOwner());
-
-	auto targetPos	= Target->GetActorLocation();
-	auto ownerPos	= GetOwner()->GetActorLocation();
-	auto newLoc		= FVector(ownerPos.X, targetPos.Y, ownerPos.Z);
-	auto interpPos	= FMath::VInterpTo(ownerPos, newLoc, delta, 5);
 
 	UX::SetRootLinearVelocity(GetOwner(), FVector(targetVelocity.X, ownerVelocity.Y, ownerVelocity.Z));
 }
