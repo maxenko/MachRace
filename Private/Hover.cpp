@@ -61,10 +61,6 @@ float UHover::checkGroundDist(FHitResult& hit) {
 	params.AddIgnoredActor(GetOwner());
 	GetOwner()->GetWorld()->LineTraceSingleByChannel(hit, from, to, ECollisionChannel::ECC_Visibility,params);
 
-	if(DrawDebug){
-		
-	}
-
 	return FVector::Dist(from, hit.Location);
 }
 

@@ -21,16 +21,16 @@ void UFlightNavigator::BeginPlay(){
 void UFlightNavigator::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (MoveInFrontOfTarget) {
-		moveInFrontOfTarget(DeltaTime);
+	if (DodgeObstacles) {
+		if (!dodge(DeltaTime)) {
+			if (MoveInFrontOfTarget && Target) {
+				moveInFrontOfTarget(DeltaTime, Target->GetActorLocation());
+			}
+		}
 	}
 
 	if (FollowTarget) {
 		followTarget(DeltaTime);
-	}
-
-	if (DodgeObstacles) {
-		//dodge(DeltaTime);
 	}
 
 }
@@ -48,7 +48,7 @@ void UFlightNavigator::nudge(EAxisList::Type axis, FVector from, FVector to) {
 			auto dist = FVector::Dist(fromY, toY) * (from.Y > to.Y ? -1 : 1);
 
 			UX::SetRootLinearVelocity(GetOwner(), FVector(0, dist*100, 0), true);
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, "Dodge velocity: " + FVector(0, dist, 0).ToString());
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, "Dodge velocity: " + FVector(0, dist, 0).ToString());
 
 			break;
 	}
@@ -68,10 +68,16 @@ void UFlightNavigator::decay(EAxisList::Type axis, float delta) {
 
 
 
-void UFlightNavigator::dodge(float delta) {
+bool UFlightNavigator::dodge(float delta) {
 
 	FVector to = GetToLoc();
-	nudge(EAxisList::Y, GetOwner()->GetActorLocation(), to);
+
+	if(GetOwner()->GetActorLocation().Y != to.Y){
+		moveInFrontOfTarget(delta, to);
+		return true;
+	}
+
+	return false;
 }
 
 // creates the scan intervals, centered
@@ -266,7 +272,6 @@ FVector UFlightNavigator::GetToLoc() {
 
 	// compose target from existing actor location, and heaviest ray
 	FVector targetLoc = FVector(aggregateWorldLocation.X, maxRay.From.Y, aggregateWorldLocation.Z);
-
 	return targetLoc;
 }
 
@@ -285,20 +290,16 @@ void UFlightNavigator::followTarget(float delta) {
 	auto interpPos	= FMath::VInterpTo(ownerPos, newLoc, delta, 5);
 
 	UX::SetRootLinearVelocity(GetOwner(), FVector(targetVelocity.X, ownerVelocity.Y, ownerVelocity.Z));
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow,
-		GetOwner()->GetRootPrimitiveComponent()->GetPhysicsLinearVelocity().ToString()
-	);
 }
 
-void UFlightNavigator::moveInFrontOfTarget(float delta) {
+void UFlightNavigator::moveInFrontOfTarget(float delta, FVector to) {
 
 	if (!Target && !hasObstacle) {
 		return;
 	}
 
 	auto ownerLoc	= GetOwner()->GetActorLocation();
-	auto targetLoc	= Target->GetActorLocation();
+	auto targetLoc	= to;
 	auto desiredLoc = FVector(ownerLoc.X, targetLoc.Y, ownerLoc.Z);
 	auto direction	= (ownerLoc - desiredLoc).GetSafeNormal();
 	auto dist		= FVector::Dist(ownerLoc, desiredLoc);
@@ -309,5 +310,4 @@ void UFlightNavigator::moveInFrontOfTarget(float delta) {
 	}
 
 	UX::SetRootLinearVelocity(GetOwner(), velocity);
-
 } 

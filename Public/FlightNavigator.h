@@ -48,9 +48,9 @@ private:
 	FFlightNavigationRay noHitRay;
 	void drawDebug(TArray<FFlightNavigationRay> rays);
 	TArray<FFlightNavigationRay> generateNoHitResult();
-	void dodge(float delta);
+	bool dodge(float delta);
 	void followTarget(float delta);
-	void moveInFrontOfTarget(float delta);
+	void moveInFrontOfTarget(float delta, FVector to);
 
 	bool hasObstacle = false;
 	bool isDecayingY = true;
