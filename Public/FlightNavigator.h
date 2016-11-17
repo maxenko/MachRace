@@ -41,7 +41,7 @@ class MACHRACE_API UFlightNavigator : public UActorComponent
 
 private:
 
-	// generate scan field intervals
+	// generate sca field intervals
 	TArray<float> getIntervals();
 	TArray<FFlightNavigationRay> getForwardScan();
 	bool hasSideObstacle(int32 dir); // -1/1 for direction
@@ -49,8 +49,8 @@ private:
 	void drawDebug(TArray<FFlightNavigationRay> rays);
 	TArray<FFlightNavigationRay> generateNoHitResult();
 	void dodge(float delta);
-	void followTarget();
-	void moveInFrontOfTarget(float delta, FVector& aggregate);
+	void followTarget(float delta);
+	void moveInFrontOfTarget(float delta);
 
 	bool hasObstacle = false;
 	bool isDecayingY = true;

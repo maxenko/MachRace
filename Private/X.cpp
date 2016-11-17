@@ -10,13 +10,21 @@ FVector UX::GetRootLinearVelocity(AActor* target) {
 }
 
 void UX::SetRootLinearVelocity(AActor* target, FVector v, bool addTo) {
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, v.ToString());
+
 	auto targetRoot = Cast<UStaticMeshComponent>(target->GetRootComponent());
 	if (!targetRoot) { return; }
 
 	if ( addTo ) {
-		targetRoot->SetPhysicsLinearVelocity(v, true);
+		targetRoot->SetAllPhysicsLinearVelocity(v, true);
+		
 	} else {
-		targetRoot->SetPhysicsLinearVelocity(v, false);
+		targetRoot->SetAllPhysicsLinearVelocity(v, false);
 	}
 	
+}
+
+FVector UX::NullifyY(FVector v) {
+	return FVector(v.X, 0, v.Z);
 }
