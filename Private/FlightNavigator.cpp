@@ -72,7 +72,7 @@ bool UFlightNavigator::dodge(float delta) {
 
 	FVector to = GetToLoc();
 
-	if(GetOwner()->GetActorLocation().Y != to.Y){
+	if(hasObstacle){
 		moveInFrontOfTarget(delta, to);
 		return true;
 	}
