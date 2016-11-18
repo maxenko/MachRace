@@ -21,6 +21,8 @@ void UFlightNavigator::BeginPlay(){
 void UFlightNavigator::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	hasObstacle = false; // reset on each tick
+
 	if (DodgeObstacles) {
 		if (!dodge(DeltaTime)) {
 			if (MoveInFrontOfTarget && Target) {
@@ -91,6 +93,8 @@ TArray<FFlightNavigationRay> UFlightNavigator::generateNoHitResult() {
 }
 
 TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
+
+	
 	
 	auto w = GetWorld();
 	if (!w) {
@@ -119,13 +123,17 @@ TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 
 		FHitResult hit;
 		w->LineTraceSingleByChannel(hit, scan[i].From, scan[i].To, ECollisionChannel::ECC_Visibility, params);
+
 		if (hit.IsValidBlockingHit()) {
+
 			collisions.Add(hit.Location);
 			scan[i].Distance = FVector::Dist(hit.Location,scan[i].From);
 			hasObstacle = true;
+
 		} else {
 			scan[i].Distance = ScanDistance;
 		}
+
 		scan[i].Hit = hit;
 	}
 
@@ -255,7 +263,7 @@ void UFlightNavigator::followTarget(float delta) {
 
 void UFlightNavigator::moveInFrontOfTarget(float delta, FVector to) {
 
-	if (!Target && !hasObstacle) {
+	if (!Target || hasObstacle) {
 		return;
 	}
 
