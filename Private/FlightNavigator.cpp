@@ -21,10 +21,10 @@ void UFlightNavigator::BeginPlay(){
 void UFlightNavigator::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	hasObstacle = false; // reset on each tick
+	HasObstacle = false; // reset on each tick
 
 	if (DodgeObstacles) {
-		if (!dodge(DeltaTime)) {
+		if ( !dodge(DeltaTime) ) {
 			if (MoveInFrontOfTarget && Target) {
 				moveInFrontOfTarget(DeltaTime, Target->GetActorLocation());
 			}
@@ -38,9 +38,9 @@ void UFlightNavigator::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 bool UFlightNavigator::dodge(float delta) {
 
-	FVector to = GetToLoc();
+	FVector to = GetToLoc(); // dodge obstacle destination
 
-	if(hasObstacle){
+	if(HasObstacle){
 		moveInFrontOfTarget(delta, to);
 		return true;
 	}
@@ -94,8 +94,6 @@ TArray<FFlightNavigationRay> UFlightNavigator::generateNoHitResult() {
 
 TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 
-	
-	
 	auto w = GetWorld();
 	if (!w) {
 		return TArray<FFlightNavigationRay>();
@@ -128,7 +126,7 @@ TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 
 			collisions.Add(hit.Location);
 			scan[i].Distance = FVector::Dist(hit.Location,scan[i].From);
-			hasObstacle = true;
+			HasObstacle = true;
 
 		} else {
 			scan[i].Distance = ScanDistance;
@@ -137,7 +135,7 @@ TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 		scan[i].Hit = hit;
 	}
 
-	if (!hasObstacle) {
+	if (!HasObstacle) {
 		return generateNoHitResult();
 	}
 
@@ -262,10 +260,6 @@ void UFlightNavigator::followTarget(float delta) {
 }
 
 void UFlightNavigator::moveInFrontOfTarget(float delta, FVector to) {
-
-	if (!Target || hasObstacle) {
-		return;
-	}
 
 	auto ownerLoc	= GetOwner()->GetActorLocation();
 	auto targetLoc	= to;

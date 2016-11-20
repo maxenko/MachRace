@@ -52,7 +52,7 @@ private:
 	void followTarget(float delta);
 	void moveInFrontOfTarget(float delta, FVector to);
 
-	bool hasObstacle = false;
+	//bool hasObstacle = false;
 	bool isDecayingY = true;
 
 	FVector aggregateWorldLocation;
@@ -64,6 +64,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool FollowTarget = true;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	bool HasObstacle = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool MoveInFrontOfTarget = true;
