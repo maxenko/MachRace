@@ -26,5 +26,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	UPrimitiveComponent* TiltComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	bool ActivateManually = false;
+
+	UFUNCTION(BlueprintCallable, Category = "MachRace|Gameplay")
+	void Tilt();
 	
 };

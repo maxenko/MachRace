@@ -37,10 +37,16 @@ void UVelocityTilt::TickComponent( float DeltaTime, ELevelTick TickType, FActorC
 		return;
 	}
 
+	if (!ActivateManually) {
+		Tilt();
+	}
+}
+
+void UVelocityTilt::Tilt() {
 	// face the direction
-	FVector v	= UX::GetRootLinearVelocity(Target);
-	FVector al	= Target->GetActorLocation();
-	FRotator r	= UKismetMathLibrary::FindLookAtRotation(al, al + v);
+	FVector v = UX::GetRootLinearVelocity(Target);
+	FVector al = Target->GetActorLocation();
+	FRotator r = UKismetMathLibrary::FindLookAtRotation(al, al + v);
 
 	FRotator rn = r;
 	rn.Normalize();
@@ -48,10 +54,9 @@ void UVelocityTilt::TickComponent( float DeltaTime, ELevelTick TickType, FActorC
 	FVector vn = v;
 	vn.Normalize();
 
-	auto roll = fmod(vn.Y*50.0, 360);
+	auto roll = FMath::Clamp<float>(fmod(vn.Y*50.0, 180), -180, 180);
+	r.Roll = roll;
 
-	TiltComponent->SetWorldRotation(r.Add( 0, 0, roll ));
-
-	// rotate sideways
+	TiltComponent->SetWorldRotation(r);
 }
 
