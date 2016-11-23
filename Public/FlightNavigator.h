@@ -72,19 +72,10 @@ public:
 	bool MoveInFrontOfTarget = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float MoveInTargetVelocity = 5;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float BankingSpeedMultiplier = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	FVector FollowOffset;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool DodgeObstacles = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float DodgeSpeedDecay = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	int32 DetectionRays = 8;
@@ -94,12 +85,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float DetectionRayInterval = 20.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	float FollowDistance = 1000.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float DodgeSpeed = 4.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float ScanDistance = 3000.0f;

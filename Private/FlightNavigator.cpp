@@ -268,9 +268,6 @@ void UFlightNavigator::moveInFrontOfTarget(float delta, FVector to) {
 	auto dist		= FVector::Dist(ownerLoc, desiredLoc);
 
 	FVector velocity = dist*-direction*BankingSpeedMultiplier;
-	if (dist < 10) {
-		velocity = UX::NullifyY(velocity);
-	}
 
 	UX::SetRootLinearVelocity(GetOwner(), velocity);
 } 
