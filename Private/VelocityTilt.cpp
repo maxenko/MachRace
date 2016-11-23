@@ -48,7 +48,9 @@ void UVelocityTilt::TickComponent( float DeltaTime, ELevelTick TickType, FActorC
 	FVector vn = v;
 	vn.Normalize();
 
-	TiltComponent->SetWorldRotation(r+FRotator(v.Y,0,0));
+	auto roll = fmod(vn.Y*50.0, 360);
+
+	TiltComponent->SetWorldRotation(r.Add( 0, 0, roll ));
 
 	// rotate sideways
 }
