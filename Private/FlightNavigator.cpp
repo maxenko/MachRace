@@ -31,6 +31,7 @@ void UFlightNavigator::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		}
 	}
 
+	// fly with the speed of the target
 	if (FollowTarget) {
 		followTarget(DeltaTime);
 	}
@@ -116,11 +117,8 @@ TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 	// generate scan
 	for (int32 i = 0; i < DetectionRays; ++i) {
 
-		//scan[i].From = wT.TransformPosition(FVector(0, intervals[i], 0));
-		//scan[i].To = wT.TransformPosition(FVector(-ScanDistance, intervals[i], 0));
-
-		scan[i].From = wT.GetLocation() + FVector(0, intervals[i], 0);
-		scan[i].To = wT.GetLocation() + FVector(-ScanDistance, intervals[i], 0);
+		scan[i].From	= wT.GetLocation() + FVector(0, intervals[i], 0);
+		scan[i].To		= wT.GetLocation() + FVector(-ScanDistance, intervals[i], 0);
 
 		FHitResult hit;
 		w->LineTraceSingleByChannel(hit, scan[i].From, scan[i].To, ECollisionChannel::ECC_Visibility, params);

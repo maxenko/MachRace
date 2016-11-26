@@ -54,7 +54,7 @@ void UVelocityTilt::Tilt() {
 	FVector vn = v;
 	vn.Normalize();
 
-	auto roll = FMath::Clamp<float>(fmod(vn.Y*50.0, 180), -180, 180);
+	auto roll = FMath::Clamp<float>(fmod(vn.Y*25.0, 180), -180, 180);
 	r.Roll = roll;
 
 	TiltComponent->SetWorldRotation(r);
