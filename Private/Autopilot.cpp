@@ -79,15 +79,36 @@ FVector UAutopilot::getTargetVelocity() {
 	//////////////////////////////////////////////////////////////////////////
 	// calculate dodge velocity
 	//////////////////////////////////////////////////////////////////////////
-	DodgeVelocity = FVector::ZeroVector;
-
+	if (ObstacleDetected) {
+	
+		DodgeVelocity = FVector::ZeroVector;
+	
+	}
+	
 
 	//////////////////////////////////////////////////////////////////////////
 	// calculate velocity to position owner in line (Y axis) with Target 
 	//////////////////////////////////////////////////////////////////////////
-	AlignWithTargetVelocity = FVector::ZeroVector;
+	if (!ObstacleDetected && AlignWithTarget) {
 
+		if(ownerLoc.Y != targetActorLoc.Y){
 
+			// calculate distance from target in Y axis
+			FVector tYLoc = FVector(targetActorLoc.Y, 0, 0);
+			FVector oYLoc = FVector(ownerLoc.Y, 0, 0);
+
+			float yDist = FVector::Dist(tYLoc, oYLoc);
+			float alignSpeed = FMath::Clamp<float>(yDist, 0, AlignWithTargetSpeed);
+			float multMod = tYLoc.Y < oYLoc.Y ? 1 : -1;
+			float fallOffMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, AlignWithTargetSpeedFaloff), FVector2D(.5, 1), yDist); // .5 to make alignment faster at the end, could be exposed as a param in the future
+
+			AlignWithTargetVelocity = FVector(0, alignSpeed*multMod, 0);
+
+		} else {
+			AlignWithTargetVelocity = FVector::ZeroVector;
+		}
+	}
+	
 	return UX::GetRootLinearVelocity(Target) + TargetFollowVelocity + DodgeVelocity + AlignWithTargetVelocity;
 }
 

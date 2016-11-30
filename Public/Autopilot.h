@@ -52,6 +52,9 @@ public:
 	bool FollowTarget = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool AlignWithTarget = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float MaxFollowSpeed = -2000.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
@@ -69,11 +72,20 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
 	FVector DodgeVelocity = FVector::ZeroVector;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float AlignWithTargetSpeed = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float AlignWithTargetSpeedFaloff = 200;
+
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
 	FVector TargetFollowVelocity = FVector::ZeroVector;
 
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
 	FVector AlignWithTargetVelocity = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	bool ObstacleDetected = false;
 
 	// not velocity of the target, but rather desired velocity that autopilot adjusts to with every UpdateVelocity()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
