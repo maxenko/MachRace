@@ -98,7 +98,7 @@ FVector UAutopilot::getTargetVelocity() {
 			SafeSpaceVelocity += (v * MaxSelfDistancingSpeed);
 		}
 
-		SafeSpaceVelocity.ClampMaxSize(MaxSelfDistancingSpeed);
+		SafeSpaceVelocity = SafeSpaceVelocity.ClampMaxSize(MaxSelfDistancingSpeed);
 
 		scanAroundStale = false; // reset back to fresh scan, so this is ignored until next scan
 	}
