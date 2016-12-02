@@ -175,7 +175,7 @@ TArray<FFlightNavigationRay> UFlightNavigator::getForwardScan() {
 	}
 		// normalize
 	for (auto& ray : scan) {
-		ray.Weight = FMath::GetMappedRangeValue(FVector2D(min, max), FVector2D(0, 1), ray.Weight);
+		ray.Weight = FMath::GetMappedRangeValueClamped(FVector2D(min, max), FVector2D(0, 1), ray.Weight);
 	}
 
 	drawDebug(scan);
@@ -218,7 +218,7 @@ bool UFlightNavigator::hasSideObstacle(int32 dir) {
 
 	// cast fill rays (variant)
 	for (int32 i = 0; i < SideDetectionRays+1; ++i) {
-		auto posX = FMath::GetMappedRangeValue(FVector2D(0, SideDetectionRays), FVector2D(-b.X, b.X), i);
+		auto posX = FMath::GetMappedRangeValueClamped(FVector2D(0, SideDetectionRays), FVector2D(-b.X, b.X), i);
 		bool isBlocked = checkTrace(o + FVector(posX, 0, 0));
 		if (isBlocked) {
 			return true;

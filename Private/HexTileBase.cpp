@@ -209,12 +209,12 @@ FHexTileDistribuition AHexTileBase::normilizeDistribution(FHexTileDistribuition 
 		auto a = FVector2D(0, sum);
 		auto b = FVector2D(0, 1);
 
-		d.Accelerators		= FMath::GetMappedRangeValue(a, b, d.Accelerators);
-		d.Collectables		= FMath::GetMappedRangeValue(a, b, d.Collectables);
-		d.Column			= FMath::GetMappedRangeValue(a, b, d.Column);
-		d.Decelerators		= FMath::GetMappedRangeValue(a, b, d.Decelerators);
-		d.ICBM				= FMath::GetMappedRangeValue(a, b, d.ICBM);
-		d.Standard			= FMath::GetMappedRangeValue(a, b, d.Standard);
+		d.Accelerators		= FMath::GetMappedRangeValueClamped(a, b, d.Accelerators);
+		d.Collectables		= FMath::GetMappedRangeValueClamped(a, b, d.Collectables);
+		d.Column			= FMath::GetMappedRangeValueClamped(a, b, d.Column);
+		d.Decelerators		= FMath::GetMappedRangeValueClamped(a, b, d.Decelerators);
+		d.ICBM				= FMath::GetMappedRangeValueClamped(a, b, d.ICBM);
+		d.Standard			= FMath::GetMappedRangeValueClamped(a, b, d.Standard);
 
 		return d;
 	}

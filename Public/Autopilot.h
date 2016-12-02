@@ -23,8 +23,10 @@ class MACHRACE_API UAutopilot : public UActorComponent
 private:
 
 	float lastDelta = 0.0;
-	void keepUpWithTarget();
 	FVector getTargetVelocity(); // calculates target velocity (as in velocity toward which autopilot interps to)
+
+	int scanAroundStale = true;
+	TArray<FHitResult> scanAroundHits;
 
 public:	
 	// Sets default values for this component's properties
@@ -39,8 +41,11 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "FollowTarget", Keywords = "Follow target, accelerating and decelerating as necessary."), Category = "MachRace|Gameplay")
 	void AdjustVelocityToFollowTarget(float delta);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Scan", Keywords = "Scans around the owner."), Category = "MachRace|Gameplay")
-	void Scan();
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "ScanAhead", Keywords = "Scans in front of the owner."), Category = "MachRace|Gameplay")
+	void ScanAhead();
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "ScanAround", Keywords = "Scans around the owner."), Category = "MachRace|Gameplay")
+	void ScanAround();
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Update Velocity", Keywords = "Interpolates velocity once from current to target velocity."), Category = "MachRace|Gameplay")
 	void UpdateVelocity();
@@ -55,7 +60,16 @@ public:
 	bool AlignWithTarget = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool ShowDebug = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float MaxFollowSpeed = -2000.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (UIMin = "0", ClampMin = "0") )
+	float MaxSelfDistancingSpeed = 200.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (UIMin = "0", ClampMin = "0"))
+	float SelfDistanceTo = 350.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float FollowOffset = -1000.0;
@@ -68,6 +82,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
 	FVector TargetFollowLocation = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	FVector SafeSpaceVelocity = FVector::ZeroVector;
 
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
 	FVector DodgeVelocity = FVector::ZeroVector;
@@ -96,5 +113,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	AActor* Target;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	TArray<TEnumAsByte<EObjectTypeQuery>> ScanAroundObjectTypes;
 	
 };
