@@ -86,18 +86,19 @@ FVector UAutopilot::getTargetVelocity() {
 	if (scanAroundStale) { // if fresh scan
 		// update velocity
 		SafeSpaceVelocity = FVector::ZeroVector;
-		// update velocity
 		for (auto sch : scanAroundHits) {
 			auto v = (GetOwner()->GetActorLocation() - sch.ImpactPoint);
 			auto dist = FVector::Dist(GetOwner()->GetActorLocation(), sch.ImpactPoint);
 
 			if (dist >= SelfDistanceTo) {
-				continue;
+				continue; // far enough, don't add to velocity
 			}
 
 			v.Normalize();
 			SafeSpaceVelocity += (v * MaxSelfDistancingSpeed);
 		}
+
+		SafeSpaceVelocity.ClampMaxSize(MaxSelfDistancingSpeed);
 
 		scanAroundStale = false; // reset back to fresh scan, so this is ignored until next scan
 	}
