@@ -71,6 +71,26 @@ TArray<FFlightNavigationRay> ULinearForwardScanner::getForwardScan() {
 		scan[i].Hit = hit;
 	}
 
+	// calculate weights, - assigns heaviest weight to a ray that is surrounded by most rays that either didn't hit anything or hit something farthest.
+	for (int32 i = 0; i < scan.Num(); ++i) {
+		for (int32 n = 0; n < scan.Num(); ++n) {
 
-	return TArray<FFlightNavigationRay>();
+			if (n == i) {
+				continue; // don't calculate against itself
+			}
+
+			auto edgeCompensator = 0.f;
+			if (EdgeCompensation) {
+				auto indexPos = FMath::GetMappedRangeValueClamped(FVector2D(1, scan.Num()), FVector2D(0, 1), i);
+				edgeCompensator = EdgeCompensation->GetFloatValue(indexPos);
+			}
+
+			float fractionOfMaxDist = scan[n].Distance / ScanDistance;
+			scan[i].Weight += fractionOfMaxDist / (FMath::Abs(n - i) + edgeCompensator); // divide fraction by [n] rays distance from current [i] ray
+																						 // (note: this is not actual 3D world dist, its numerical
+																						 // distance between array indices.)
+		}
+	}
+
+	return scan;
 }
