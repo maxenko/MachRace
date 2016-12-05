@@ -6,6 +6,7 @@
 TArray<FHitResult> ULinearForwardScanner::Scan() {
 
 	// do the trace
+	auto scan = getForwardScan();
 
 	return TArray<FHitResult>();
 }
