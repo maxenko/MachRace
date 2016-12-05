@@ -50,7 +50,8 @@ FVector UAutopilot::getTargetVelocity() {
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// calculate follow velocity
+	// calculate follow velocity, if set, autopilot will always follow
+	// velocity of the Target
 	//////////////////////////////////////////////////////////////////////////
 	if (FollowTarget) {
 		
@@ -76,6 +77,22 @@ FVector UAutopilot::getTargetVelocity() {
 		TargetFollowVelocity = FVector::ZeroVector;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	// calculate dodge velocity, if this is applicable, 
+	// it overrides anything below, because we dodge before we do anything else
+	//////////////////////////////////////////////////////////////////////////
+	if (ObstacleDetected) {
+
+		DodgeVelocity = FVector::ZeroVector;
+
+		if (ForwardScanner) {
+			
+			// get last forward scan
+			scanAheadHits = ForwardScanner->LastScan;
+
+			// calc optimal location
+		}
+	}
 
 	//////////////////////////////////////////////////////////////////////////
 	// calculate velocity to move away from objects in immediate proximity (safe space)
@@ -98,21 +115,12 @@ FVector UAutopilot::getTargetVelocity() {
 			SafeSpaceVelocity += (v * MaxSelfDistancingSpeed);
 		}
 
-		SafeSpaceVelocity = SafeSpaceVelocity.ClampMaxSize(MaxSelfDistancingSpeed);
+		SafeSpaceVelocity = SafeSpaceVelocity.GetClampedToMaxSize(MaxSelfDistancingSpeed);
 
 		scanAroundStale = false; // reset back to fresh scan, so this is ignored until next scan
 	}
 
 
-	//////////////////////////////////////////////////////////////////////////
-	// calculate dodge velocity
-	//////////////////////////////////////////////////////////////////////////
-	if (ObstacleDetected) {
-	
-		DodgeVelocity = FVector::ZeroVector;
-	
-	}
-	
 
 	//////////////////////////////////////////////////////////////////////////
 	// calculate velocity to position owner in line (Y axis) with Target 
@@ -128,8 +136,10 @@ FVector UAutopilot::getTargetVelocity() {
 			float yDist				= FVector::Dist(tYLoc, oYLoc);
 			float alignSpeed		= FMath::Clamp<float>(yDist, 0, AlignWithTargetSpeed);
 			float multMod			= tYLoc.Y < oYLoc.Y ? 1 : -1;
-			float fallOffMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, AlignWithTargetSpeedFaloff), FVector2D(.5, 1), yDist); // .5 to make alignment faster at the end, could be exposed as a param in the future
 
+										// .5 to make alignment faster at the end, could be exposed as a param in the future
+			float fallOffMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, AlignWithTargetSpeedFaloff), FVector2D(.5, 1), yDist); 
+			
 			AlignWithTargetVelocity = FVector(0, alignSpeed*multMod, 0);
 
 		} else {
@@ -151,7 +161,9 @@ void UAutopilot::AdjustVelocityToFollowTarget(float delta) {
 
 
 void UAutopilot::ScanAhead() {
-
+	if (ForwardScanner) {
+		scanAheadHits = ForwardScanner->Scan();
+	}
 }
 
 // scans in the sphere around the owner, processing heavy, not meant to be run on each frame, use sparingly

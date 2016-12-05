@@ -3,35 +3,13 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
+#include "CommonTypes.h"
 #include "FlightNavigator.generated.h"
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FObstacleFoundAhead);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FObstacleFoundSide);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FClearAhead);
-
-
-USTRUCT(BlueprintType)
-struct FFlightNavigationRay {
-	GENERATED_USTRUCT_BODY()
-
-public:
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
-	FVector From = FVector::ZeroVector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
-	FVector To = FVector::ZeroVector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
-	float Weight = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
-	float Distance = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
-	FHitResult Hit;
-};
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )

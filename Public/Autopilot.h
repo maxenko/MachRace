@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
+#include "EnvironmentScanner.h"
 #include "Autopilot.generated.h"
 
 
@@ -27,6 +28,7 @@ private:
 
 	int scanAroundStale = true;
 	TArray<FHitResult> scanAroundHits;
+	TArray<FHitResult> scanAheadHits;
 
 public:	
 	// Sets default values for this component's properties
@@ -49,6 +51,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Update Velocity", Keywords = "Interpolates velocity once from current to target velocity."), Category = "MachRace|Gameplay")
 	void UpdateVelocity();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UEnvironmentScanner* ForwardScanner = NULL;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float ClearanceWidth = 300;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float NavigationSpeed = 1.0;
@@ -116,5 +124,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	TArray<TEnumAsByte<EObjectTypeQuery>> ScanAroundObjectTypes;
-	
+
 };

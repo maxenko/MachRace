@@ -238,3 +238,25 @@ enum class EHexTileChance : uint8
 	Collectable,
 	ICBM
 };
+
+USTRUCT(BlueprintType)
+struct FFlightNavigationRay {
+	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
+		FVector From = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
+		FVector To = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
+		float Weight = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
+		float Distance = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
+		FHitResult Hit;
+};

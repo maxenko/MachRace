@@ -35,7 +35,7 @@ bool ARaceLaser::traceAhead() {
 	auto from = actorLoc + From;
 	auto to = from + To;
 
-	bool block;
+	bool block = true;
 
 	// handle autoaim logic (sphere trace, and closest IsAutomAimTarget of RaceActorBase
 	if (state->EnableAutoaim) {
