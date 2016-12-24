@@ -3,12 +3,11 @@
 #include "MachRace.h"
 #include "LinearForwardScanner.h"
 
-TArray<FHitResult> ULinearForwardScanner::Scan() {
+TArray<FFlightNavigationRay> ULinearForwardScanner::Scan() {
 
 	// do the trace
-	auto scan = getForwardScan();
-
-	return TArray<FHitResult>();
+	LastScan = getForwardScan();
+	return LastScan;
 }
 
 // creates the scan intervals, center out
@@ -34,7 +33,6 @@ TArray<FFlightNavigationRay> ULinearForwardScanner::getForwardScan() {
 		return TArray<FFlightNavigationRay>();
 	}
 
-	
 	auto rayIntervals = getIntervals();					// relative origins for scan rays
 	TArray<FFlightNavigationRay> scan;					// scan data
 	scan.SetNum(DetectionRays);

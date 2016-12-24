@@ -135,7 +135,7 @@ FVector UAutopilot::getTargetVelocity() {
 
 			float yDist				= FVector::Dist(tYLoc, oYLoc);
 			float alignSpeed		= FMath::Clamp<float>(yDist, 0, AlignWithTargetSpeed);
-			float multMod			= tYLoc.Y < oYLoc.Y ? 1 : -1;
+			float multMod			= tYLoc.Y < oYLoc.Y ? -1 : 1; // reverse velocity multiplier
 
 										// .5 to make alignment faster at the end, could be exposed as a param in the future
 			float fallOffMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, AlignWithTargetSpeedFaloff), FVector2D(.5, 1), yDist); 
@@ -162,7 +162,26 @@ void UAutopilot::AdjustVelocityToFollowTarget(float delta) {
 
 void UAutopilot::ScanAhead() {
 	if (ForwardScanner) {
+
 		scanAheadHits = ForwardScanner->Scan();
+
+		ObstacleDetected = false;
+
+		for (auto h : scanAheadHits) {
+			if (h.Hit.IsValidBlockingHit()) {
+				ObstacleDetected = true;
+				break;
+			}
+		}
+
+		// show debug?
+		if (ShowDebug) {
+			// draw line for each scan ray
+			for (auto h : scanAheadHits) {
+				//DrawDebugLine(GetWorld(), h.TraceStart, h.IsValidBlockingHit() ? h.Location : h.TraceEnd, FColor::Red, false, .04, 0, ray.Weight*2.0);
+			}
+		}
+
 	}
 }
 

@@ -31,6 +31,6 @@ void UEnvironmentScanner::TickComponent( float DeltaTime, ELevelTick TickType, F
 	// ...
 }
 
-TArray<FHitResult> UEnvironmentScanner::Scan() {
-	return TArray<FHitResult>();
+TArray<FFlightNavigationRay> UEnvironmentScanner::Scan() {
+	return TArray<FFlightNavigationRay>();
 }

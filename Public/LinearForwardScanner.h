@@ -18,7 +18,7 @@ private:
 	
 public:
 
-	TArray<FHitResult> Scan() override;
+	TArray<FFlightNavigationRay> Scan() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System", meta = (UIMin = "0", ClampMin = "0"))
 	int32 DetectionRays = 8;

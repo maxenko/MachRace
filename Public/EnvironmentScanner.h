@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
+#include "CommonTypes.h"
 #include "EnvironmentScanner.generated.h"
 
 
@@ -22,8 +23,8 @@ public:
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System")
-	TArray<FHitResult> LastScan;
+	TArray<FFlightNavigationRay> LastScan;
 
 	UFUNCTION(BlueprintCallable, Category = "MachRace|System")
-	virtual TArray<FHitResult> Scan();
+	virtual TArray<FFlightNavigationRay> Scan();
 };

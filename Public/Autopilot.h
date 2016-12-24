@@ -28,7 +28,7 @@ private:
 
 	int scanAroundStale = true;
 	TArray<FHitResult> scanAroundHits;
-	TArray<FHitResult> scanAheadHits;
+	TArray<FFlightNavigationRay> scanAheadHits;
 
 public:	
 	// Sets default values for this component's properties

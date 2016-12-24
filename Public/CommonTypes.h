@@ -246,17 +246,17 @@ struct FFlightNavigationRay {
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
-		FVector From = FVector::ZeroVector;
+	FVector From = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
-		FVector To = FVector::ZeroVector;
+	FVector To = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
-		float Weight = 0;
+	float Weight = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
-		float Distance = 0;
+	float Distance = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
-		FHitResult Hit;
+	FHitResult Hit;
 };
