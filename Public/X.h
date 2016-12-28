@@ -18,4 +18,13 @@ public:
 	static FVector GetRootLinearVelocity(AActor* target);
 	static void SetRootLinearVelocity(AActor* target, FVector v, bool addTo = false);
 	static FVector NullifyY(FVector v);
+
+	static int32 GetYDirMult(FVector a, FVector b) {
+		return a.Y < b.Y ? -1 : 1;
+	}
+	
+	static float GetYDist(FVector a, FVector b) {
+		a.X = a.Z = b.X = b.Z = 0;
+		return FVector::Dist(a, b);
+	}
 };

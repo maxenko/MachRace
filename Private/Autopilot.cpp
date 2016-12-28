@@ -51,7 +51,7 @@ FVector UAutopilot::getTargetVelocity() {
 
 	//////////////////////////////////////////////////////////////////////////
 	// calculate follow velocity, if set, autopilot will always follow
-	// velocity of the Target
+	// velocity of the Target (fly along)
 	//////////////////////////////////////////////////////////////////////////
 	if (FollowTarget) {
 		
@@ -90,8 +90,17 @@ FVector UAutopilot::getTargetVelocity() {
 			// get last forward scan
 			scanAheadHits = ForwardScanner->LastScan;
 
-			// calc optimal location
+			// get direction away from obstacle loc
+			int32 yDir = UX::GetYDirMult(ownerLoc, obstacleLoc);
+
+			// get Y distance based multiplier
+			float yDistToObstacle = UX::GetYDist(ownerLoc, obstacleLoc);
+			float yDistMult = FMath::GetMappedRangeValueClamped(FVector2D(0, ClearanceWidth), FVector2D(0, .5), yDistToObstacle);
+
+			DodgeVelocity = FVector(0, MaxDodgeVelocity * yDistMult * yDir, 0);
 		}
+	} else {
+		DodgeVelocity = FVector::ZeroVector;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -104,8 +113,8 @@ FVector UAutopilot::getTargetVelocity() {
 		// update velocity
 		SafeSpaceVelocity = FVector::ZeroVector;
 		for (auto sch : scanAroundHits) {
-			auto v = (GetOwner()->GetActorLocation() - sch.ImpactPoint);
-			auto dist = FVector::Dist(GetOwner()->GetActorLocation(), sch.ImpactPoint);
+			auto v		= (GetOwner()->GetActorLocation() - sch.ImpactPoint);
+			auto dist	= FVector::Dist(GetOwner()->GetActorLocation(), sch.ImpactPoint);
 
 			if (dist >= SelfDistanceTo) {
 				continue; // far enough, don't add to velocity
@@ -130,17 +139,15 @@ FVector UAutopilot::getTargetVelocity() {
 		if(ownerLoc.Y != targetActorLoc.Y){
 
 			// calculate distance from target in Y axis
-			FVector tYLoc = FVector(targetActorLoc.Y, 0, 0);
-			FVector oYLoc = FVector(ownerLoc.Y, 0, 0);
 
-			float yDist				= FVector::Dist(tYLoc, oYLoc);
+			float yDist				= UX::GetYDist(targetActorLoc, ownerLoc);//FVector::Dist(tYLoc, oYLoc);
 			float alignSpeed		= FMath::Clamp<float>(yDist, 0, AlignWithTargetSpeed);
-			float multMod			= tYLoc.Y < oYLoc.Y ? -1 : 1; // reverse velocity multiplier
+			int32 yDir				= UX::GetYDirMult(targetActorLoc, ownerLoc); // Y axis direction in which we should dodge (left or right)
 
-										// .5 to make alignment faster at the end, could be exposed as a param in the future
+					// .5 to make alignment faster at the end, could be exposed as a param in the future
 			float fallOffMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, AlignWithTargetSpeedFaloff), FVector2D(.5, 1), yDist); 
 			
-			AlignWithTargetVelocity = FVector(0, alignSpeed*multMod, 0);
+			AlignWithTargetVelocity = FVector(0, alignSpeed*yDir, 0);
 
 		} else {
 			AlignWithTargetVelocity = FVector::ZeroVector;
@@ -160,13 +167,16 @@ void UAutopilot::AdjustVelocityToFollowTarget(float delta) {
 }
 
 
+//////////////////////////////////////////////////////////////////////////
+// Scans ahead of the Owner (-X), and stores a location to avoid
+//////////////////////////////////////////////////////////////////////////
 void UAutopilot::ScanAhead() {
 	if (ForwardScanner) {
 
 		scanAheadHits = ForwardScanner->Scan();
 
+		// did we hit anything?
 		ObstacleDetected = false;
-
 		for (auto h : scanAheadHits) {
 			if (h.Hit.IsValidBlockingHit()) {
 				ObstacleDetected = true;
@@ -174,14 +184,29 @@ void UAutopilot::ScanAhead() {
 			}
 		}
 
-		// show debug?
-		if (ShowDebug) {
-			// draw line for each scan ray
-			for (auto h : scanAheadHits) {
-				//DrawDebugLine(GetWorld(), h.TraceStart, h.IsValidBlockingHit() ? h.Location : h.TraceEnd, FColor::Red, false, .04, 0, ray.Weight*2.0);
+		if (!ObstacleDetected) {
+			return;
+		}
+
+		// find the heaviest ray
+		FFlightNavigationRay heaviest;
+		heaviest.Weight = 0;
+		for (auto r : scanAheadHits) {
+			if (r.Weight > heaviest.Weight) {
+				heaviest = r;
 			}
 		}
 
+		// remember location of the hit (since scan doesn't run every frame)
+		obstacleLoc = heaviest.Hit.Location;
+
+		// show debug?
+		if (ShowDebug) {
+			// draw line for each scan ray, indicate ray weight with thicker line
+			for (auto h : scanAheadHits) {
+				DrawDebugLine(GetWorld(), h.Hit.TraceStart, h.Hit.IsValidBlockingHit() ? h.Hit.Location : h.Hit.TraceEnd, FColor::Red, false, .04, 0, h.Weight*2.0);
+			}
+		}
 	}
 }
 
@@ -223,8 +248,7 @@ void UAutopilot::ScanAround() {
 		}
 	}
 
-	scanAroundHits = hits;
-
+	scanAroundHits	= hits;
 	scanAroundStale = true; // mark scan as stale, velocity will recalculate
 }
 

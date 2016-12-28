@@ -28,7 +28,9 @@ private:
 
 	int scanAroundStale = true;
 	TArray<FHitResult> scanAroundHits;
+	FVector obstacleLoc = FVector::ZeroVector;
 	TArray<FFlightNavigationRay> scanAheadHits;
+
 
 public:	
 	// Sets default values for this component's properties
@@ -40,7 +42,7 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "FollowTarget", Keywords = "Follow target, accelerating and decelerating as necessary."), Category = "MachRace|Gameplay")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "FollowTarget", Keywords = "Follow target, accelerating and decelerating as necessary, and dodge obstacles."), Category = "MachRace|Gameplay")
 	void AdjustVelocityToFollowTarget(float delta);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "ScanAhead", Keywords = "Scans in front of the owner."), Category = "MachRace|Gameplay")
@@ -67,7 +69,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool AlignWithTarget = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Dev|Debug")
 	bool ShowDebug = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
@@ -75,6 +77,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (UIMin = "0", ClampMin = "0") )
 	float MaxSelfDistancingSpeed = 200.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (UIMin = "0", ClampMin = "0"))
+	float MaxDodgeVelocity = 1000.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (UIMin = "0", ClampMin = "0"))
 	float SelfDistanceTo = 350.0;
