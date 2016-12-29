@@ -4,6 +4,8 @@
 #include "Autopilot.h"
 #include "X.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "LinearForwardScanner.h"
+#include "SideScanner.h"
 
 
 // Sets default values for this component's properties
@@ -31,6 +33,13 @@ void UAutopilot::TickComponent( float DeltaTime, ELevelTick TickType, FActorComp
 
 	lastDelta = DeltaTime;
 	UpdateVelocity();
+	decayRadialVelocity();
+}
+
+void UAutopilot::decayRadialVelocity() {
+	auto o = GetOwner();
+	FVector target = FMath::VInterpTo(UX::GetRootAngularVelocity(o), FVector::ZeroVector, lastDelta, .2);
+	UX::SetRootAngularVelocity(o, target, false);
 }
 
 
@@ -63,14 +72,11 @@ FVector UAutopilot::getTargetVelocity() {
 			float dist = FVector::Dist(FVector(ownerLoc.X, 0, 0), FVector(TargetFollowLocation.X, 0, 0));
 
 			// calc percentage of distance away from target follow location
-			float pctOfDistToTargetFollowLoc = FMath::Clamp<float>(dist/FMath::Abs(FollowOffset), 0, 1);
+			float pctOfDistToTargetFollowLoc	= FMath::Clamp<float>(dist/FMath::Abs(FollowOffset), 0, 1);
+			float dir							= TargetFollowLocation.X < ownerLoc.X ? 1 : -1; // direction
+			float additionalSpeed				= MaxFollowSpeed * pctOfDistToTargetFollowLoc * dir;
 
-			// multiplier for additional (accelerated) follow speed
-			float multiplier		= FollowOffsetApproachCurve ? FollowOffsetApproachCurve->GetFloatValue(pctOfDistToTargetFollowLoc) : pctOfDistToTargetFollowLoc;
-			float multiplierMod		= TargetFollowLocation.X < ownerLoc.X ? 1 : -1;
-			float additionalSpeed	= MaxFollowSpeed * multiplier * multiplierMod;
-
-			TargetFollowVelocity	= FVector(additionalSpeed, 0, 0);
+			TargetFollowVelocity				= FVector(additionalSpeed, 0, 0);
 		}
 
 	} else {
@@ -95,9 +101,8 @@ FVector UAutopilot::getTargetVelocity() {
 
 			// get Y distance based multiplier
 			float yDistToObstacle = UX::GetYDist(ownerLoc, obstacleLoc);
-			float yDistMult = FMath::GetMappedRangeValueClamped(FVector2D(0, ClearanceWidth), FVector2D(0, .5), yDistToObstacle);
 
-			DodgeVelocity = FVector(0, MaxDodgeVelocity * yDistMult * yDir, 0);
+			DodgeVelocity = FVector(0, MaxDodgeVelocity * yDir, 0);
 		}
 	} else {
 		DodgeVelocity = FVector::ZeroVector;
@@ -129,8 +134,6 @@ FVector UAutopilot::getTargetVelocity() {
 		scanAroundStale = false; // reset back to fresh scan, so this is ignored until next scan
 	}
 
-
-
 	//////////////////////////////////////////////////////////////////////////
 	// calculate velocity to position owner in line (Y axis) with Target 
 	//////////////////////////////////////////////////////////////////////////
@@ -140,30 +143,30 @@ FVector UAutopilot::getTargetVelocity() {
 
 			// calculate distance from target in Y axis
 
-			float yDist				= UX::GetYDist(targetActorLoc, ownerLoc);//FVector::Dist(tYLoc, oYLoc);
+			float yDist				= UX::GetYDist(targetActorLoc, ownerLoc);		// FVector::Dist(tYLoc, oYLoc);
 			float alignSpeed		= FMath::Clamp<float>(yDist, 0, AlignWithTargetSpeed);
-			int32 yDir				= UX::GetYDirMult(targetActorLoc, ownerLoc); // Y axis direction in which we should dodge (left or right)
+			int32 yDir				= UX::GetYDirMult(targetActorLoc, ownerLoc);	// Y axis direction in which we should dodge (left or right)
 
-					// .5 to make alignment faster at the end, could be exposed as a param in the future
-			float fallOffMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, AlignWithTargetSpeedFaloff), FVector2D(.5, 1), yDist); 
-			
 			AlignWithTargetVelocity = FVector(0, alignSpeed*yDir, 0);
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Aligning...!"));
 
 		} else {
 			AlignWithTargetVelocity = FVector::ZeroVector;
 		}
 	}
+
+	FVector combinedVelocity = UX::GetRootLinearVelocity(Target) + TargetFollowVelocity + DodgeVelocity + AlignWithTargetVelocity + SafeSpaceVelocity;
 	
-	return UX::GetRootLinearVelocity(Target) + TargetFollowVelocity + DodgeVelocity + AlignWithTargetVelocity + SafeSpaceVelocity;
-}
-
-
-void UAutopilot::AdjustVelocityToFollowTarget(float delta) {
-	if (!Target) {
-		return;
+	// check if there are obstacles on the side we're going in, if there are,
+	// don't crash into stuff on that side
+	if ( (combinedVelocity.Y > 0 && ObstacleLeftDetected) || (combinedVelocity.Y < 0 && ObstacleRightDetected)) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Side Obstacle...!"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, scanSidesHits[0].Hit.Actor->GetName());
+		combinedVelocity.Y = 0;
 	}
-	
-	UX::SetRootLinearVelocity(GetOwner(), getTargetVelocity());
+
+	return combinedVelocity;
 }
 
 
@@ -171,12 +174,19 @@ void UAutopilot::AdjustVelocityToFollowTarget(float delta) {
 // Scans ahead of the Owner (-X), and stores a location to avoid
 //////////////////////////////////////////////////////////////////////////
 void UAutopilot::ScanAhead() {
+
+	ObstacleDetected = false;
+
+
 	if (ForwardScanner) {
 
-		scanAheadHits = ForwardScanner->Scan();
+		ULinearForwardScanner* forwardScanner = Cast<ULinearForwardScanner>(ForwardScanner);
 
+		scanAheadHits = forwardScanner->Scan();
+		ObstacleDetected = forwardScanner->ObstacleDetected;
+
+		
 		// did we hit anything?
-		ObstacleDetected = false;
 		for (auto h : scanAheadHits) {
 			if (h.Hit.IsValidBlockingHit()) {
 				ObstacleDetected = true;
@@ -202,6 +212,9 @@ void UAutopilot::ScanAhead() {
 
 		// show debug?
 		if (ShowDebug) {
+
+			DrawDebugSphere(GetWorld(), obstacleLoc, 400, 6, FColor::Black, true, 500, 0, 20);
+
 			// draw line for each scan ray, indicate ray weight with thicker line
 			for (auto h : scanAheadHits) {
 				DrawDebugLine(GetWorld(), h.Hit.TraceStart, h.Hit.IsValidBlockingHit() ? h.Hit.Location : h.Hit.TraceEnd, FColor::Red, false, .04, 0, h.Weight*2.0);
@@ -252,12 +265,27 @@ void UAutopilot::ScanAround() {
 	scanAroundStale = true; // mark scan as stale, velocity will recalculate
 }
 
+void UAutopilot::ScanSides() {
+	if (SideScanner) {
+		
+		scanSidesHits = SideScanner->Scan(); // store scan, this may be used for cosmetic gameplay elements - like visuals or sounds when passing close to something.
+
+		// cast to side scanner (for left/right obstacle detection)
+		USideScanner* sideScanner = Cast<USideScanner>(SideScanner);
+		if (sideScanner) {
+			ObstacleLeftDetected	= sideScanner->ObstacleOnTheLeft;
+			ObstacleRightDetected	= sideScanner->ObstacleOnTheRight;
+		}
+
+	} else {
+		ObstacleLeftDetected = ObstacleRightDetected = false;
+	}
+}
 
 void UAutopilot::UpdateVelocity() {
 
+	FVector currentVelocity = UX::GetRootLinearVelocity(GetOwner());
 	TargetVelocity = getTargetVelocity();
-
-	FVector newV = FMath::VInterpTo(UX::GetRootLinearVelocity(GetOwner()), TargetVelocity, lastDelta, VelocityChangeSpeed);
-
+	FVector newV = FMath::VInterpTo(currentVelocity, TargetVelocity, lastDelta, VelocityChangeSpeed);
 	UX::SetRootLinearVelocity(GetOwner(), newV);
 }

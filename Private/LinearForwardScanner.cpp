@@ -27,6 +27,9 @@ TArray<float> ULinearForwardScanner::getIntervals() {
 
 TArray<FFlightNavigationRay> ULinearForwardScanner::getForwardScan() {
 
+
+	ObstacleDetected = false; // reset
+
 	// sanity check
 	auto w = GetWorld();
 	if (!w) {
@@ -43,10 +46,8 @@ TArray<FFlightNavigationRay> ULinearForwardScanner::getForwardScan() {
 	wR.X = 0;
 	wT.SetRotation(wR);
 
-	TArray<FVector> collisions;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(GetOwner());
-
 
 	// generate scan
 	for (int32 i = 0; i < DetectionRays; ++i) {
@@ -55,13 +56,12 @@ TArray<FFlightNavigationRay> ULinearForwardScanner::getForwardScan() {
 		scan[i].To = wT.GetLocation() + FVector(-ScanDistance, rayIntervals[i], 0);
 
 		FHitResult hit;
-		w->LineTraceSingleByChannel(hit, scan[i].From, scan[i].To, ECollisionChannel::ECC_Visibility, params);
+		w->LineTraceSingleByChannel(hit, scan[i].From, scan[i].To, ECollisionChannel::ECC_OverlapAll_Deprecated, params);
 
 		if (hit.IsValidBlockingHit()) {
 
-			collisions.Add(hit.Location);
 			scan[i].Distance = FVector::Dist(hit.Location, scan[i].From);
-			DetectedObstacle = true;
+			ObstacleDetected = true;
 
 		} else {
 			scan[i].Distance = ScanDistance;
@@ -78,16 +78,10 @@ TArray<FFlightNavigationRay> ULinearForwardScanner::getForwardScan() {
 				continue; // don't calculate against itself
 			}
 
-			auto edgeCompensator = 0.f;
-			if (EdgeCompensation) {
-				auto indexPos = FMath::GetMappedRangeValueClamped(FVector2D(1, scan.Num()), FVector2D(0, 1), i);
-				edgeCompensator = EdgeCompensation->GetFloatValue(indexPos);
-			}
-
 			float fractionOfMaxDist = scan[n].Distance / ScanDistance;
-			scan[i].Weight += fractionOfMaxDist / (FMath::Abs(n - i) + edgeCompensator); // divide fraction by [n] rays distance from current [i] ray
-																						 // (note: this is not actual 3D world dist, its numerical
-																						 // distance between array indices.)
+			scan[i].Weight += fractionOfMaxDist / (FMath::Abs(n - i)); // divide fraction by [n] rays distance from current [i] ray
+																	   // (note: this is not actual 3D world dist, its numerical
+																	   // distance between array indices.)
 		}
 	}
 

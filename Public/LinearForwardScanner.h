@@ -27,14 +27,9 @@ public:
 	float DetectionRayInterval = 20.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	bool DetectedObstacle = false;
+	bool ObstacleDetected = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (UIMin = "0", ClampMin = "0"))
 	float ScanDistance = 3000.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (UIMin = "0", ClampMin = "0"))
-	float MinimumClearance = 300.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	UCurveFloat* EdgeCompensation;
 };

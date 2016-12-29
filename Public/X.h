@@ -16,7 +16,9 @@ class MACHRACE_API UX : public UBlueprintFunctionLibrary
 public:
 
 	static FVector GetRootLinearVelocity(AActor* target);
+	static FVector GetRootAngularVelocity(AActor* target);
 	static void SetRootLinearVelocity(AActor* target, FVector v, bool addTo = false);
+	static void SetRootAngularVelocity(AActor* target, FVector v, bool addTo = false);
 	static FVector NullifyY(FVector v);
 
 	static int32 GetYDirMult(FVector a, FVector b) {
