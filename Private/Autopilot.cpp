@@ -23,25 +23,64 @@ UAutopilot::UAutopilot() {
 void UAutopilot::BeginPlay() {
 	Super::BeginPlay();
 
-	// ...
+	// record original rotation
+	DefaultTransform = GetOwner()->GetActorTransform();
 }
 
 
 // Called every frame
-void UAutopilot::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) {
-	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
+void UAutopilot::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	lastDelta = DeltaTime;
 	UpdateVelocity();
-	decayRadialVelocity();
+
+	if (RestoreAngularVelocityToZero){
+		RestoreRotationToDefault = false; // turn it off, otherwise there might be race conflict
+		decayRadialVelocity();
+		
+	}
+
+	if (RestoreRotationToDefault) {
+
+		bool rootOk = false;
+		auto root = UX::GetRootAsPrimitive(GetOwner(), rootOk);
+
+		if (rootOk) {
+			FRotator current = root->GetComponentRotation();
+			FRotator target = FMath::RInterpTo(current, FRotator(0, 0, 0), GetWorld()->GetDeltaSeconds(), 2);
+			FVector currentV = root->GetComponentVelocity();
+
+			root->SetWorldRotation(FQuat(FRotator(0,0,0))); // ideally this should be gradually adjusted to target via RInterp, but there is a bug in UE4 that kills physics.
+
+			if (current == FRotator(0, 0, 0)) {
+				RestoreRotationToDefault = false;
+			}
+		}
+	}
 }
 
 void UAutopilot::decayRadialVelocity() {
 	auto o = GetOwner();
-	FVector target = FMath::VInterpTo(UX::GetRootAngularVelocity(o), FVector::ZeroVector, lastDelta, .2);
-	UX::SetRootAngularVelocity(o, target, false);
-}
+	
+	// get root component primitive
+	bool rootOK = false;
+	auto root = UX::GetRootAsPrimitive(o, rootOK);
+	if (rootOK) {
+		//root->get
+	}
 
+	FVector current = UX::GetRootAngularVelocity(o);
+
+	if (current == FVector::ZeroVector) {
+		RestoreAngularVelocityToZero = false;
+		OnAngularVelocityRestoredToZero.Broadcast();
+		return;
+	}
+
+	FVector target = FMath::VInterpTo(current, FVector::ZeroVector, lastDelta, 6);
+	UX::SetRootAngularVelocity(o, target);
+}
 
 // calculates target velocity based on all current settings, and from all applicable velocities
 FVector UAutopilot::getTargetVelocity() {
@@ -93,19 +132,16 @@ FVector UAutopilot::getTargetVelocity() {
 
 		if (ForwardScanner) {
 			
-			// get last forward scan
-			scanAheadHits = ForwardScanner->LastScan;
-
 			// get direction away from obstacle loc
-			int32 yDir = UX::GetYDirMult(ownerLoc, obstacleLoc);
+			int32 yDir				= UX::GetYDirMult(ownerLoc, obstacleLoc);
 
 			// get Y distance based multiplier
-			float yDistToObstacle = UX::GetYDist(ownerLoc, obstacleLoc);
+			float yDistToObstacle	= UX::GetYDist(ownerLoc, obstacleLoc);
 
-			DodgeVelocity = FVector(0, MaxDodgeVelocity * yDir, 0);
+			DodgeVelocity			= FVector(0, MaxDodgeVelocity * yDir, 0);
 		}
 	} else {
-		DodgeVelocity = FVector::ZeroVector;
+		DodgeVelocity				= FVector::ZeroVector;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -113,7 +149,6 @@ FVector UAutopilot::getTargetVelocity() {
 	// (for instance other drones), this is always on, there is no setting to turn it off.
 	// calculated off scanAroundHits, which should be updated infrequently, as its a sphere trace
 	//////////////////////////////////////////////////////////////////////////
-
 	if (scanAroundStale) { // if fresh scan
 		// update velocity
 		SafeSpaceVelocity = FVector::ZeroVector;
@@ -149,7 +184,7 @@ FVector UAutopilot::getTargetVelocity() {
 
 			AlignWithTargetVelocity = FVector(0, alignSpeed*yDir, 0);
 
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Aligning...!"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Aligning...!"));
 
 		} else {
 			AlignWithTargetVelocity = FVector::ZeroVector;
@@ -161,7 +196,7 @@ FVector UAutopilot::getTargetVelocity() {
 	// check if there are obstacles on the side we're going in, if there are,
 	// don't crash into stuff on that side
 	if ( (combinedVelocity.Y > 0 && ObstacleLeftDetected) || (combinedVelocity.Y < 0 && ObstacleRightDetected)) {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Side Obstacle...!"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Side Obstacle...!"));
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, scanSidesHits[0].Hit.Actor->GetName());
 		combinedVelocity.Y = 0;
 	}
@@ -176,7 +211,6 @@ FVector UAutopilot::getTargetVelocity() {
 void UAutopilot::ScanAhead() {
 
 	ObstacleDetected = false;
-
 
 	if (ForwardScanner) {
 

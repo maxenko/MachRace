@@ -34,3 +34,38 @@ void UX::SetRootAngularVelocity(AActor* target, FVector v, bool addTo) {
 FVector UX::NullifyY(FVector v) {
 	return FVector(v.X, 0, v.Z);
 }
+
+UPrimitiveComponent* UX::GetRootAsPrimitive(AActor* a, bool& success) {
+
+	if (!a) {
+		success = false;
+		return NULL;
+	}
+
+	auto rootAsPrimitive = Cast<UPrimitiveComponent>(a->GetRootComponent());
+
+	if (rootAsPrimitive) {
+		success = true;
+		return rootAsPrimitive;
+	} else {
+		success = false;
+	}
+
+	return NULL;
+}
+
+void UX::DecayRootRotToZero(AActor* a, float delta, float decaySpeed) {
+	bool rootOk = false;
+	auto physVol = UX::GetRootAsPrimitive(a,rootOk);
+
+	if (!rootOk) {
+		return;
+	}
+
+	// stop all rotation
+	if (physVol->GetPhysicsAngularVelocity() != FVector::ZeroVector) {
+		physVol->SetPhysicsAngularVelocity(FVector::ZeroVector);
+	}
+
+	physVol->SetWorldRotation(FMath::RInterpTo(physVol->GetComponentRotation(), FRotator(0, 0, 0), delta, decaySpeed),false,nullptr,ETeleportType::TeleportPhysics);
+}

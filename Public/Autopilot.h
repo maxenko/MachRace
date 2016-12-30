@@ -6,15 +6,7 @@
 #include "EnvironmentScanner.h"
 #include "Autopilot.generated.h"
 
-
-UENUM(BlueprintType)		//"BlueprintType" is essential to include
-enum class EDroneOperationType : uint8
-{
-	DroneOp_FollowTarget 			UMETA(DisplayName = "Follow Target"),
-	DroneOp_Dodge					UMETA(DisplayName = "Dodge Obstacles"),
-	DroneOp_AlignWithTarget			UMETA(DisplayName = "Get in front of Player")
-};
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAngularVelocityRestoredToZero);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MACHRACE_API UAutopilot : public UActorComponent
@@ -60,11 +52,23 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Update Velocity", Keywords = "Interpolates velocity once from current to target velocity."), Category = "MachRace|Gameplay")
 	void UpdateVelocity();
 
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FAngularVelocityRestoredToZero OnAngularVelocityRestoredToZero;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	UEnvironmentScanner* ForwardScanner = NULL;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	UEnvironmentScanner* SideScanner = NULL;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	FTransform DefaultTransform = FTransform::Identity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool RestoreAngularVelocityToZero = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool RestoreRotationToDefault = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool FollowTarget = false;

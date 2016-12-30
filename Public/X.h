@@ -29,4 +29,7 @@ public:
 		a.X = a.Z = b.X = b.Z = 0;
 		return FVector::Dist(a, b);
 	}
+
+	static UPrimitiveComponent* GetRootAsPrimitive(AActor* a, bool& success);
+	static void DecayRootRotToZero(AActor* a, float delta, float decaySpeed);
 };

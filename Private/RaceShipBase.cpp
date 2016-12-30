@@ -27,6 +27,7 @@ void ARaceShipBase::decayLateralMovement(float delta) {
 }
 
 
+// todo: replace this with UX implementation
 void ARaceShipBase::decayRotationToZero(float delta) {
 
 	bool rootOk = false;
@@ -89,7 +90,7 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 	}
 }
 
-
+// todo: replace this with UX implementation
 UPrimitiveComponent* ARaceShipBase::getRootAsPrimitive(bool& success) {
 
 	auto rootAsPrimitive = Cast<UPrimitiveComponent>(RootComponent);

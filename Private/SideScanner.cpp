@@ -6,12 +6,15 @@
 
 //////////////////////////////////////////////////////////////////////////
 // Performs a box scan in the Y direction of the pawns velocity, returns
-// single result of the closest object.
+// single result of the closest object. ObstacleOnTheRight & ObstacleOnTheLeft
+// are convenience properties that can be checked if obstracle is found.
 //////////////////////////////////////////////////////////////////////////
 TArray<FFlightNavigationRay> USideScanner::Scan() {
 
 	auto o = GetOwner();
 	auto w = GetWorld();
+
+	ObstacleOnTheLeft = ObstacleOnTheRight = false; // reset detection flags
 
 	if (!o || !w) {
 		LastScan = emptyResult;
@@ -29,6 +32,7 @@ TArray<FFlightNavigationRay> USideScanner::Scan() {
 		FCollisionObjectQueryParams objQueryParams;
 		FCollisionQueryParams queryParams;
 		queryParams.AddIgnoredActor(o);
+		queryParams.AddIgnoredActors(IgnoredActors);
 
 		FVector ownerLoc	= o->GetActorLocation();
 		int32 m				= dir.Y > 0 ? 1 : -1;					  // left or right?

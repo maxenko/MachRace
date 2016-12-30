@@ -27,4 +27,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "MachRace|System")
 	virtual TArray<FFlightNavigationRay> Scan();
+
+	UPROPERTY(BlueprintReadWrite, Category = "MachRace|System")
+	TArray<AActor*> IgnoredActors;
 };
