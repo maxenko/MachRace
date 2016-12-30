@@ -197,7 +197,7 @@ FVector UAutopilot::getTargetVelocity() {
 	// don't crash into stuff on that side
 	if ( (combinedVelocity.Y > 0 && ObstacleLeftDetected) || (combinedVelocity.Y < 0 && ObstacleRightDetected)) {
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Side Obstacle...!"));
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, scanSidesHits[0].Hit.Actor->GetName());
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, scanSidesHits[0].Hit.Actor->GetName());
 		combinedVelocity.Y = 0;
 	}
 

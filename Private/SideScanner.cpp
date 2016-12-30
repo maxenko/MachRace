@@ -56,8 +56,8 @@ TArray<FFlightNavigationRay> USideScanner::Scan() {
 
 			result.Add(ray);
 			LastScan		= result;
-
-			DrawDebugSphere(GetWorld(), hit.Location, 100, 6, FColor::Red, true, 60, 0, 20);
+			
+			//DrawDebugSphere(GetWorld(), hit.Location, 100, 6, FColor::Red, true, 60, 0, 20);
 
 			ObstacleOnTheLeft	= m > 0;
 			ObstacleOnTheRight	= m < 0;

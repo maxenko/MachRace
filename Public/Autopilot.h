@@ -7,6 +7,7 @@
 #include "Autopilot.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAngularVelocityRestoredToZero);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAlignmentWithinThreshold);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MACHRACE_API UAutopilot : public UActorComponent
@@ -52,14 +53,62 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Update Velocity", Keywords = "Interpolates velocity once from current to target velocity."), Category = "MachRace|Gameplay")
 	void UpdateVelocity();
 
+	
+	//////////////////////////////////////////////////////////////////////////
+	// Gameplay events / indicators
+	//////////////////////////////////////////////////////////////////////////
+
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FAngularVelocityRestoredToZero OnAngularVelocityRestoredToZero;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FAlignmentWithinThreshold OnAlignmentWithinThreshold;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	bool ObstacleDetected = false; // front (-X)
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	bool ObstacleLeftDetected = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	bool ObstacleRightDetected = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	FVector Velocity = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	FVector TargetFollowLocation = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	FVector SafeSpaceVelocity = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	FVector DodgeVelocity = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	FVector TargetFollowVelocity = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	FVector AlignWithTargetVelocity = FVector::ZeroVector;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Scanners
+	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	UEnvironmentScanner* ForwardScanner = NULL;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	UEnvironmentScanner* SideScanner = NULL;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	TArray<TEnumAsByte<EObjectTypeQuery>> ScanAroundObjectTypes;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Internals mechanics / runtime switches / properties
+	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	FTransform DefaultTransform = FTransform::Identity;
@@ -69,6 +118,14 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool RestoreRotationToDefault = false;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Settings
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	AActor* Target;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool FollowTarget = false;
@@ -94,38 +151,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float FollowOffset = -1000.0;
 
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	FVector Velocity = FVector::ZeroVector;
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	FVector TargetFollowLocation = FVector::ZeroVector;
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	FVector SafeSpaceVelocity = FVector::ZeroVector;
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	FVector DodgeVelocity = FVector::ZeroVector;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float AlignWithTargetSpeed = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float AlignWithTargetSpeedFaloff = 200;
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	FVector TargetFollowVelocity = FVector::ZeroVector;
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	FVector AlignWithTargetVelocity = FVector::ZeroVector;
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	bool ObstacleDetected = false; // front
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	bool ObstacleLeftDetected = false;
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
-	bool ObstacleRightDetected = false;
 
 	// not velocity of the target, but rather desired velocity that autopilot adjusts to with every UpdateVelocity()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
@@ -133,11 +163,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float VelocityChangeSpeed = 5.0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	AActor* Target;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	TArray<TEnumAsByte<EObjectTypeQuery>> ScanAroundObjectTypes;
 
 };
