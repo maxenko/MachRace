@@ -60,6 +60,7 @@ void UAutopilot::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	}
 }
 
+
 void UAutopilot::decayRadialVelocity() {
 	auto o = GetOwner();
 	
@@ -81,6 +82,7 @@ void UAutopilot::decayRadialVelocity() {
 	FVector target = FMath::VInterpTo(current, FVector::ZeroVector, lastDelta, 6);
 	UX::SetRootAngularVelocity(o, target);
 }
+
 
 // calculates target velocity based on all current settings, and from all applicable velocities
 FVector UAutopilot::getTargetVelocity() {
@@ -257,6 +259,7 @@ void UAutopilot::ScanAhead() {
 	}
 }
 
+
 // scans in the sphere around the owner, processing heavy, not meant to be run on each frame, use sparingly
 // scanAroundVersion increments with each scan for comparison
 void UAutopilot::ScanAround() {
@@ -299,6 +302,7 @@ void UAutopilot::ScanAround() {
 	scanAroundStale = true; // mark scan as stale, velocity will recalculate
 }
 
+
 void UAutopilot::ScanSides() {
 	if (SideScanner) {
 		
@@ -315,6 +319,7 @@ void UAutopilot::ScanSides() {
 		ObstacleLeftDetected = ObstacleRightDetected = false;
 	}
 }
+
 
 void UAutopilot::UpdateVelocity() {
 

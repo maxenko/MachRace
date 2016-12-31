@@ -116,9 +116,11 @@ void ARaceGameStateBase::AddIgnoredByLaserTrace(AActor* actorToIgnore) {
 TArray<AActor*> ARaceGameStateBase::GetActorsIgnoredByLaserTrace(bool doCleanUp) {
 
 	if (doCleanUp) {
-		IgnoredByLaserTrace.RemoveAll([](const AActor* a) {
-			return !UKismetSystemLibrary::IsValid(a);
-		});
+		IgnoredByLaserTrace.RemoveAll(
+			[](const AActor* a) {
+				return !UKismetSystemLibrary::IsValid(a);
+			}
+		);
 	}
 
 	return IgnoredByLaserTrace;

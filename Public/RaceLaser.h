@@ -24,8 +24,12 @@ private:
 	bool previousIsFiring = false;
 	
 public:	
-	// Sets default values for this actor's properties
+
 	ARaceLaser();
+
+	//////////////////////////////////////////////////////////////////////////
+	// gameplay specific properties
+	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsFiring;
@@ -36,17 +40,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Direction = FVector(-50000,0,0);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float AutoAimRadius = 600;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector From = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector To = From + Direction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	USceneComponent* FromMarker;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// gameplay events
+	//////////////////////////////////////////////////////////////////////////
+
 	UPROPERTY(BlueprintReadOnly)
 	FHitResult LastHit;
-
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
-	FFireDelegate Fire;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FHitDelegate HasHit;
@@ -58,13 +70,32 @@ public:
 	FFireDelegate NoHit;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
+	FFireDelegate FireTriggered;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FFireDelegate StartFiring;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FFireDelegate EndFiring;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+
+	//////////////////////////////////////////////////////////////////////////
+	// presentation
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	FLinearColor LaserColor = FLinearColor::Yellow;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// system properties
+	//////////////////////////////////////////////////////////////////////////
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	TArray<TEnumAsByte<EObjectTypeQuery>> AutoAimQueryParams;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Dev")
+	bool ShowDebug = false;
+
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

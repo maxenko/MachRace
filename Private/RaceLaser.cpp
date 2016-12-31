@@ -32,22 +32,36 @@ bool ARaceLaser::traceAhead() {
 	ECollisionChannel channel = ECollisionChannel::ECC_Visibility;
 
 	auto actorLoc = GetActorLocation();
+	From = FromMarker ? FromMarker->GetComponentLocation() : actorLoc;
+	To = From + Direction;
+	/*
 	auto from = actorLoc + From;
 	auto to = from + To;
+	*/
 
 	bool block = true;
 
+	//////////////////////////////////////////////////////////////////////////
 	// handle autoaim logic (sphere trace, and closest IsAutomAimTarget of RaceActorBase
+	//////////////////////////////////////////////////////////////////////////
 	if (state->EnableAutoaim) {
 
 		// sphere trace
 		TArray<TEnumAsByte<EObjectTypeQuery>> channels;
 		TArray<AActor*> ignore = GetState()->GetActorsIgnoredByLaserTrace();
 		TArray<FHitResult> hits;
-		UKismetSystemLibrary::SphereTraceMultiForObjects(this, from, to, 600, AutoAimQueryParams, false, ignore, EDrawDebugTrace::ForOneFrame, hits, true);
-
-
-		DrawDebugLine(w, from, to, FColor::Green, false, 0.0, 0, 5);
+		UKismetSystemLibrary::SphereTraceMultiForObjects(
+			this, 
+			From,
+			To, 
+			AutoAimRadius, 
+			AutoAimQueryParams, 
+			false, 
+			ignore, 
+			EDrawDebugTrace::ForOneFrame, 
+			hits, 
+			true
+		);		
 
 		if (hits.Num() <= 0) {
 
@@ -76,8 +90,8 @@ bool ARaceLaser::traceAhead() {
 					}
 
 					// calc angle between forward and hit vector
-					auto hitVector = (from - to);
-					auto straightVector = (from - (from + FVector(-10000, 0, 0)));
+					auto hitVector = (From - To);
+					auto straightVector = (From - (From + FVector(-10000, 0, 0)));
 					hitVector.Normalize();
 					straightVector.Normalize();
 
@@ -101,25 +115,40 @@ bool ARaceLaser::traceAhead() {
 			}
 		}
 
+	//////////////////////////////////////////////////////////////////////////
 	// handle standard (aim straight) logic
+	//////////////////////////////////////////////////////////////////////////
 	} else {
-		block = w->LineTraceSingleByChannel(hit, from, to, channel);
+		block = w->LineTraceSingleByChannel(hit, From, To, channel);
 	}
 
-	if (IsFiring == false && previousIsFiring == true) {
+	if (ShowDebug) {
+		FColor traceColor = FColor::Green;
+		if (IsFiring) {
+			traceColor = FColor::Red;
+		}
+		DrawDebugLine(w, From, To, traceColor, false, 0.0, 0, 5);
+	}
+
+	if (IsFiring == false && previousIsFiring == true) { // prevents double triggering laser from different keys
+
 		EndFiring.Broadcast();
-	} else if (IsFiring == true && previousIsFiring == false) {
+
+	} else if (IsFiring == true && previousIsFiring == false) { // prevents double triggering laser from different keys
+
 		StartFiring.Broadcast();
 	}
+
 	previousIsFiring = IsFiring;
 
-	if (block && IsFiring) {
-		LastHit = hit;
+	if (block && IsFiring) { // we hit something while firing!
 
-		//OnLaserHit(hit);
+		LastHit = hit;
 		HasHit.Broadcast(hit);
 		isHitting = true;
+
 	} else {
+
 		if (isHitting == true) {
 			isHitting = false;
 			HitEnded.Broadcast();
@@ -136,13 +165,11 @@ bool ARaceLaser::traceAhead() {
 // Called when the game starts or when spawned
 void ARaceLaser::BeginPlay() {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void ARaceLaser::Tick( float DeltaTime ) {
 	Super::Tick( DeltaTime );
-	
 	traceAhead();
 }
 
