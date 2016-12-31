@@ -20,12 +20,18 @@ class MACHRACE_API ARaceLaser : public ARaceActorBase
 private:
 
 	bool traceAhead();
+	bool doAutoAimTrace();
+	bool isAutoAimScanDue();
 	bool isHitting = false;
 	bool previousIsFiring = false;
+	FDateTime lastAutoAimTraceTime = FDateTime::Now();
+	ARaceActorBase* autoAimTarget = NULL;
+	FHitResult lastAutoAimHit;
 	
 public:	
 
 	ARaceLaser();
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay specific properties
@@ -93,12 +99,15 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// system properties
 	//////////////////////////////////////////////////////////////////////////
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	TArray<TEnumAsByte<EObjectTypeQuery>> AutoAimQueryParams;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Dev")
 	bool ShowDebug = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	int32 AutoAimScanInterval = 100;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

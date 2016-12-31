@@ -3,22 +3,130 @@
 #include "MachRace.h"
 #include "RaceLaser.h"
 #include "DrawDebugHelpers.h"
+#include "X.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 
 
-// Sets default values
 ARaceLaser::ARaceLaser() {
+
 	bIgnoresOriginShifting = false;
 	PrimaryActorTick.bCanEverTick = true;
 }
+
+
+bool ARaceLaser::isAutoAimScanDue() {
+
+	auto sinceLastTime = FDateTime::Now() - lastAutoAimTraceTime;
+	if (AutoAimScanInterval > sinceLastTime.GetTotalMilliseconds()) {
+		return false;
+	}
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// handle autoaim logic (sphere trace, looking for closest RaceActorBase with .IsAutomAimTarget == true)
+//////////////////////////////////////////////////////////////////////////
+bool ARaceLaser::doAutoAimTrace() {
+
+	lastAutoAimTraceTime = FDateTime::Now();
+
+	auto w = GetWorld();
+	if (!w) {
+		return false;
+	}
+
+	auto state = GetState();
+	if (!state) {
+		return false;
+	}
+
+	// reset last found object, if the same target is still relevant, it will pop up on scan again
+	autoAimTarget = NULL;
+
+	// sphere trace
+	TArray<TEnumAsByte<EObjectTypeQuery>> channels;
+	TArray<AActor*> ignore = GetState()->GetActorsIgnoredByLaserTrace();
+	TArray<FHitResult> hits;
+
+	bool hasHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
+		this,
+		From,
+		To,
+		AutoAimRadius,
+		AutoAimQueryParams,
+		false,
+		state->IgnoredByLaserTrace,
+		ShowDebug ? EDrawDebugTrace::ForOneFrame : EDrawDebugTrace::None,
+		hits,
+		true
+	);
+
+	// didn't hit anything?
+	if (!hasHit || hits.Num() <= 0) {
+
+		return false; 
+
+	// hit something?
+	} else {
+
+		// find the closest of the hits
+		FHitResult lastClosest;
+		float lastClosestDist = 999999;
+
+		bool hitFound = false;
+
+		for (auto h : hits) {
+
+			auto dist = FVector::Dist(h.Location, GetActorLocation());
+
+			// are we hitting a target that can be autoaimed?
+			if (h.Actor.Get()->IsA(ARaceActorBase::StaticClass())) {
+
+				auto target = Cast<ARaceActorBase>(h.Actor.Get());
+
+				// only process autoaim targets
+				if (!target->IsAutoAimTarget) {
+					continue;
+				}
+
+				// calc angle between forward and hit vector
+				auto hitVector = (From - To);
+				auto straightVector = (From - (From + FVector(-10000, 0, 0)));
+				hitVector.Normalize();
+				straightVector.Normalize();
+
+				auto angle = FVector::DotProduct(hitVector, straightVector);
+				auto deg = UKismetMathLibrary::DegCos(angle);
+
+				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Angle: %f"), deg));
+
+				if (lastClosestDist > dist) {
+					lastClosestDist = dist;
+					lastClosest = h;
+					hitFound = true;
+				}
+			}
+		}
+
+		// if we got something
+		if (hitFound) {
+			lastAutoAimHit = lastClosest;
+			return true;
+		}
+	}
+
+
+	return false;
+}
+
 
 // always tracing ahead, regardless if laser is firing or not
 // mainly for on/off states between firing as laser cools off and turns on
 bool ARaceLaser::traceAhead() {
 
 	auto w = GetWorld();
-
 	if (!w) {
 		return false;
 	}
@@ -32,87 +140,21 @@ bool ARaceLaser::traceAhead() {
 	ECollisionChannel channel = ECollisionChannel::ECC_Visibility;
 
 	auto actorLoc = GetActorLocation();
-	From = FromMarker ? FromMarker->GetComponentLocation() : actorLoc;
+	From = FromMarker ? FromMarker->GetComponentLocation() : actorLoc; // figure out where laser is originating from
 	To = From + Direction;
-	/*
-	auto from = actorLoc + From;
-	auto to = from + To;
-	*/
+	bool block = false; // whether trace hit anything or not
 
-	bool block = true;
+	// do we have autoAimTarget? If so thats what we need to hit!
+	if (state->EnableAutoAim && autoAimTarget) {
 
-	//////////////////////////////////////////////////////////////////////////
-	// handle autoaim logic (sphere trace, and closest IsAutomAimTarget of RaceActorBase
-	//////////////////////////////////////////////////////////////////////////
-	if (state->EnableAutoaim) {
+		To = autoAimTarget->GetActorLocation();
 
-		// sphere trace
-		TArray<TEnumAsByte<EObjectTypeQuery>> channels;
-		TArray<AActor*> ignore = GetState()->GetActorsIgnoredByLaserTrace();
-		TArray<FHitResult> hits;
-		UKismetSystemLibrary::SphereTraceMultiForObjects(
-			this, 
-			From,
-			To, 
-			AutoAimRadius, 
-			AutoAimQueryParams, 
-			false, 
-			ignore, 
-			EDrawDebugTrace::ForOneFrame, 
-			hits, 
-			true
-		);		
+		// do a line trace to the center of that target, place To there.
+		bool block = w->LineTraceSingleByChannel(hit, From, To, channel);
 
-		if (hits.Num() <= 0) {
-
-			block = false;
-
-		} else {
-
-			// find the closest
-			FHitResult lastClosest;
-			float lastClosestDist = 999999;
-
-			bool hitFound = false;
-
-			for (auto h : hits) {
-
-				auto dist = FVector::Dist(h.Location, GetActorLocation());
-
-				// are we hitting a target that can be autoaimed?
-				if (h.Actor.Get()->IsA(ARaceActorBase::StaticClass())) {
-
-					auto target = Cast<ARaceActorBase>(h.Actor.Get());
-
-					// only process autoaim targets
-					if (!target->IsAutoAimTarget) {
-						continue;
-					}
-
-					// calc angle between forward and hit vector
-					auto hitVector = (From - To);
-					auto straightVector = (From - (From + FVector(-10000, 0, 0)));
-					hitVector.Normalize();
-					straightVector.Normalize();
-
-					auto angle = FVector::DotProduct(hitVector, straightVector);
-					auto deg = UKismetMathLibrary::DegCos(angle);
-
-					//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Angle: %f"), deg));
-
-					if (lastClosestDist > dist) {
-						lastClosestDist = dist;
-						lastClosest = h;
-						hitFound = true;
-					}
-				}
-			}
-
-			// if we got something
-			if (hitFound) {
-				hit = lastClosest;
-				block = true;
-			}
+		if (!block) {
+			// revert to standard
+			block = w->LineTraceSingleByChannel(hit, From, To, channel);
 		}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -123,6 +165,7 @@ bool ARaceLaser::traceAhead() {
 	}
 
 	if (ShowDebug) {
+
 		FColor traceColor = FColor::Green;
 		if (IsFiring) {
 			traceColor = FColor::Red;
@@ -144,7 +187,7 @@ bool ARaceLaser::traceAhead() {
 	if (block && IsFiring) { // we hit something while firing!
 
 		LastHit = hit;
-		HasHit.Broadcast(hit);
+		HasHit.Broadcast(hit); // broadcast hit, only when firing and hitting
 		isHitting = true;
 
 	} else {
@@ -162,15 +205,23 @@ bool ARaceLaser::traceAhead() {
 	return block;
 }
 
+
 // Called when the game starts or when spawned
 void ARaceLaser::BeginPlay() {
 	Super::BeginPlay();
 }
 
+
 // Called every frame
 void ARaceLaser::Tick( float DeltaTime ) {
 	Super::Tick( DeltaTime );
+
+	// always trace
 	traceAhead(); 
+
+	if (isAutoAimScanDue()) {
+		doAutoAimTrace();
+	}
 
 	// update look at rotation between From and To (as it may shift), useful for various effects on the laser to align.
 	LaserLookAtRot = UKismetMathLibrary::FindLookAtRotation(From, To);

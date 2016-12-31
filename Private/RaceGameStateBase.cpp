@@ -27,14 +27,15 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 				ship->SetShipSpeed(2600);
 			}
 
+			EnableAutoAim =
 			DisableAccelerators =
 			DisableDecorativeGeometry =
 			DisableObstacles = true;
-			
 
 		} else if(newStage == GameStage::InfiniteHex){
 			// force 2600 + set lvl1 boss death to true
 
+			EnableAutoAim =
 			Level1BossDefeated = true;
 
 			bool shipOk = false;
