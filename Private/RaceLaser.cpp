@@ -170,6 +170,9 @@ void ARaceLaser::BeginPlay() {
 // Called every frame
 void ARaceLaser::Tick( float DeltaTime ) {
 	Super::Tick( DeltaTime );
-	traceAhead();
+	traceAhead(); 
+
+	// update look at rotation between From and To (as it may shift), useful for various effects on the laser to align.
+	LaserLookAtRot = UKismetMathLibrary::FindLookAtRotation(From, To);
 }
 

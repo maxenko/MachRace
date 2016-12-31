@@ -86,6 +86,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
 	FLinearColor LaserColor = FLinearColor::Yellow;
 
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Presentation")
+	FRotator LaserLookAtRot = FRotator::ZeroRotator;
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// system properties
