@@ -49,6 +49,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float AutoAimRadius = 600;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float LaserConeOfVision = 45.0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector From = FVector::ZeroVector;
 

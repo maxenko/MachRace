@@ -4,7 +4,6 @@
 #include "RaceLaser.h"
 #include "DrawDebugHelpers.h"
 #include "X.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 
 
@@ -45,85 +44,48 @@ bool ARaceLaser::doAutoAimTrace() {
 	// reset last found object, if the same target is still relevant, it will pop up on scan again
 	autoAimTarget = NULL;
 
-	// sphere trace
-	TArray<TEnumAsByte<EObjectTypeQuery>> channels;
-	TArray<AActor*> ignore = GetState()->GetActorsIgnoredByLaserTrace();
-	TArray<FHitResult> hits;
+	// do a sphere sweep forward, if anything hits continue!
+	FHitResult firstClosestHit;
+	FCollisionObjectQueryParams objParams;
+	FCollisionQueryParams params;
+	params.AddIgnoredActors(state->IgnoredByLaserTrace);
+	FCollisionShape shape;
+	shape.SetSphere(AutoAimRadius);
 
-	bool hasHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
-		this,
-		From,
-		To,
-		AutoAimRadius,
-		AutoAimQueryParams,
-		false,
-		state->IgnoredByLaserTrace,
-		ShowDebug ? EDrawDebugTrace::ForOneFrame : EDrawDebugTrace::None,
-		hits,
-		true
-	);
+	bool sphereSweepHit = w->SweepSingleByObjectType(firstClosestHit, From, To, FQuat::Identity, objParams, shape, params);
 
-	// didn't hit anything?
-	if (!hasHit || hits.Num() <= 0) {
+	if (!sphereSweepHit) {
+		return false;
 
-		return false; 
-
-	// hit something?
 	} else {
 
-		// find the closest of the hits
-		FHitResult lastClosest;
-		float lastClosestDist = 999999;
+		// are we hitting a target that can be autoaimed?
+		if ( firstClosestHit.GetActor()->IsA(ARaceActorBase::StaticClass()) ) {
 
-		bool hitFound = false;
-
-		for (auto h : hits) {
-
-			auto dist = FVector::Dist(h.Location, GetActorLocation());
-
-			// are we hitting a target that can be autoaimed?
-			if (h.Actor.Get()->IsA(ARaceActorBase::StaticClass())) {
-
-				auto target = Cast<ARaceActorBase>(h.Actor.Get());
-
-				// only process autoaim targets
-				if (!target->IsAutoAimTarget) {
-					continue;
-				}
-
-				// calc angle between forward and hit vector
-				auto hitVector = (From - To);
-				auto straightVector = (From - (From + FVector(-10000, 0, 0)));
-				hitVector.Normalize();
-				straightVector.Normalize();
-
-				auto angle = FVector::DotProduct(hitVector, straightVector);
-				auto deg = UKismetMathLibrary::DegCos(angle);
-
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Angle: %f"), deg));
-
-				if (lastClosestDist > dist) {
-					lastClosestDist = dist;
-					lastClosest = h;
-					hitFound = true;
-				}
+			ARaceActorBase* target = Cast<ARaceActorBase>(firstClosestHit.GetActor());
+			if (!target->IsAutoAimTarget) {
+				return false;
 			}
-		}
 
-		// if we got something
-		if (hitFound) {
-			lastAutoAimHit = lastClosest;
+			// we must be if we're here
+			autoAimTarget = target;
+			lastAutoAimHit = firstClosestHit;
+
+			if (ShowDebug) {
+				DrawDebugPoint(w, firstClosestHit.ImpactPoint, 50, FColor::White, false, .16, 0);
+			}
+
 			return true;
 		}
 	}
 
-
 	return false;
 }
 
-
+//////////////////////////////////////////////////////////////////////////
 // always tracing ahead, regardless if laser is firing or not
 // mainly for on/off states between firing as laser cools off and turns on
+//////////////////////////////////////////////////////////////////////////
 bool ARaceLaser::traceAhead() {
 
 	auto w = GetWorld();
@@ -144,25 +106,38 @@ bool ARaceLaser::traceAhead() {
 	To = From + Direction;
 	bool block = false; // whether trace hit anything or not
 
-	// do we have autoAimTarget? If so thats what we need to hit!
-	if (state->EnableAutoAim && autoAimTarget) {
 
-		To = autoAimTarget->GetActorLocation();
+	//////////////////////////////////////////////////////////////////////////
+	// handle auto-aim logic if autoaim is on on this level
+	//////////////////////////////////////////////////////////////////////////
+	if (state->EnableAutoAim) {
 
-		// do a line trace to the center of that target, place To there.
-		bool block = w->LineTraceSingleByChannel(hit, From, To, channel);
+		// do we have autoAimTarget? If so thats what we need to hit!
+		// here we set hit only if it passes all the requirements, otherwise hit is set later to standard straight trace
+		if (doAutoAimTrace() && autoAimTarget != NULL) {
 
-		if (!block) {
-			// revert to standard
-			block = w->LineTraceSingleByChannel(hit, From, To, channel);
+			// do a test line trace to the center of that target
+			FHitResult testHit;
+			bool test = w->LineTraceSingleByChannel(testHit, From, To, channel);
+
+			// is it within cone of lasers vision?
+			auto hitVector = (From - lastAutoAimHit.Location);
+			auto straightVector = (From + Direction);
+
+			if (UX::VectorsWithinAngle(hitVector, straightVector, LaserConeOfVision)) {
+				hit = lastAutoAimHit;
+				block = true;
+				To = lastAutoAimHit.ImpactPoint;
+			}
 		}
 
 	//////////////////////////////////////////////////////////////////////////
-	// handle standard (aim straight) logic
+	// handle standard (aim straight) logic, this is hit if auto-aim is off or there was no block(ing) hit with auto-aim
 	//////////////////////////////////////////////////////////////////////////
-	} else {
+	} else if (!block) {
 		block = w->LineTraceSingleByChannel(hit, From, To, channel);
 	}
+
 
 	if (ShowDebug) {
 
@@ -179,14 +154,14 @@ bool ARaceLaser::traceAhead() {
 
 	} else if (IsFiring == true && previousIsFiring == false) { // prevents double triggering laser from different keys
 
-		StartFiring.Broadcast();
+   		StartFiring.Broadcast();
 	}
 
 	previousIsFiring = IsFiring;
 
 	if (block && IsFiring) { // we hit something while firing!
 
-		LastHit = hit;
+ 		LastHit = hit;
 		HasHit.Broadcast(hit); // broadcast hit, only when firing and hitting
 		isHitting = true;
 
@@ -217,11 +192,7 @@ void ARaceLaser::Tick( float DeltaTime ) {
 	Super::Tick( DeltaTime );
 
 	// always trace
-	traceAhead(); 
-
-	if (isAutoAimScanDue()) {
-		doAutoAimTrace();
-	}
+	traceAhead();
 
 	// update look at rotation between From and To (as it may shift), useful for various effects on the laser to align.
 	LaserLookAtRot = UKismetMathLibrary::FindLookAtRotation(From, To);

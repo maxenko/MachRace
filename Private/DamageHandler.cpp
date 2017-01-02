@@ -42,12 +42,12 @@ float UDamageHandler::TakeDamage(AActor* DamagedActor, float Damage, const FVect
 	// otherwise take damage as actor
 	} else {
 
-		Health = FMath::Clamp(Health - Damage, 0.f, Health);
+ 		Health = FMath::Clamp(Health - Damage, 0.f, Health);
 
 		// if at zero, call actor destroyed event
 		if (Health <= 0) {
+			Health = 0;
 			OnActorDestroyed.Broadcast(GetOwner());
-			return 0;
 		} else {
 			OnActorDamage.Broadcast(Health);
 		}

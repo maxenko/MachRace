@@ -2,6 +2,7 @@
 
 #include "MachRace.h"
 #include "X.h"
+#include "Kismet/KismetMathLibrary.h"
 
 FVector UX::GetRootLinearVelocity(AActor* target) {
 	auto targetRoot = Cast<UStaticMeshComponent>(target->GetRootComponent());
@@ -68,4 +69,16 @@ void UX::DecayRootRotToZero(AActor* a, float delta, float decaySpeed) {
 	}
 
 	physVol->SetWorldRotation(FMath::RInterpTo(physVol->GetComponentRotation(), FRotator(0, 0, 0), delta, decaySpeed),false,nullptr,ETeleportType::TeleportPhysics);
+}
+
+bool UX::VectorsWithinAngle(FVector a, FVector b, float angle) {
+	// calc angle between forward and hit vector
+
+	a.Normalize();
+	b.Normalize();
+
+	auto angeToEachOther = FVector::DotProduct(a, b);
+	auto deg = UKismetMathLibrary::DegCos(angeToEachOther);
+
+	return deg < angle;
 }

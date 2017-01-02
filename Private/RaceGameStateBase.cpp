@@ -44,7 +44,7 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 				ship->SetShipSpeed(2600);
 			}
 
-			OnDeathLevel1Boss.Broadcast();
+			SetLevelOneBossDeafeated();
 		}
 	}
 }
@@ -53,7 +53,7 @@ void  ARaceGameStateBase::SetLevelOneBossDeafeated() {
 	Level1BossDefeated = true;
 	OnDeathLevel1Boss.Broadcast();
 
-	SetStage(GameStage::InfiniteHex);
+	//SetStage(GameStage::InfiniteHex);
 }
 
 // Called when the game starts or when spawned

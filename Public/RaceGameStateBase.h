@@ -34,9 +34,76 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
+
+	//////////////////////////////////////////////////////////////////////////
+	// machrace system related
+	//////////////////////////////////////////////////////////////////////////
 	
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System")
 	TArray<AActor*> IgnoredByLaserTrace;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	GameStage Stage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	GameStage PreviousStage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Grid")
+	TArray<FVector> Level2Index;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Grid")
+	int32 Level1Index = 0;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Game Stage", Keywords = "Sets game stage, forces if necessary."), Category = "MachRace|System")
+	void SetStage(GameStage newStage, bool force = false);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Reset XYZ Grid", Keywords = "Reset grid to current location of player."), Category = "MachRace|Engine")
+	void ResetXYZGrid(float xOffset);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	ARaceContentInstancer* Instancer;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Content Instancer", Keywords = "Get reference to content instancer."), Category = "MachRace|Engine")
+	ARaceContentInstancer* GetInstancer(bool& success);
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System")
+	ARacePlayerBase* Player;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Player", Keywords = "Get MachRace specific player."), Category = "MachRace|Engine")
+	ARacePlayerBase* GetRacePlayer(bool& success);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Ship", Keywords = "Get MachRace specific ship."), Category = "MachRace|Engine")
+	ARaceShipBase* GetRaceShip(bool& success);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get next desert tile N", Keywords = "Gets next desert tile number based on Level1Index."), Category = "MachRace|Controls")
+	int32 GetNextDesertTileN(bool increment);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add to Ignore By Laser", Keywords = "Add actor to registry of actors ignored by laser traces."), Category = "MachRace|System")
+	void AddIgnoredByLaserTrace(AActor* actorToIgnore);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Actors Ignored By Laser Trace", Keywords = "Gets actors ignored by laser traces."), Category = "MachRace|System")
+	TArray<AActor*> GetActorsIgnoredByLaserTrace(bool doCleanUp = true);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Maintain State", Keywords = "Observe and maintain rules of the game."), Category = "MachRace|Gameplay")
+	void MaintainState();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Control settings", Keywords = "Get controls settings based on game stage and speed."), Category = "MachRace|Controls")
+	FControlSettings GetControlSettings(float speed);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Theoretical Speed Mult", Keywords = "Get theoretical speed multiplier, used to translate physical speed to theoretical."), Category = "MachRace|Engine")
+	float GetTheoreticalSpeedMultiplier() {
+		return 0.3176;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// gameplay related 
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnSpawnLevel1Boss OnSpawnLevel1Boss;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnDeathLevel1Boss OnDeathLevel1Boss;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	bool IsInGame = false;
@@ -60,46 +127,14 @@ public:
 	bool EnableAutoAim = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	GameStage Stage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	GameStage PreviousStage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Grid")
-	TArray<FVector> Level2Index;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Grid")
-	int32 Level1Index = 0;
-
-	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
-	FOnSpawnLevel1Boss OnSpawnLevel1Boss;
-
-	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
-	FOnDeathLevel1Boss OnDeathLevel1Boss;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool Level1BossDefeated = false;
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Level 1 Boss as Defeated", Keywords = "Sets level one boss as defeated, affecting related state conditions."), Category = "MachRace|System")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Level 1 Boss as Defeated", Keywords = "Sets level one boss as defeated, affecting related state conditions."), Category = "MachRace|Gameplay")
 	void SetLevelOneBossDeafeated();
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Game Stage", Keywords = "Sets game stage, forces if necessary."), Category = "MachRace|System")
-	void SetStage(GameStage newStage, bool force = false);
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add to Ignore By Laser", Keywords = "Add actor to registry of actors ignored by laser traces."), Category = "MachRace|System")
-	void AddIgnoredByLaserTrace(AActor* actorToIgnore);
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Actors Ignored By Laser Trace", Keywords = "Gets actors ignored by laser traces."), Category = "MachRace|System")
-	TArray<AActor*> GetActorsIgnoredByLaserTrace(bool doCleanUp = true);
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Maintain State", Keywords = "Observe and maintain rules of the game."), Category = "MachRace|Gameplay")
-	void MaintainState();
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get next desert tile N", Keywords = "Gets next desert tile number based on Level1Index."), Category = "MachRace|Controls")
-	int32 GetNextDesertTileN(bool increment);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Control settings", Keywords = "Get controls settings based on game stage and speed."), Category = "MachRace|Controls")
-	FControlSettings GetControlSettings(float speed);
+	//////////////////////////////////////////////////////////////////////////
+	// presentation 
+	//////////////////////////////////////////////////////////////////////////
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Camera Settings", Keywords = "Get camera settings based on ship speed and stage of the game."), Category = "MachRace|Presentation")
 	FCameraSettings GetCameraSettings(float speed);
@@ -110,33 +145,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get UnderFade Settings", Keywords = "Get ship underfade settings."), Category = "MachRace|Presentation")
 	FUnderfadeSettings GetUnderFadeSettings();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Content Instancer", Keywords = "Get reference to content instancer."), Category = "MachRace|Engine")
-	ARaceContentInstancer* GetInstancer(bool& success);
-
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Exponential Fog", Keywords = "Get reference to content Exponential Fog component."), Category = "MachRace|Presentation")
 	AExponentialHeightFog* GetExponentialFog(bool& success);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	ARaceContentInstancer* Instancer;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
 	AExponentialHeightFog* ExponentialFog;
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Reset XYZ Grid", Keywords = "Reset grid to current location of player."), Category = "MachRace|Engine")
-	void ResetXYZGrid(float xOffset);
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System")
-	ARacePlayerBase* Player;
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Player", Keywords = "Get MachRace specific player."), Category = "MachRace|Engine")
-	ARacePlayerBase* GetRacePlayer(bool& success);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Ship", Keywords = "Get MachRace specific ship."), Category = "MachRace|Engine")
-	ARaceShipBase* GetRaceShip(bool& success);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Theoretical Speed Mult", Keywords = "Get theoretical speed multiplier, used to translate physical speed to theoretical."), Category = "MachRace|Engine")
-	float GetTheoreticalSpeedMultiplier() {
-		return 0.3176;
-	}
 
 };

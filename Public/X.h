@@ -32,4 +32,5 @@ public:
 
 	static UPrimitiveComponent* GetRootAsPrimitive(AActor* a, bool& success);
 	static void DecayRootRotToZero(AActor* a, float delta, float decaySpeed);
+	static bool VectorsWithinAngle(FVector a, FVector b, float angle);
 };
