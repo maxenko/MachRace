@@ -20,11 +20,11 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 
 	if (force) {
 		if (newStage == GameStage::DesertBoss) {
-			// force to 2600
+			// force to Level1BossTriggerSpeed
 			bool shipOk = false;
 			auto ship = GetRaceShip(shipOk);
-			if (shipOk && ship->GetSpeed() < 2600) {
-				ship->SetShipSpeed(2600);
+			if (shipOk && ship->GetSpeed() < Level1BossTriggerSpeed) {
+				ship->SetShipSpeed(Level1BossTriggerSpeed);
 			}
 
 			EnableAutoAim =
@@ -33,15 +33,15 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			DisableObstacles = true;
 
 		} else if(newStage == GameStage::InfiniteHex){
-			// force 2600 + set lvl1 boss death to true
+			// force Level1BossTriggerSpeed + set lvl1 boss death to true
 
 			EnableAutoAim =
 			Level1BossDefeated = true;
 
 			bool shipOk = false;
 			auto ship = GetRaceShip(shipOk);
-			if (shipOk && ship->GetSpeed() < 2600) {
-				ship->SetShipSpeed(2600);
+			if (shipOk && ship->GetSpeed() < Level1BossTriggerSpeed) {
+				ship->SetShipSpeed(Level1BossTriggerSpeed);
 			}
 
 			SetLevelOneBossDeafeated();
@@ -52,8 +52,6 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 void  ARaceGameStateBase::SetLevelOneBossDeafeated() {
 	Level1BossDefeated = true;
 	OnDeathLevel1Boss.Broadcast();
-
-	//SetStage(GameStage::InfiniteHex);
 }
 
 // Called when the game starts or when spawned
@@ -72,13 +70,22 @@ void ARaceGameStateBase::MaintainState() {
 
 	float speed = ship->GetTheoreticalSpeed();
 
-	// level 1  rules
-	if (Stage == GameStage::Desert && speed >= 2600 && !Level1BossDefeated) {
+	// level 1 rules
+	if (Stage == GameStage::Desert && speed >= Level1BossTriggerSpeed && !Level1BossDefeated) {
 		PreviousStage = GameStage::Desert;
 		Stage = GameStage::DesertBoss;
 		OnSpawnLevel1Boss.Broadcast();
+		return;
 	}
-	
+
+	// level 2 rules
+	if (Stage == GameStage::InfiniteHex) {
+		// is there a drone active?
+		if (ActiveEnemies.Num() <= 0) {
+			// if not spawn one
+			OnSpawnEnemy.Broadcast(Stage); // blueprint handles the rest
+		}
+	}
 }
 
 // Called every frame
@@ -107,24 +114,22 @@ void ARaceGameStateBase::Tick(float DeltaTime) {
 	}
 
 	MaintainState();
+
+	// clean up enemies array
+	auto removeInvalids = [](const AActor* a) {
+		return !UKismetSystemLibrary::IsValid(a);
+	};
+
+	ActiveEnemies.RemoveAll(removeInvalids);
+	IgnoredByLaserTrace.RemoveAll(removeInvalids);
 }
 
 void ARaceGameStateBase::AddIgnoredByLaserTrace(AActor* actorToIgnore) {
 	IgnoredByLaserTrace.Add(actorToIgnore);	
 }
 
-
-TArray<AActor*> ARaceGameStateBase::GetActorsIgnoredByLaserTrace(bool doCleanUp) {
-
-	if (doCleanUp) {
-		IgnoredByLaserTrace.RemoveAll(
-			[](const AActor* a) {
-				return !UKismetSystemLibrary::IsValid(a);
-			}
-		);
-	}
-
-	return IgnoredByLaserTrace;
+void ARaceGameStateBase::AddActiveEnemy(AActor* enemy) {
+	ActiveEnemies.Add(enemy);
 }
 
 void ARaceGameStateBase::ResetXYZGrid(float xOffset) {

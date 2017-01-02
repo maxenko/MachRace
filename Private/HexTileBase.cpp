@@ -178,7 +178,7 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 		d.Decelerators = .05;
 		d.Accelerators = .025;
 		d.Collectables = .004;
-		d.ICBM = .02;
+		d.ICBM = .005;
 		d.Column = .005;
 
 		return adjust(d);

@@ -12,6 +12,7 @@ class ARacePlayerBase;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpawnLevel1Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathLevel1Boss);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnEnemy, GameStage, stage);
 
 UCLASS()
 class MACHRACE_API ARaceGameStateBase : public AGameState
@@ -54,6 +55,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Grid")
 	int32 Level1Index = 0;
 
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Gameplay")
+	TArray<AActor*> ActiveEnemies;
+
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Game Stage", Keywords = "Sets game stage, forces if necessary."), Category = "MachRace|System")
 	void SetStage(GameStage newStage, bool force = false);
 
@@ -81,8 +85,8 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add to Ignore By Laser", Keywords = "Add actor to registry of actors ignored by laser traces."), Category = "MachRace|System")
 	void AddIgnoredByLaserTrace(AActor* actorToIgnore);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Actors Ignored By Laser Trace", Keywords = "Gets actors ignored by laser traces."), Category = "MachRace|System")
-	TArray<AActor*> GetActorsIgnoredByLaserTrace(bool doCleanUp = true);
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add Active Enemy", Keywords = "Add actor to collections of enemies currently active in the level."), Category = "MachRace|Gameplay")
+	void AddActiveEnemy(AActor* enemy);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Maintain State", Keywords = "Observe and maintain rules of the game."), Category = "MachRace|Gameplay")
 	void MaintainState();
@@ -99,11 +103,17 @@ public:
 	// gameplay related 
 	//////////////////////////////////////////////////////////////////////////
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Level1BossTriggerSpeed = 2600;
+
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnSpawnLevel1Boss OnSpawnLevel1Boss;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnDeathLevel1Boss OnDeathLevel1Boss;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnSpawnEnemy OnSpawnEnemy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	bool IsInGame = false;
