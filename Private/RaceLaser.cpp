@@ -24,8 +24,10 @@ void ARaceLaser::buildBeamSpline() {
 	// clean out existing geometry
 	if (beamMesh) {
 		beamMesh->DestroyComponent();
+		beamMesh->DetachFromParent();
 	}
 	if (BeamPath) {
+		BeamPath->DetachFromParent();
 		BeamPath->DestroyComponent();
 	}
 
@@ -254,10 +256,12 @@ void ARaceLaser::Tick( float DeltaTime ) {
 	} else {
 
 		if (beamMesh) {
+			beamMesh->DetachFromParent();
 			beamMesh->DestroyComponent(false);
 		}
 
 		if (BeamPath) {
+			BeamPath->DetachFromParent();
 			BeamPath->DestroyComponent(false);
 		}
 		
