@@ -117,7 +117,7 @@ void ARaceGameStateBase::Tick(float DeltaTime) {
 
 	// clean up enemies array
 	auto removeInvalids = [](const AActor* a) {
-		return !UKismetSystemLibrary::IsValid(a);
+		return a == NULL || !UKismetSystemLibrary::IsValid(a);
 	};
 
 	ActiveEnemies.RemoveAll(removeInvalids);
@@ -130,6 +130,17 @@ void ARaceGameStateBase::AddIgnoredByLaserTrace(AActor* actorToIgnore) {
 
 void ARaceGameStateBase::AddActiveEnemy(AActor* enemy) {
 	ActiveEnemies.Add(enemy);
+}
+
+bool ARaceGameStateBase::RemoveActiveEnemy(AActor* enemy) {
+	for (int i = 0; i < ActiveEnemies.Num(); ++i) {
+		if (ActiveEnemies[i] == enemy) {
+			ActiveEnemies.RemoveAt(i);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void ARaceGameStateBase::ResetXYZGrid(float xOffset) {

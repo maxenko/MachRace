@@ -85,8 +85,11 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add to Ignore By Laser", Keywords = "Add actor to registry of actors ignored by laser traces."), Category = "MachRace|System")
 	void AddIgnoredByLaserTrace(AActor* actorToIgnore);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add Active Enemy", Keywords = "Add actor to collections of enemies currently active in the level."), Category = "MachRace|Gameplay")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add Active Enemy", Keywords = "Add actor to collection of enemies currently active in the level."), Category = "MachRace|Gameplay")
 	void AddActiveEnemy(AActor* enemy);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Remove Active Enemy", Keywords = "Removes actor from collection of enemies currently active in the level."), Category = "MachRace|Gameplay")
+	bool RemoveActiveEnemy(AActor* enemy);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Maintain State", Keywords = "Observe and maintain rules of the game."), Category = "MachRace|Gameplay")
 	void MaintainState();

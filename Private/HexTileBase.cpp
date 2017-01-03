@@ -222,7 +222,9 @@ FHexTileDistribuition AHexTileBase::normilizeDistribution(FHexTileDistribuition 
 
 void AHexTileBase::HexTileChanceSpawn(EHexTileChance& Branches) {
 
-
+	if (chances.Num() <= 0) {
+		return;
+	}
 
 	// random index!
 	int32 pick = FMath::RandRange(0, chances.Num() - 1);
@@ -249,5 +251,4 @@ FVector AHexTileBase::GetNextTileSpawnPos() {
 	float xOffset = (rows) * -cellHeight;
 
 	return FVector( xOffset + GetActorLocation().X, ship->GetActorLocation().Y, GetActorLocation().Z );
-
 }

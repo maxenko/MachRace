@@ -14,6 +14,50 @@ ARaceLaser::ARaceLaser() {
 }
 
 
+void ARaceLaser::buildBeamSpline() {
+
+	// we need mesh component before we proceed 
+	if (!BeamBodyTemplate) {
+		return;
+	}
+
+	// clean out existing geometry
+	if (beamMesh) {
+		beamMesh->DestroyComponent();
+	}
+	if (BeamPath) {
+		BeamPath->DestroyComponent();
+	}
+
+	// build new curve
+	auto path = NewObject<USplineComponent>(this);
+	path->SetMobility(EComponentMobility::Movable);
+	//path->WeldTo(this->GetRootComponent());
+	path->ClearSplinePoints();
+	path->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+	path->RegisterComponent();
+
+	BeamPath = path;
+	
+	auto segment = NewObject<USplineMeshComponent>(this);
+	segment->SetMobility(EComponentMobility::Movable);
+	segment->SetStaticMesh(BeamBodyTemplate);
+	segment->SetForwardAxis(ESplineMeshAxis::Z);
+	if (BeamMaterial) {
+		segment->SetMaterial(0, BeamMaterial);
+	}
+	segment->AttachToComponent(BeamPath, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	segment->RegisterComponent();
+
+	segment->SetStartPosition(From, false);
+	segment->SetStartScale(BeamFromScale);
+
+	segment->SetEndPosition(To, true);
+	segment->SetEndScale(BeamToScale);
+
+	beamMesh = segment;
+}
+
 bool ARaceLaser::isAutoAimScanDue() {
 
 	auto sinceLastTime = FDateTime::Now() - lastAutoAimTraceTime;
@@ -180,6 +224,13 @@ bool ARaceLaser::traceAhead() {
 	return block;
 }
 
+void ARaceLaser::CreateBeam() {
+	if (!beamExists) {
+		buildBeamSpline();
+		beamExists = true;
+	}
+}
+
 
 // Called when the game starts or when spawned
 void ARaceLaser::BeginPlay() {
@@ -193,6 +244,24 @@ void ARaceLaser::Tick( float DeltaTime ) {
 
 	// always trace
 	traceAhead();
+	if (BeamPath) {
+		BeamPath->SetVisibility(IsFiring);
+	}
+	
+	if (IsFiring) {
+		buildBeamSpline();
+		//updateBeamGeometry();
+	} else {
+
+		if (beamMesh) {
+			beamMesh->DestroyComponent(false);
+		}
+
+		if (BeamPath) {
+			BeamPath->DestroyComponent(false);
+		}
+		
+	}
 
 	// update look at rotation between From and To (as it may shift), useful for various effects on the laser to align.
 	LaserLookAtRot = UKismetMathLibrary::FindLookAtRotation(From, To);

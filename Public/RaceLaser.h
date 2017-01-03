@@ -4,6 +4,8 @@
 
 #include "GameFramework/Actor.h"
 #include "RaceActorBase.h"
+#include "Components/SplineComponent.h"
+#include "Components/SplineMeshComponent.h"
 #include "RaceLaser.generated.h"
 
 
@@ -27,11 +29,13 @@ private:
 	FDateTime lastAutoAimTraceTime = FDateTime::Now();
 	ARaceActorBase* autoAimTarget = NULL;
 	FHitResult lastAutoAimHit;
+	void buildBeamSpline();
+	bool beamExists = false;
+	USplineMeshComponent* beamMesh = NULL;
 	
 public:	
 
 	ARaceLaser();
-
 
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay specific properties
@@ -52,14 +56,31 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float LaserConeOfVision = 45.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector From = FVector::ZeroVector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector To = From + Direction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	USceneComponent* FromMarker;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// presentation
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	FVector2D BeamFromScale = FVector2D(1, 1);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	FVector2D BeamToScale = FVector2D(.1, .1);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	UStaticMesh* BeamBodyTemplate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	UMaterialInterface* BeamMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	FLinearColor LaserColor = FLinearColor::Yellow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Presentation")
+	FRotator LaserLookAtRot = FRotator::ZeroRotator;
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -87,21 +108,26 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FFireDelegate EndFiring;
 
-
-	//////////////////////////////////////////////////////////////////////////
-	// presentation
-	//////////////////////////////////////////////////////////////////////////
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
-	FLinearColor LaserColor = FLinearColor::Yellow;
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Presentation")
-	FRotator LaserLookAtRot = FRotator::ZeroRotator;
+	// Updates the mesh of the segment matching the index.
+	UFUNCTION(BlueprintCallable, Category = "MachRace|System")
+	void CreateBeam();
 
 
 	//////////////////////////////////////////////////////////////////////////
 	// system properties
 	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	FVector From = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	FVector To = From + Direction;
+
+	UPROPERTY(BlueprintReadOnly, Instanced, Category = "MachRace|System")
+	USplineComponent* BeamPath;
+
+	UPROPERTY(BlueprintReadOnly, Instanced, Category = "MachRace|System")
+	TArray<USplineMeshComponent*> BeamSegments;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	TArray<TEnumAsByte<EObjectTypeQuery>> AutoAimQueryParams;

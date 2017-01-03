@@ -47,7 +47,11 @@ float UDamageHandler::TakeDamage(AActor* DamagedActor, float Damage, const FVect
 		// if at zero, call actor destroyed event
 		if (Health <= 0) {
 			Health = 0;
-			OnActorDestroyed.Broadcast(GetOwner());
+			auto o = GetOwner();
+			if (o) {
+				OnActorDestroyed.Broadcast(o);
+			}
+			
 		} else {
 			OnActorDamage.Broadcast(Health);
 		}
