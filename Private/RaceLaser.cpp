@@ -21,16 +21,6 @@ void ARaceLaser::buildBeamSpline() {
 		return;
 	}
 
-	// clean out existing geometry
-	if (beamMesh) {
-		beamMesh->DestroyComponent();
-		beamMesh->DetachFromParent();
-	}
-	if (BeamPath) {
-		BeamPath->DetachFromParent();
-		BeamPath->DestroyComponent();
-	}
-
 	// build new curve
 	auto path = NewObject<USplineComponent>(this);
 	path->SetMobility(EComponentMobility::Movable);
@@ -41,14 +31,14 @@ void ARaceLaser::buildBeamSpline() {
 
 	BeamPath = path;
 	
-	auto segment = NewObject<USplineMeshComponent>(this);
+	auto segment = NewObject<USplineMeshComponent>(path);
 	segment->SetMobility(EComponentMobility::Movable);
 	segment->SetStaticMesh(BeamBodyTemplate);
 	segment->SetForwardAxis(ESplineMeshAxis::Z);
 	if (BeamMaterial) {
 		segment->SetMaterial(0, BeamMaterial);
 	}
-	segment->AttachToComponent(BeamPath, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	segment->AttachToComponent(BeamPath, FAttachmentTransformRules::KeepRelativeTransform);
 	segment->RegisterComponent();
 
 	segment->SetStartPosition(From, false);
@@ -246,25 +236,17 @@ void ARaceLaser::Tick( float DeltaTime ) {
 
 	// always trace
 	traceAhead();
+
+	if (beamMesh) {
+		beamMesh->DestroyComponent();
+	}
+
 	if (BeamPath) {
-		BeamPath->SetVisibility(IsFiring);
+		BeamPath->DestroyComponent();
 	}
 	
 	if (IsFiring) {
 		buildBeamSpline();
-		//updateBeamGeometry();
-	} else {
-
-		if (beamMesh) {
-			beamMesh->DetachFromParent();
-			beamMesh->DestroyComponent(false);
-		}
-
-		if (BeamPath) {
-			BeamPath->DetachFromParent();
-			BeamPath->DestroyComponent(false);
-		}
-		
 	}
 
 	// update look at rotation between From and To (as it may shift), useful for various effects on the laser to align.
