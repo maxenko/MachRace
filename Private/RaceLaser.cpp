@@ -22,7 +22,7 @@ void ARaceLaser::buildBeamSpline() {
 	}
 
 	// build new curve
-	auto path = NewObject<USplineComponent>(this);
+	auto path = NewObject<USplineComponent>(this, NAME_None);
 	path->SetMobility(EComponentMobility::Movable);
 	//path->WeldTo(this->GetRootComponent());
 	path->ClearSplinePoints();
