@@ -29,7 +29,8 @@ private:
 	FDateTime lastAutoAimTraceTime = FDateTime::Now();
 	ARaceActorBase* autoAimTarget = NULL;
 	FHitResult lastAutoAimHit;
-	void buildBeamSpline();
+	void buildBeam();
+	void updateBeam();
 	bool beamExists = false;
 	USplineMeshComponent* beamMesh = NULL;
 	
@@ -107,10 +108,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FFireDelegate EndFiring;
-
-	// Updates the mesh of the segment matching the index.
-	UFUNCTION(BlueprintCallable, Category = "MachRace|System")
-	void CreateBeam();
 
 
 	//////////////////////////////////////////////////////////////////////////

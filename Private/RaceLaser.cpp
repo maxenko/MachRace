@@ -14,7 +14,7 @@ ARaceLaser::ARaceLaser() {
 }
 
 
-void ARaceLaser::buildBeamSpline() {
+void ARaceLaser::buildBeam() {
 
 	// we need mesh component before we proceed 
 	if (!BeamBodyTemplate) {
@@ -24,7 +24,6 @@ void ARaceLaser::buildBeamSpline() {
 	// build new curve
 	auto path = NewObject<USplineComponent>(this, NAME_None);
 	path->SetMobility(EComponentMobility::Movable);
-	//path->WeldTo(this->GetRootComponent());
 	path->ClearSplinePoints();
 	path->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
 	path->RegisterComponent();
@@ -41,13 +40,27 @@ void ARaceLaser::buildBeamSpline() {
 	segment->AttachToComponent(BeamPath, FAttachmentTransformRules::KeepRelativeTransform);
 	segment->RegisterComponent();
 
-	segment->SetStartPosition(From, false);
-	segment->SetStartScale(BeamFromScale);
-
-	segment->SetEndPosition(To, true);
-	segment->SetEndScale(BeamToScale);
-
 	beamMesh = segment;
+}
+
+void ARaceLaser::updateBeam(){
+	
+	BeamPath->ClearSplinePoints(false);
+	TArray<FVector>points;
+
+	points.Add(From);
+	points.Add(To);
+
+	BeamPath->SetSplinePoints(points,ESplineCoordinateSpace::World,false);
+	BeamPath->UpdateSpline();
+
+	beamMesh->SetStartPosition(BeamPath->GetLocationAtDistanceAlongSpline(0, ESplineCoordinateSpace::Local), false);
+	beamMesh->SetStartScale(BeamFromScale);
+
+	beamMesh->SetEndPosition(BeamPath->GetLocationAtDistanceAlongSpline(BeamPath->GetSplineLength(), ESplineCoordinateSpace::Local), false);
+	beamMesh->SetEndScale(BeamToScale);
+
+ 	beamMesh->UpdateMesh();
 }
 
 bool ARaceLaser::isAutoAimScanDue() {
@@ -216,13 +229,6 @@ bool ARaceLaser::traceAhead() {
 	return block;
 }
 
-void ARaceLaser::CreateBeam() {
-	if (!beamExists) {
-		buildBeamSpline();
-		beamExists = true;
-	}
-}
-
 
 // Called when the game starts or when spawned
 void ARaceLaser::BeginPlay() {
@@ -237,17 +243,13 @@ void ARaceLaser::Tick( float DeltaTime ) {
 	// always trace
 	traceAhead();
 
-	if (beamMesh) {
-		beamMesh->DestroyComponent();
+	if(!BeamPath){
+		buildBeam();
+	}else if(IsFiring){
+		updateBeam();
 	}
 
-	if (BeamPath) {
-		BeamPath->DestroyComponent();
-	}
-	
-	if (IsFiring) {
-		buildBeamSpline();
-	}
+	beamMesh->SetVisibility(IsFiring);
 
 	// update look at rotation between From and To (as it may shift), useful for various effects on the laser to align.
 	LaserLookAtRot = UKismetMathLibrary::FindLookAtRotation(From, To);
