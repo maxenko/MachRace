@@ -106,23 +106,34 @@ UPrimitiveComponent* ARaceShipBase::getRootAsPrimitive(bool& success) {
 }
 
 
-void ARaceShipBase::Accelerate(float forwardVelocity) {
-	
-	auto absV = FMath::Abs(forwardVelocity);
+void ARaceShipBase::changeSpeed(float by) {
+
+	//auto absV = FMath::Abs(forwardVelocity);
 
 	bool rootOk = false;
 	auto physVol = getRootAsPrimitive(rootOk);
 
 	if (rootOk) {
 		auto v = physVol->GetPhysicsLinearVelocity();
-		physVol->SetPhysicsLinearVelocity(v + FVector(-absV,0,0));
+		physVol->SetPhysicsLinearVelocity(v + FVector(by, 0, 0));
 	} else {
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Unable to accelerate ship, physics volume not found."));
 	}
 
-	OnAccelerate.Broadcast(forwardVelocity);
+	if (by < 0) {
+		OnAccelerate.Broadcast(by);
+	} else {
+		OnDecelerate.Broadcast(by);
+	}
 }
 
+void ARaceShipBase::Accelerate(float forwardVelocity) {
+	changeSpeed(-FMath::Abs(forwardVelocity));
+}
+
+void ARaceShipBase::Decelerate(float forwardVelocity) {
+	changeSpeed(FMath::Abs(forwardVelocity));
+}
 
 float ARaceShipBase::CheckGroundDist(FHitResult& hit) {
 

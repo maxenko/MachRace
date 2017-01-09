@@ -7,6 +7,7 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAccelerate, float, SpeedIncrease);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDecelerate, float, SpeedDecrease);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMachSpeedChange, int32, MachSpeed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBank, int32, Direction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIgnition, bool, OnOff);
@@ -20,6 +21,7 @@ private:
 	void decayLateralMovement(float delta);
 	void decayRotationToZero(float delta);
 	int32 previousMach = 0;
+	void changeSpeed(float by);
 
 public:
 
@@ -31,8 +33,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Accelerate", Keywords = "Aceelerate the ship."), Category = "MachRace|System")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Accelerate", Keywords = "Accelerate the ship."), Category = "MachRace|Gameplay")
 	void Accelerate(float forwardVelocity);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Decelerate", Keywords = "Decelerate the ship."), Category = "MachRace|Gameplay")
+	void Decelerate(float forwardVelocity);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float MinDistFromGround = 150;
@@ -51,6 +56,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnAccelerate OnAccelerate;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnDecelerate OnDecelerate;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnMachSpeedChange OnMachSpeedChange;
