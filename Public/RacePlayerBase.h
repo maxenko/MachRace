@@ -8,6 +8,8 @@
 #include "RaceGameStateBase.h"
 #include "RacePlayerBase.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTethered, ARaceShipBase*, Ship);
+
 UCLASS()
 class MACHRACE_API ARacePlayerBase : public APawnBase
 {
@@ -45,4 +47,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Tether Player to Ship", Keywords = "Sets the player to follow its RaceShip."), Category = "Utility|Engine")
 	bool TetherTo(ARaceShipBase* ship);
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnTethered OnThethered;
 };

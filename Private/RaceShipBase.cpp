@@ -277,3 +277,7 @@ FVector ARaceShipBase::GetFuselageAngularImpulse() {
 
 	return FVector::ZeroVector;
 }
+
+void ARaceShipBase::TriggerIgnition(bool onOff) {
+	OnIgnition.Broadcast(onOff);
+}

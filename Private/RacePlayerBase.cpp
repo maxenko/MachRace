@@ -18,7 +18,9 @@ ARacePlayerBase::ARacePlayerBase()
 void ARacePlayerBase::BeginPlay() {
 	Super::BeginPlay();
 	bool success = false;
-	this->TetherTo(this->GetRaceShip(success));
+	auto ship = this->GetRaceShip(success);
+	this->TetherTo(ship);
+	this->OnThethered.Broadcast(ship);
 }
 
 // Called every frame
