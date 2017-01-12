@@ -11,6 +11,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDecelerate, float, SpeedDecrease)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMachSpeedChange, int32, MachSpeed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBank, int32, Direction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIgnition, bool, OnOff);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAccelerationFlash, float, Multiplier);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDecelerationFlash, float, Multiplier);
 
 UCLASS()
 class MACHRACE_API ARaceShipBase : public AShipBase {
@@ -59,6 +61,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnDecelerate OnDecelerate;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnAccelerationFlash OnAccelerateFlash;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnDecelerationFlash OnDecelerationFlash;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnMachSpeedChange OnMachSpeedChange;

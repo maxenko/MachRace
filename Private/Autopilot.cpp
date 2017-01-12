@@ -58,6 +58,24 @@ void UAutopilot::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 			}
 		}
 	}
+
+	// check alignment, notify if its found or lost
+	if (Target) {
+		float yDist = UX::GetYDist(Target->GetActorLocation(), GetOwner()->GetActorLocation());
+
+		if (yDist > AlignmentThreshold) {
+			if (lastAlignmentStatus != 0) {
+				lastAlignmentStatus = 0;
+				OnAlignmentWithinThreshold.Broadcast(false);
+			}
+		} else if (yDist <= AlignmentThreshold) {
+			if (lastAlignmentStatus != 1) {
+				lastAlignmentStatus = 1;
+				OnAlignmentWithinThreshold.Broadcast(true);
+			}
+		}
+	}
+
 }
 
 

@@ -7,7 +7,7 @@
 #include "Autopilot.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAngularVelocityRestoredToZero);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAlignmentWithinThreshold);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAlignmentWithinThreshold, bool, isWithin);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MACHRACE_API UAutopilot : public UActorComponent
@@ -27,6 +27,8 @@ private:
 
 	bool goingLeft = false;
 	bool goingRight = false;
+
+	int lastAlignmentStatus = -1; // 0 false, 1 true
 
 	void decayRadialVelocity();
 
@@ -132,6 +134,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool AlignWithTarget = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float AlignmentThreshold = 200;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Dev|Debug")
 	bool ShowDebug = false;

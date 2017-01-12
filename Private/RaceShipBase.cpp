@@ -129,10 +129,22 @@ void ARaceShipBase::changeSpeed(float by) {
 
 void ARaceShipBase::Accelerate(float forwardVelocity) {
 	changeSpeed(-FMath::Abs(forwardVelocity));
+
+	// cosmetic triggers
+	auto stage = GetState()->Stage;
+	if (stage == GameStage::InfiniteHex) {
+		OnAccelerateFlash.Broadcast(1.0);
+	}
 }
 
 void ARaceShipBase::Decelerate(float forwardVelocity) {
 	changeSpeed(FMath::Abs(forwardVelocity));
+
+	// cosmetic triggers
+	auto stage = GetState()->Stage;
+	if (stage == GameStage::InfiniteHex) {
+		OnDecelerationFlash.Broadcast(1.0);
+	}
 }
 
 float ARaceShipBase::CheckGroundDist(FHitResult& hit) {
