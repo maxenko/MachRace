@@ -25,6 +25,7 @@ public:
 		return a.Y < b.Y ? -1 : 1;
 	}
 	
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Y Dist.", Keywords = "Get distance between vectors using Y axis only."), Category = "Machrace|Utility")
 	static float GetYDist(FVector a, FVector b) {
 		a.X = a.Z = b.X = b.Z = 0;
 		return FVector::Dist(a, b);

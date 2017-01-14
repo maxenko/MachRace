@@ -63,7 +63,7 @@ float UDamageHandler::AddHealth(float amount) {
 	if (MaxHealth <= 0) {
 		Health = FMath::Clamp(Health+amount,0.f, 999999.f);
 	} else {
-		Health = FMath::Clamp(amount, 0.0f, MaxHealth);
+		Health = FMath::Clamp(Health+amount, 0.0f, MaxHealth);
 	}
 	return Health;
 }
