@@ -13,6 +13,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBank, int32, Direction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIgnition, bool, OnOff);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAccelerationFlash, float, Multiplier);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDecelerationFlash, float, Multiplier);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOutOfLevelBounds);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnExploded);
 
 UCLASS()
 class MACHRACE_API ARaceShipBase : public AShipBase {
@@ -24,6 +26,7 @@ private:
 	void decayRotationToZero(float delta);
 	int32 previousMach = 0;
 	void changeSpeed(float by);
+	bool level1IsShipOutOfBounds(AActor* tile);
 
 public:
 
@@ -45,13 +48,24 @@ public:
 	float MinDistFromGround = 150;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float GroundFollowSpeed = 100;
+	float GroundFollowSpeed = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float MaxBankingYaw = 4.5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float MaxBankingYawSpeed = 10;
+
+	/// used to calculate forward velocity fluctuations on various hits, hits that don't slow 
+	/// the ship down enough shouldn't explode it.
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System")
+	float PreviousXVelocity = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float MaxVelocityChangeThreshold = 300;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "IsVelocityChangeFatal", Keywords = "Checks wether velocity change between now and last time should be treated as fatal collision."), Category = "MachRace|Gameplay")
+	bool IsVelocityChangeFatal();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
 	bool EnableLateralDecay = false;
@@ -76,6 +90,18 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnBank OnBank;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Level1Bound = 1000;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnOutOfLevelBounds OnOutOfLevelBounds;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnExploded OnExploded;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Broadcast exploded.", Keywords = "Notifies all subscribers, that ship has exploded."), Category = "MachRace|System")
+	void BroadcastExploded();
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Trigger Ignition", Keywords = "Starts ignition sequence, purely cosmetic."), Category = "MachRace|Presentation")
 	void TriggerIgnition(bool onOff);

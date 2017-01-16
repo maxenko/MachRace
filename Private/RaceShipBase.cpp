@@ -3,6 +3,7 @@
 #include "MachRace.h"
 #include "RaceShipBase.h"
 #include "CustomExtensions.h"
+#include "X.h"
 #include "Kismet/KismetMathLibrary.h"
 
 ARaceShipBase::ARaceShipBase() {
@@ -80,14 +81,57 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 		FHitResult hit;
 		CheckGroundDist(hit);
 
-		// non hex ground
 		if( hit.IsValidBlockingHit() ) {
 
 			FVector actorLoc = GetActorLocation();
-			FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGround);
-			SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
+
+			if ( hit.Actor->ActorHasTag("Floor") && state->Stage != GameStage::InfiniteHex) {
+
+				if(hit.Actor->ActorHasTag("DesertFloor")) {
+					level1IsShipOutOfBounds(hit.GetActor());
+				}
+				
+				FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGround);
+				SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
+
+			} else if (state->Stage == GameStage::InfiniteHex) {
+
+				SetActorLocation(FMath::VInterpTo(actorLoc, FVector(actorLoc.X, actorLoc.Y,MinDistFromGround), DeltaSeconds, GroundFollowSpeed));
+			}
 		}
 	}
+}
+
+bool ARaceShipBase::IsVelocityChangeFatal() {
+	float current = UX::GetRootLinearVelocity(this).X;
+
+	if (current < PreviousXVelocity) { // we are accelerating in -X, everything is ok
+		PreviousXVelocity = current;
+		return false;
+	}
+
+	if (current > 0) { // ship is going in reverse, our forward is -X
+		return true;
+	}
+
+	current = FMath::Abs(current);
+	float diff = FMath::Abs(PreviousXVelocity) - current;
+
+	if (diff == 0) {
+		PreviousXVelocity = current;
+		return false;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Prev: %f"), FMath::Abs(PreviousXVelocity)));
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, FString::Printf(TEXT("Curr: %f"), current));
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, FString::Printf(TEXT("Diff: %f"), diff));
+
+	if (FMath::Abs(diff) > MaxVelocityChangeThreshold) {
+		return true;
+	}
+
+	PreviousXVelocity = current;
+	return false;
 }
 
 // todo: replace this with UX implementation
@@ -125,6 +169,20 @@ void ARaceShipBase::changeSpeed(float by) {
 	} else {
 		OnDecelerate.Broadcast(by);
 	}
+}
+
+bool ARaceShipBase::level1IsShipOutOfBounds(AActor* tile) {
+	FVector tileLoc = tile->GetActorLocation();
+	FVector shipLoc = GetActorLocation();
+
+	float distFromCenterOfTile = UX::GetYDist(tileLoc, shipLoc);
+
+	if (distFromCenterOfTile > Level1Bound) {
+		OnOutOfLevelBounds.Broadcast();
+		return true;
+	}
+
+	return false;
 }
 
 void ARaceShipBase::Accelerate(float forwardVelocity) {
@@ -303,4 +361,8 @@ FVector ARaceShipBase::GetFuselageAngularImpulse() {
 
 void ARaceShipBase::TriggerIgnition(bool onOff) {
 	OnIgnition.Broadcast(onOff);
+}
+
+void ARaceShipBase::BroadcastExploded() {
+	OnExploded.Broadcast();
 }
