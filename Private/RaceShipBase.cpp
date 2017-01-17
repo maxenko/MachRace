@@ -105,7 +105,7 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 bool ARaceShipBase::IsVelocityChangeFatal() {
 	float current = UX::GetRootLinearVelocity(this).X;
 
-	if (current < PreviousXVelocity) { // we are accelerating in -X, everything is ok
+	if (current <= PreviousXVelocity) { // we are accelerating in -X, everything is ok
 		PreviousXVelocity = current;
 		return false;
 	}
@@ -114,23 +114,6 @@ bool ARaceShipBase::IsVelocityChangeFatal() {
 		return true;
 	}
 
-	current = FMath::Abs(current);
-	float diff = FMath::Abs(PreviousXVelocity) - current;
-
-	if (diff == 0) {
-		PreviousXVelocity = current;
-		return false;
-	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Prev: %f"), FMath::Abs(PreviousXVelocity)));
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, FString::Printf(TEXT("Curr: %f"), current));
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, FString::Printf(TEXT("Diff: %f"), diff));
-
-	if (FMath::Abs(diff) > MaxVelocityChangeThreshold) {
-		return true;
-	}
-
-	PreviousXVelocity = current;
 	return false;
 }
 
