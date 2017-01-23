@@ -148,14 +148,13 @@ void AMachGameStateBase::transitionAtmosphere(AExponentialHeightFog* fog, FAtmos
 FControlSettings AMachGameStateBase::GetControlSettings(GameStage stage, float speed) {
 
 	FControlSettings settings;
+	settings.BankingRotationImpulse = 0;
+	settings.BankingRotationImpulseMax = 0;
+	settings.BankingSpeedImpulse = 0;
+	settings.LeapImpulse = 0;
+	settings.MaxBankingSpeed = 0;
 
 	if (stage == GameStage::Prelaunch) {
-		
-		settings.BankingRotationImpulse		= 0;
-		settings.BankingRotationImpulseMax	= 0;
-		settings.BankingSpeedImpulse		= 0;
-		settings.LeapImpulse				= 0;
-		settings.MaxBankingSpeed			= 0;
 
 		return settings;
 

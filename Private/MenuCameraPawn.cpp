@@ -26,9 +26,10 @@ void AMenuCameraPawn::Tick( float DeltaTime )
 
 }
 
+/*
 // Called to bind functionality to input
 void AMenuCameraPawn::SetupPlayerInputComponent(class UInputComponent* InputComponent) {
 	Super::SetupPlayerInputComponent(InputComponent);
 
 }
-
+*/

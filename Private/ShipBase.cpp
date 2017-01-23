@@ -41,3 +41,20 @@ void AShipBase::SetShipSpeed(float speed) {
 	}
 }
 
+void AShipBase::ChargeShield(float amount) {
+
+	ShieldHitPoints = FMath::Clamp<float>(ShieldHitPoints + amount, 0, ShieldMaxHitPoints);
+
+	OnShieldCharge.Broadcast();
+}
+
+void AShipBase::DepleteShield(float amount) {
+
+	ShieldHitPoints = FMath::Clamp<float>(ShieldHitPoints - amount, 0, ShieldMaxHitPoints);
+
+	OnShieldDeplete.Broadcast();
+
+	if (ShieldHitPoints == 0) {
+		OnShieldDepleted.Broadcast();
+	}
+}

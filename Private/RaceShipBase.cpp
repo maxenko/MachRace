@@ -6,6 +6,7 @@
 #include "X.h"
 #include "Kismet/KismetMathLibrary.h"
 
+
 ARaceShipBase::ARaceShipBase() {
 	bIgnoresOriginShifting = false;
 	PrimaryActorTick.bCanEverTick = true;
@@ -102,6 +103,7 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 	}
 }
 
+
 bool ARaceShipBase::IsVelocityChangeFatal() {
 	float current = UX::GetRootLinearVelocity(this).X;
 
@@ -116,6 +118,7 @@ bool ARaceShipBase::IsVelocityChangeFatal() {
 
 	return false;
 }
+
 
 // todo: replace this with UX implementation
 UPrimitiveComponent* ARaceShipBase::getRootAsPrimitive(bool& success) {
@@ -154,6 +157,7 @@ void ARaceShipBase::changeSpeed(float by) {
 	}
 }
 
+
 bool ARaceShipBase::level1IsShipOutOfBounds(AActor* tile) {
 	FVector tileLoc = tile->GetActorLocation();
 	FVector shipLoc = GetActorLocation();
@@ -168,6 +172,7 @@ bool ARaceShipBase::level1IsShipOutOfBounds(AActor* tile) {
 	return false;
 }
 
+
 void ARaceShipBase::Accelerate(float forwardVelocity) {
 	changeSpeed(-FMath::Abs(forwardVelocity));
 
@@ -178,6 +183,7 @@ void ARaceShipBase::Accelerate(float forwardVelocity) {
 	}
 }
 
+
 void ARaceShipBase::Decelerate(float forwardVelocity) {
 	changeSpeed(FMath::Abs(forwardVelocity));
 
@@ -187,6 +193,7 @@ void ARaceShipBase::Decelerate(float forwardVelocity) {
 		OnDecelerationFlash.Broadcast(1.0);
 	}
 }
+
 
 float ARaceShipBase::CheckGroundDist(FHitResult& hit) {
 

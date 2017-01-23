@@ -53,6 +53,7 @@ void APawnBase::Tick( float DeltaTime )
 
 }
 
+/*
 // Called to bind functionality to input
 void APawnBase::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
@@ -60,3 +61,4 @@ void APawnBase::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 
 }
 
+*/

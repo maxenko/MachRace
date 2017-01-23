@@ -54,7 +54,8 @@ void ARaceContentInstancer::Tick( float DeltaTime ) {
 
 					FActorSpawnParameters params;
 
-					params.bNoCollisionFail = true;
+					//params.bNoCollisionFail = true;
+					params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 					params.bNoFail = true;
 					
 					AActor* a = NULL;

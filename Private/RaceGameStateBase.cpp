@@ -406,14 +406,13 @@ void ARaceGameStateBase::transitionAtmosphere(AExponentialHeightFog* fog, FAtmos
 FControlSettings ARaceGameStateBase::GetControlSettings(float speed) {
 
 	FControlSettings settings;
+	settings.BankingRotationImpulse = 0;
+	settings.BankingRotationImpulseMax = 0;
+	settings.BankingSpeedImpulse = 0;
+	settings.LeapImpulse = 0;
+	settings.MaxBankingSpeed = 0;
 
 	if (Stage == GameStage::Prelaunch) {
-
-		settings.BankingRotationImpulse			= 0;
-		settings.BankingRotationImpulseMax		= 0;
-		settings.BankingSpeedImpulse			= 0;
-		settings.LeapImpulse					= 0;
-		settings.MaxBankingSpeed				= 0;
 
 		return settings;
 
