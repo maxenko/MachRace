@@ -5,23 +5,19 @@
 
 
 // Sets default values
-AShipBase::AShipBase()
-{
+AShipBase::AShipBase() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
-void AShipBase::BeginPlay(){
+void AShipBase::BeginPlay() {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
-void AShipBase::Tick( float DeltaTime ){
+void AShipBase::Tick( float DeltaTime ) {
 	Super::Tick( DeltaTime );
-
 }
 
 void AShipBase::SetShipSpeed(float speed) {
@@ -43,9 +39,24 @@ void AShipBase::SetShipSpeed(float speed) {
 
 void AShipBase::ChargeShield(float amount) {
 
+	float plusCharge = (ShieldHitPoints + amount);
+
+	// are we going to max out shield?
+	if (plusCharge > ShieldMaxHitPoints) {
+
+		// add overflow to overcharge
+		ShieldHitPoints = ShieldMaxHitPoints;
+		OverchargeTotal += (plusCharge - ShieldMaxHitPoints);
+
+	} else {
+		ShieldHitPoints = plusCharge;
+	}
+
 	ShieldHitPoints = FMath::Clamp<float>(ShieldHitPoints + amount, 0, ShieldMaxHitPoints);
 
 	OnShieldCharge.Broadcast();
+
+	OnShieldActivity.Broadcast();
 }
 
 void AShipBase::DepleteShield(float amount) {
@@ -57,4 +68,11 @@ void AShipBase::DepleteShield(float amount) {
 	if (ShieldHitPoints == 0) {
 		OnShieldDepleted.Broadcast();
 	}
+
+	OnShieldActivity.Broadcast();
+}
+
+int32 AShipBase::GetOverchargeCount() {
+	float wholes = (OverchargeTotal - FMath::Fmod(OverchargeTotal, ShieldMaxHitPoints))/ShieldMaxHitPoints;
+	return (int32)wholes;
 }

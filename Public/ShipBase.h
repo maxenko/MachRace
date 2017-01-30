@@ -9,11 +9,15 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShieldCharge);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShieldDeplete);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShieldDepleted);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOverchargeAdded);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShieldActivity);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBoostIncreased, int32, count);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBoostUsed, int32, count);
 
 UCLASS()
 class MACHRACE_API AShipBase : public ARaceActorBase {
 	GENERATED_BODY()
-	
+
 public:	
 	// Sets default values for this actor's properties
 	AShipBase();
@@ -31,13 +35,22 @@ public:
 	float ShieldHitPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float ShieldMaxHitPoints;
+	float ShieldMaxHitPoints = 500;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	float OverchargeTotal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	int32 BoostCount;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Charge Shield", Keywords = "Recharge shield hitpoints."), Category = "MachRace|Gameplay")
 	void ChargeShield(float amount);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Deplete Shield", Keywords = "Deplete shield hitpoints."), Category = "MachRace|Gameplay")
 	void DepleteShield(float amount);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Overcharge Count", Keywords = "Gets total count of usable overcharges."), Category = "MachRace|Gameplay")
+	int32 GetOverchargeCount();
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnShieldCharge OnShieldCharge;
@@ -47,4 +60,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnShieldDepleted OnShieldDepleted;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnShieldActivity OnShieldActivity;
 };
