@@ -42,7 +42,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	int32 FollowHistorySize;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Content Instancer", Keywords = "Get reference to content instancer."), Category = "Utility|Engine")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Race Ship", Keywords = "Get race ship as RaceShipBase."), Category = "Utility|Engine")
 	ARaceShipBase* GetRaceShip(bool& success);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Tether Player to Ship", Keywords = "Sets the player to follow its RaceShip."), Category = "Utility|Engine")

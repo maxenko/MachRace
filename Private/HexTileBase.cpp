@@ -24,6 +24,12 @@ void AHexTileBase::Tick(float DeltaSeconds) {
 void AHexTileBase::BeginPlay() {
 	Super::BeginPlay();
 
+	auto state = GetState();
+	if (state) {
+		state->CountHexTile();
+	}
+
+
 	weights = GenerateDistributionMap();
 	auto d = normilizeDistribution(weights);
 	int32 mapSize = 1000;
@@ -167,30 +173,34 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 		return d;
 	}
 
-	// always update the standard weight based on all other weights
+	// always update the standard weight based on all other weights 
+	// (this is the amount of standard hex pieces that is left over after all other pieces)
 	auto adjust = [](FHexTileDistribuition d) {
 		d.Standard = 1.0f - (d.Decelerators + d.Accelerators + d.Collectables + d.ICBM + d.Column);
 		return d;
 	};
 
-	if (ship->GetSpeed() < 2700) {
+	auto speed = ship->GetTheoreticalSpeed();
 
-		d.Decelerators = .05;
-		d.Accelerators = .025;
+	if (speed < state->Level2ObstacleTriggerspeed) {
+
+		d.Decelerators = .02;
+		d.Accelerators = .03;
 		d.Collectables = .004;
-		d.ICBM = .005;
-		d.Column = .005;
-
+		d.ICBM		   = .000;
+		d.Column	   = .000;
+		
 		return adjust(d);
-
-	} else if (ship->GetSpeed() < 3000) {
+	}
+	
+	if (speed >= state->Level2ObstacleTriggerspeed) { // check RaceGameStateBase.cpp where this is also used in tandem
 
 		d.Decelerators = .15;
 		d.Accelerators = .15;
 		d.Collectables = .005;
-
+		d.ICBM = .003;
+		d.Column = .005;
 		return adjust(d);
-
 	}
 
 	return d;

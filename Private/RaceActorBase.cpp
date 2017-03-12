@@ -38,7 +38,8 @@ void ARaceActorBase::Tick( float DeltaTime ){
 
 // Called every frame
 ARaceGameStateBase* ARaceActorBase::GetState(){
-	return UCustomExtensions::GetRaceState(GetWorld());
+	State = UCustomExtensions::GetRaceState(GetWorld());
+	return State;
 }
 
 void ARaceActorBase::RememberTransform(UObject* obj, FTransform transform) {

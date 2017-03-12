@@ -20,6 +20,4 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Game", meta = (DisplayName = "ParseOption"))
 	virtual FString K2ParseOption(const FString& OptionString, const FString& OptionName);
-	
-	
 };

@@ -17,10 +17,12 @@ ARacePlayerBase::ARacePlayerBase()
 // Called when the game starts or when spawned
 void ARacePlayerBase::BeginPlay() {
 	Super::BeginPlay();
+	/*
 	bool success = false;
 	auto ship = this->GetRaceShip(success);
 	this->TetherTo(ship);
-	this->OnThethered.Broadcast(ship);
+	
+	*/
 }
 
 // Called every frame
@@ -85,6 +87,7 @@ bool ARacePlayerBase::TetherTo(ARaceShipBase* ship) {
 	if (ship) {
 		this->RaceShip = ship;
 		IsTethered = true;
+		this->OnThethered.Broadcast(ship);
 	} else {
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("RaceShip not tethered to."));
 		IsTethered = false;

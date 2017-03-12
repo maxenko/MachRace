@@ -1,3 +1,4 @@
+/*
 // Copyright 2015 - Max Enko
 
 #include "MachRace.h"
@@ -69,3 +70,4 @@ void AHexTileGrid::SpawnMainSection(UClass* typeOf, const FTransform t) {
 	}
 }
 
+*/

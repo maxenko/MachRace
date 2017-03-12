@@ -76,3 +76,9 @@ int32 AShipBase::GetOverchargeCount() {
 	float wholes = (OverchargeTotal - FMath::Fmod(OverchargeTotal, ShieldMaxHitPoints))/ShieldMaxHitPoints;
 	return (int32)wholes;
 }
+
+int32 AShipBase::ResetOverchargeCount() {
+	auto was = GetOverchargeCount();
+	OverchargeTotal = 0;
+	return was;
+}

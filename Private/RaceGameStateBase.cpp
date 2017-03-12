@@ -80,10 +80,25 @@ void ARaceGameStateBase::MaintainState() {
 
 	// level 2 rules
 	if (Stage == GameStage::InfiniteHex) {
-		// is there a drone active?
-		if (ActiveEnemies.Num() <= 0) {
-			// if not spawn one
-			OnSpawnEnemy.Broadcast(Stage); // blueprint handles the rest
+		
+		// are we deploying drone?
+		if ((speed > Level2ObstacleTriggerspeed) && Level2Count > Level2OnStartTilesToKeepFreeOfObstacles) {
+
+			// is there a drone active?
+			if (ActiveEnemies.Num() <= 0) {
+				// if not spawn one
+				OnSpawnEnemy.Broadcast(Stage); // blueprint handles the rest
+
+				// check if this is first time obstacles are enabled (this is when we introduce level 2 guidance drone)
+				if (!Level2GuidanceDroneIntroduced) {
+
+					Level2GuidanceDroneIntroduced = true;
+
+					// trigger one time event (when first drone appears)
+					OnIntroduceDrone.Broadcast();
+				}
+
+			}
 		}
 	}
 }

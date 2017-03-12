@@ -43,6 +43,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	int32 BoostCount;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	FColor LaserColor;
+
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Charge Shield", Keywords = "Recharge shield hitpoints."), Category = "MachRace|Gameplay")
 	void ChargeShield(float amount);
 
@@ -51,6 +54,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Overcharge Count", Keywords = "Gets total count of usable overcharges."), Category = "MachRace|Gameplay")
 	int32 GetOverchargeCount();
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Reset Overcharge Count", Keywords = "Reset total count of usable overcharges."), Category = "MachRace|Gameplay")
+	int32 ResetOverchargeCount();
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnShieldCharge OnShieldCharge;

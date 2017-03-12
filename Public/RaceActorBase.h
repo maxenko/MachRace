@@ -36,6 +36,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	bool IsAutoAimTarget = false;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Race State", Keywords = "Get Race State as base class."), Category = "MachRace|Engine")
 	ARaceGameStateBase* GetState();
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Remember Transform", Keywords = "Records transform of given object at the time of calling this function."), Category = "MachRace|Engine")

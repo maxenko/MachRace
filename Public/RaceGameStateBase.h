@@ -14,6 +14,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpawnLevel1Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathLevel1Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnEnemy, GameStage, stage);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnIntroduceDrone);
+
 UCLASS()
 class MACHRACE_API ARaceGameStateBase : public AGameState
 {
@@ -55,6 +57,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Grid")
 	int32 Level1Index = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Grid")
+	int32 Level2Count = 0;
+
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Gameplay")
 	TArray<AActor*> ActiveEnemies;
 
@@ -81,6 +86,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get next desert tile N", Keywords = "Gets next desert tile number based on Level1Index."), Category = "MachRace|Controls")
 	int32 GetNextDesertTileN(bool increment);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get next desert tile N", Keywords = "Gets next desert tile number based on Level1Index."), Category = "MachRace|Controls")
+	int32 CountHexTile() {
+		Level2Count++; 
+		return Level2Count;
+	}
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add to Ignore By Laser", Keywords = "Add actor to registry of actors ignored by laser traces."), Category = "MachRace|System")
 	void AddIgnoredByLaserTrace(AActor* actorToIgnore);
@@ -109,11 +120,26 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float Level1BossTriggerSpeed = 2600;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Level2ObstacleTriggerspeed = 2700;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Level2DroneSpawnSpeedLimit = 2800;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool Level2GuidanceDroneIntroduced = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	int32 Level2OnStartTilesToKeepFreeOfObstacles = 3;
+
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnSpawnLevel1Boss OnSpawnLevel1Boss;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnDeathLevel1Boss OnDeathLevel1Boss;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnIntroduceDrone OnIntroduceDrone;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnSpawnEnemy OnSpawnEnemy;

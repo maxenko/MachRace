@@ -204,8 +204,6 @@ FVector UAutopilot::getTargetVelocity() {
 
 			AlignWithTargetVelocity = FVector(0, alignSpeed*yDir, 0);
 
-			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Aligning...!"));
-
 		} else {
 			AlignWithTargetVelocity = FVector::ZeroVector;
 		}
@@ -216,8 +214,7 @@ FVector UAutopilot::getTargetVelocity() {
 	// check if there are obstacles on the side we're going in, if there are,
 	// don't crash into stuff on that side
 	if ( (combinedVelocity.Y > 0 && ObstacleLeftDetected) || (combinedVelocity.Y < 0 && ObstacleRightDetected)) {
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Side Obstacle...!"));
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, scanSidesHits[0].Hit.Actor->GetName());
+
 		combinedVelocity.Y = 0;
 	}
 
