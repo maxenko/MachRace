@@ -46,7 +46,10 @@ void AShipBase::ChargeShield(float amount) {
 
 		// add overflow to overcharge
 		ShieldHitPoints = ShieldMaxHitPoints;
-		OverchargeTotal += (plusCharge - ShieldMaxHitPoints);
+
+		if(EnableOvercharge){
+			OverchargeTotal += (plusCharge - ShieldMaxHitPoints);
+		}
 
 	} else {
 		ShieldHitPoints = plusCharge;

@@ -10,7 +10,9 @@ ARacePlayerControllerBase::ARacePlayerControllerBase() {
 // Called when the game starts or when spawned
 void ARacePlayerControllerBase::BeginPlay() {
 	Super::BeginPlay();
+
 }
+
 
 // Called every frame
 void ARacePlayerControllerBase::Tick(float DeltaSeconds) {

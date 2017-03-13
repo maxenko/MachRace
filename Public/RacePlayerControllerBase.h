@@ -7,12 +7,10 @@
 #include "RaceShipBase.h"
 #include "RacePlayerControllerBase.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MACHRACE_API ARacePlayerControllerBase : public APlayerController {
 	GENERATED_BODY()
+
 
 public:
 
