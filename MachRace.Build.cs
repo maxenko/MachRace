@@ -16,7 +16,7 @@ public class MachRace : ModuleRules
 
         DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
 
-        PrivateDependencyModuleNames.AddRange(new string[] { "VaRestPlugin" });
+        PrivateDependencyModuleNames.AddRange(new string[] { "VaRestPlugin","SodiumUE4" });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
