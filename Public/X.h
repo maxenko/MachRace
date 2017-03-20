@@ -34,4 +34,14 @@ public:
 	static UPrimitiveComponent* GetRootAsPrimitive(AActor* a, bool& success);
 	static void DecayRootRotToZero(AActor* a, float delta, float decaySpeed);
 	static bool VectorsWithinAngle(FVector a, FVector b, float angle);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Parse DateTime", Keywords = "Parse DateTime in HTTP (RFC 1123) format."), Category = "Machrace|Utility")
+	static bool ParseDateTime(const FString & DateTimeString, FDateTime & OutDateTime) {
+		return FDateTime::ParseHttpDate(DateTimeString, OutDateTime);
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Total Milliseconds Between", Keywords = "Gets total number of milliseconds between two dates."), Category = "Machrace|Utility")
+	static int32 TotalMillisecondsBetween(FDateTime a, FDateTime b) {
+		return (int32)(a - b).GetTotalMilliseconds();
+	}
 };
