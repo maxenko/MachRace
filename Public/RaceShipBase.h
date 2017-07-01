@@ -28,8 +28,6 @@ private:
 	void changeSpeed(float by);
 	bool level1IsShipOutOfBounds(AActor* tile);
 
-	float lastZ = 0;
-
 public:
 
 	ARaceShipBase();

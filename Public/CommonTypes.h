@@ -107,6 +107,7 @@ enum class GameStage : uint8 {
 	Desert 			UMETA(DisplayName = "Plain Desert"),
 	DesertBoss 		UMETA(DisplayName = "Plain Desert Boss"),
 	InfiniteHex		UMETA(DisplayName = "Infinite Hex"),
+	InfiniteHexBoss	UMETA(DisplayName = "Infinite Hex Boss"),
 	Labyrinth		UMETA(DisplayName = "Mechanical Labyrinth"),
 	CitySubmerged	UMETA(DisplayName = "City Submerged"),
 };

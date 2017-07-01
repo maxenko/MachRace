@@ -18,6 +18,7 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 	PreviousStage = Stage;
 	Stage = newStage;
 
+	// below is a long list of bureaucracy in dealing with dev and testing, this code is not used by players in game.
 	if (force) {
 		if (newStage == GameStage::DesertBoss) {
 			// force to Level1BossTriggerSpeed
@@ -32,19 +33,31 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			DisableDecorativeGeometry =
 			DisableObstacles = true;
 
-		} else if(newStage == GameStage::InfiniteHex){
+		} else if (newStage == GameStage::InfiniteHex) {
 			// force Level1BossTriggerSpeed + set lvl1 boss death to true
 
 			EnableAutoAim =
-			Level1BossDefeated = true;
+				Level1BossDefeated = true;
 
 			bool shipOk = false;
 			auto ship = GetRaceShip(shipOk);
 			if (shipOk && ship->GetSpeed() < Level1BossTriggerSpeed) {
 				ship->SetShipSpeed(Level1BossTriggerSpeed);
+				OnLevel2Boss.Broadcast();
 			}
 
 			SetLevelOneBossDeafeated();
+
+		} else if (newStage == GameStage::InfiniteHexBoss){
+
+			bool shipOk = false;
+			auto ship = GetRaceShip(shipOk);
+			if (shipOk && ship->GetSpeed() < Level1BossTriggerSpeed) {
+				ship->SetShipSpeed(Level2BossTriggerSpeed);
+			}
+
+			SetLevelOneBossDeafeated();
+
 		} else if (newStage == GameStage::Labyrinth) {
 
 			bool shipOk = false;
@@ -101,15 +114,16 @@ void ARaceGameStateBase::MaintainState() {
 		return;
 	}
 
+
 	// level 2 rules
 	if (Stage == GameStage::InfiniteHex) {
 
-		// did player reached level 3 speed?
-		if (speed >= Level3TriggerSpeed) {
-			SetStage(GameStage::Labyrinth);
-			OnLevel3Reached.Broadcast();
+		if (speed >= Level2BossTriggerSpeed && !Level2BossDefeated) {
+			SetStage(GameStage::InfiniteHexBoss);
+			OnLevel2Boss.Broadcast();
 			return;
 		}
+
 		
 		// are we deploying drone?
 		if ((speed > Level2ObstacleTriggerspeed) && Level2Count > Level2OnStartTilesToKeepFreeOfObstacles) {
@@ -127,14 +141,22 @@ void ARaceGameStateBase::MaintainState() {
 					// trigger one time event (when first drone appears)
 					OnIntroduceDrone.Broadcast();
 				}
-
 			}
 		}
 
 		return;
+
+	} else if (Stage == GameStage::InfiniteHexBoss) {
+
+		// did player reached level 3 speed?
+		if (speed >= Level3TriggerSpeed) {
+			SetStage(GameStage::Labyrinth);
+			OnLevel3Reached.Broadcast();
+			return;
+		}
+
 	}
 
-	
 
 	if (Stage != GameStage::CitySubmerged) {
 
@@ -387,6 +409,16 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		//return settings;
 
+	} else if (Stage == GameStage::InfiniteHexBoss){
+
+		settings.InterpSpeed = 1;
+		settings.Fov = 120;
+		settings.HudScale = 1.3;
+		settings.CameraT.SetTranslation(FVector(230, 0, 750));
+		settings.CameraT.SetRotation(FRotator(-45, -180, 0).Quaternion());
+
+
+
 	} else if (Stage == GameStage::Labyrinth) {
 
 		settings.CameraT.SetTranslation(FVector(400, 0, 400));
@@ -434,6 +466,19 @@ void ARaceGameStateBase::SetAtmosphereByStage() {
 
 		settings.FogInscatteringColor = FLinearColor(.447, .638, 1, 1);
 		settings.FogInscatteringColorDirectional = FLinearColor(.25, .25, .125, 1);
+
+	} else if(Stage == GameStage::InfiniteHexBoss){
+
+		settings.FogDensity = 1.2;
+		settings.FogHeightFaloff = .0001;
+		settings.FogMaxOpacity = 1;
+		settings.FogStartDist = 1850;
+		settings.FogInscatteringExponent = 10;
+		settings.FogInscatteringStartDist = 1900;
+
+		settings.FogInscatteringColor = FLinearColor(.447, .638, 1, 1);
+		settings.FogInscatteringColorDirectional = FLinearColor(.25, .25, .125, 1);
+
 
 	} else if (Stage == GameStage::Labyrinth) {
 		
@@ -554,7 +599,7 @@ FControlSettings ARaceGameStateBase::GetControlSettings(float speed) {
 		return settings;
 
 	}
-	else if (Stage == GameStage::InfiniteHex) {
+	else if (Stage == GameStage::InfiniteHex || Stage == GameStage::InfiniteHexBoss) {
 
 		settings.BankingRotationImpulse = .05;
 		settings.BankingRotationImpulseMax = 20;
@@ -607,7 +652,7 @@ FUnderfadeSettings ARaceGameStateBase::GetUnderFadeSettings() {
 
 		return settings;
 
-	} else if (Stage == GameStage::InfiniteHex) {
+	} else if (Stage == GameStage::InfiniteHex || Stage == GameStage::InfiniteHexBoss) {
 
 		settings.Alpha = 1.5;
 		settings.Scale = FVector(6.5, 11, 6.5);

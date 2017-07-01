@@ -12,6 +12,7 @@ class ARacePlayerBase;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpawnLevel1Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathLevel1Boss);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel2Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel3Reached);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel4Reached);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnEnemy, GameStage, stage);
@@ -129,10 +130,13 @@ public:
 	float Level2DroneSpawnSpeedLimit = 2800;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float Level3TriggerSpeed = 3500;
+	float Level2BossTriggerSpeed = 4500;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float Level4TriggerSpeed = 7000;
+	float Level3TriggerSpeed = 6000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Level4TriggerSpeed = 9000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool Level2GuidanceDroneIntroduced = false;
@@ -154,6 +158,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnSpawnEnemy OnSpawnEnemy;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnLevel2Boss OnLevel2Boss;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnLevel3Reached OnLevel3Reached;
@@ -184,6 +191,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool Level1BossDefeated = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool Level2BossDefeated = false;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Level 1 Boss as Defeated", Keywords = "Sets level one boss as defeated, affecting related state conditions."), Category = "MachRace|Gameplay")
 	void SetLevelOneBossDeafeated();

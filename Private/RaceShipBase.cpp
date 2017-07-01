@@ -61,6 +61,7 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 
 	// decay lateral movement (EnableLateralDecay is usually true when player is not giving <> input)
 	if (EnableLateralDecay) {
+
 		decayLateralMovement(DeltaSeconds);
 		decayRotationToZero(DeltaSeconds);
 		
@@ -80,31 +81,32 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 
 		auto stage = state->Stage;
 
-		// interp to target distance from ground (which could be changing frame to frame)
-		MinDistFromGroundCurrent = FMath::FInterpTo(MinDistFromGroundCurrent, MinDistFromGround, DeltaSeconds, ShipHoverRealignmentSpeed);
-
 		if (stage == GameStage::Desert || stage == GameStage::DesertBoss ) { // stages where ship hovers
 
-			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Current: %f, Target: %f"), MinDistFromGroundCurrent, MinDistFromGround));
+			// interp to target distance from ground (which could be changing frame to frame)
+			MinDistFromGroundCurrent = FMath::FInterpTo(MinDistFromGroundCurrent, MinDistFromGround, DeltaSeconds, ShipHoverRealignmentSpeed);
 
 			FHitResult hit;
 			CheckGroundDist(hit);
 
 			if (hit.IsValidBlockingHit()) {
 
-				FVector actorLoc = GetActorLocation();
-				lastZ = actorLoc.Z;
+				if (hit.Actor->ActorHasTag("Floor")){ // only adjust to actual desert floor, not various objects on the floor
 
-				FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGroundCurrent);
-				SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
+					FVector actorLoc = GetActorLocation();
+					FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGroundCurrent);
+					SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
+				}
 			}
-		}
-		else { // stages where ship doesn't hover (it readjusts back to default hover value)
+
+		} else { // stages where ship doesn't hover (it readjusts back to default hover value)
 
 			FVector actorLoc = GetActorLocation();
+			MinDistFromGroundCurrent = FMath::FInterpTo(actorLoc.Z, MinDistFromGround, DeltaSeconds, ShipHoverRealignmentSpeed);
+
+			// fade to target hover height from current Z
 			FVector targetPos = FVector(actorLoc.X, actorLoc.Y, MinDistFromGroundCurrent);
 			SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
-
 		}
 	}
 }

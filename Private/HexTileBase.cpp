@@ -84,8 +84,6 @@ void AHexTileBase::projectGrid() {
 			this->Grid.Add(generateCellT(r,c));
 		}
 	}
-
-
 }
 
 bool AHexTileBase::isWithinThreshold(FVector v) {
@@ -180,25 +178,38 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 
 	auto speed = ship->GetTheoreticalSpeed();
 
-	if (speed < state->Level2ObstacleTriggerspeed) {
+	if(state->Stage == GameStage::InfiniteHex){
 
-		d.Decelerators = .02;
-		d.Accelerators = .03;
-		d.Collectables = .004;
-		d.ICBM		   = .000;
-		d.Column	   = .000;
+		if (speed < state->Level2ObstacleTriggerspeed) {
+
+			d.Decelerators = .02;
+			d.Accelerators = .03;
+			d.Collectables = .004;
+			d.ICBM		   = .000;
+			d.Column	   = .000;
 		
-		return adjust(d);
-	}
+			return adjust(d);
+		}
 	
-	if (speed >= state->Level2ObstacleTriggerspeed) { // check RaceGameStateBase.cpp where this is also used in tandem
+		if (speed >= state->Level2ObstacleTriggerspeed) { // check RaceGameStateBase.cpp where this is also used in tandem
 
-		d.Decelerators = .15;
-		d.Accelerators = .15;
+			d.Decelerators = .15;
+			d.Accelerators = .15;
+			d.Collectables = .005;
+			d.ICBM = .003;
+			d.Column = .005;
+			return adjust(d);
+		}
+
+	} else if (state->Stage == GameStage::InfiniteHexBoss) {
+
+		d.Decelerators = .05;
+		d.Accelerators = .05;
 		d.Collectables = .005;
-		d.ICBM = .003;
-		d.Column = .005;
+		d.ICBM = 0.0;
+		d.Column = 0.0;
 		return adjust(d);
+
 	}
 
 	return d;
