@@ -103,9 +103,7 @@ bool AHexTileBase::isWithinThreshold(FVector v) {
 	// angle between vectors (we're concerned whether or not vector falls inside the visible cone & dist
 	float dProductAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(cameraDir, directional))); // angle to target
 
-	auto trigger = FMath::Abs(VisibleAngleThreshold) > FMath::Abs(180 - dProductAngle);
-
-	return trigger;
+	return FMath::Abs(VisibleAngleThreshold) > FMath::Abs(180 - dProductAngle);
 }
 
 void AHexTileBase::GenerateCoordinateGrid() {

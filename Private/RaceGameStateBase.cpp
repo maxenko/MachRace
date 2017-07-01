@@ -45,6 +45,29 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			}
 
 			SetLevelOneBossDeafeated();
+		} else if (newStage == GameStage::Labyrinth) {
+
+			bool shipOk = false;
+			auto ship = GetRaceShip(shipOk);
+			
+			ship->SetShipSpeed(Level3TriggerSpeed);
+
+			EnableAutoAim = false;
+			Level1BossDefeated = true;
+
+			SetLevelOneBossDeafeated();
+
+		} else if (newStage == GameStage::CitySubmerged) {
+
+			bool shipOk = false;
+			auto ship = GetRaceShip(shipOk);
+
+			ship->SetShipSpeed(Level4TriggerSpeed);
+
+			EnableAutoAim = false;
+			Level1BossDefeated = true;
+
+			SetLevelOneBossDeafeated();
 		}
 	}
 }
@@ -80,6 +103,13 @@ void ARaceGameStateBase::MaintainState() {
 
 	// level 2 rules
 	if (Stage == GameStage::InfiniteHex) {
+
+		// did player reached level 3 speed?
+		if (speed >= Level3TriggerSpeed) {
+			SetStage(GameStage::Labyrinth);
+			OnLevel3Reached.Broadcast();
+			return;
+		}
 		
 		// are we deploying drone?
 		if ((speed > Level2ObstacleTriggerspeed) && Level2Count > Level2OnStartTilesToKeepFreeOfObstacles) {
@@ -99,6 +129,19 @@ void ARaceGameStateBase::MaintainState() {
 				}
 
 			}
+		}
+
+		return;
+	}
+
+	
+
+	if (Stage != GameStage::CitySubmerged) {
+
+		// did player reached level 4 speed?
+		if (speed >= Level4TriggerSpeed) {
+			SetStage(GameStage::CitySubmerged);
+			OnLevel4Reached.Broadcast();
 		}
 	}
 }
@@ -293,7 +336,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.HudScale = .9;
 		settings.Fov = 120;
 
-		return settings;
+		//return settings;
 
 		// DESERT LEVEL 1
 	} else if (Stage == GameStage::Desert) {
@@ -301,9 +344,9 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.InterpSpeed = 2;
 		settings.HudScale = .9;
 		settings.Fov = 110;
-		settings.CameraT.SetTranslation(FVector(200, 0, 150));
+		settings.CameraT.SetTranslation(FVector(200, 0, 120));
 
-		return settings;
+		//return settings;
 
 		// DESERT LEVEL 1 BOSS
 	} else if (Stage == GameStage::DesertBoss) {
@@ -313,12 +356,12 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.Fov = 120;
 		settings.CameraT.SetTranslation(FVector(230, 0, 150));
 
-		return settings;
+		//return settings;
 
 		// INFINITE HEX (BEGINNING)
 	} else if (Stage == GameStage::InfiniteHex) {
 
-		settings.InterpSpeed = .2;
+		settings.InterpSpeed = .5;
 		settings.Fov = 120;
 		settings.HudScale = 1.3;
 		settings.CameraT.SetTranslation(FVector(245, 0, 220));
@@ -327,7 +370,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		if (speed < 2000) {
 
-			return settings;
+			//return settings;
 
 		} else if (speed > 2500) {
 
@@ -342,7 +385,23 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 			settings.Fov = 123;
 		}
 
-		return settings;
+		//return settings;
+
+	} else if (Stage == GameStage::Labyrinth) {
+
+		settings.CameraT.SetTranslation(FVector(400, 0, 400));
+		settings.CameraT.SetRotation(FRotator(-32, -180, 0).Quaternion());
+		settings.Fov = 123;
+
+	} else if (Stage == GameStage::CitySubmerged) {
+
+		settings.InterpSpeed = 5;
+		settings.Fov = 100;
+		settings.HudScale = 2.7;
+		settings.CameraT.SetTranslation(FVector(500, 0, 150));
+		settings.CameraT.SetRotation(FRotator(-12, -180, 0).Quaternion());
+
+		//return settings;
 	}
 
 	return settings;
@@ -366,7 +425,7 @@ void ARaceGameStateBase::SetAtmosphereByStage() {
 
 	} else if (Stage == GameStage::InfiniteHex) {
 
-		settings.FogDensity = 1.3;
+		settings.FogDensity = 0.7;
 		settings.FogHeightFaloff = .0001;
 		settings.FogMaxOpacity = 1;
 		settings.FogStartDist = 1850;
@@ -375,9 +434,35 @@ void ARaceGameStateBase::SetAtmosphereByStage() {
 
 		settings.FogInscatteringColor = FLinearColor(.447, .638, 1, 1);
 		settings.FogInscatteringColorDirectional = FLinearColor(.25, .25, .125, 1);
+
+	} else if (Stage == GameStage::Labyrinth) {
+		
+		settings.FogDensity = .19;
+		settings.FogHeightFaloff = 0.0001;
+		settings.FogMaxOpacity = 1.0;
+		settings.FogStartDist = 7000.0;
+		settings.FogInscatteringExponent = 1;
+		settings.FogInscatteringStartDist = 30000.0;
+
+		settings.FogInscatteringColor = FLinearColor(0.035282, 0.038711, 0.1, 1);
+		settings.FogInscatteringColorDirectional = settings.FogInscatteringColor;
+
+	} else if (Stage == GameStage::CitySubmerged) {
+
+		settings.FogDensity = .19;
+		settings.FogHeightFaloff = 0.0001;
+		settings.FogMaxOpacity = 1.0;
+		settings.FogStartDist = 7000;
+		settings.FogInscatteringExponent = 1;
+		settings.FogInscatteringStartDist = 30000.0;
+
+		settings.FogInscatteringColor = FLinearColor(.262717, 0.315326, 0.36, 1);
+		settings.FogInscatteringColorDirectional = FLinearColor(0.1664, 0.192091, 0.26, 1);
+
 	}
 
 	atmosphereSettings = settings;
+
 }
 
 void ARaceGameStateBase::UpdateAtmosphereSettings() {
@@ -391,6 +476,12 @@ void ARaceGameStateBase::UpdateAtmosphereSettings() {
 		ARaceGameStateBase::transitionAtmosphere(ExponentialFog, atmosphereSettings, 2);
 	} else if (Stage == GameStage::InfiniteHex) {
 		ARaceGameStateBase::transitionAtmosphere(ExponentialFog, atmosphereSettings, .07);
+	}
+	else if (Stage == GameStage::Labyrinth) {
+		ARaceGameStateBase::transitionAtmosphere(ExponentialFog, atmosphereSettings, 4);
+	}
+	else {
+		ARaceGameStateBase::transitionAtmosphere(ExponentialFog, atmosphereSettings, 10);
 	}
 }
 
@@ -410,7 +501,6 @@ void ARaceGameStateBase::transitionAtmosphere(AExponentialHeightFog* fog, FAtmos
 	fogC->SetFogMaxOpacity(FMath::FInterpTo(fogC->FogMaxOpacity, to.FogMaxOpacity, delta, speed));
 	fogC->SetStartDistance(FMath::FInterpTo(fogC->StartDistance, to.FogStartDist, delta, speed));
 	fogC->SetDirectionalInscatteringExponent(FMath::FInterpTo(fogC->DirectionalInscatteringExponent, to.FogInscatteringExponent, delta, speed));
-	fogC->SetStartDistance(FMath::FInterpTo(fogC->StartDistance, to.FogStartDist, delta, speed));
 	fogC->SetDirectionalInscatteringStartDistance(FMath::FInterpTo(fogC->DirectionalInscatteringStartDistance, to.FogInscatteringStartDist, delta, speed));
 	fogC->SetFogInscatteringColor(UCustomExtensions::InterpLinearColor(fogC->FogInscatteringColor, to.FogInscatteringColor, delta, speed));
 	fogC->SetDirectionalInscatteringColor(UCustomExtensions::InterpLinearColor(fogC->DirectionalInscatteringColor, to.FogInscatteringColorDirectional, delta, speed));
@@ -463,15 +553,33 @@ FControlSettings ARaceGameStateBase::GetControlSettings(float speed) {
 
 		return settings;
 
-	} else if (Stage == GameStage::InfiniteHex) {
+	}
+	else if (Stage == GameStage::InfiniteHex) {
 
-		settings.BankingRotationImpulse			= .05;
-		settings.BankingRotationImpulseMax		= 20;
-		settings.BankingSpeedImpulse			= 450;
-		settings.LeapImpulse					= 8000;
-		settings.MaxBankingSpeed				= 1500;
+		settings.BankingRotationImpulse = .05;
+		settings.BankingRotationImpulseMax = 20;
+		settings.BankingSpeedImpulse = 450;
+		settings.LeapImpulse = 8000;
+		settings.MaxBankingSpeed = 1500;
 
 		return settings;
+
+
+	} else if (Stage == GameStage::Labyrinth) {
+
+		settings.BankingRotationImpulse = .1;
+		settings.BankingRotationImpulseMax = 30;
+		settings.BankingSpeedImpulse = 650;
+		settings.LeapImpulse = 35000;
+		settings.MaxBankingSpeed = 2500;
+
+	} else if (Stage == GameStage::CitySubmerged) {
+
+		settings.BankingRotationImpulse = .1;
+		settings.BankingRotationImpulseMax = 30;
+		settings.BankingSpeedImpulse = 650;
+		settings.LeapImpulse = 35000*20;
+		settings.MaxBankingSpeed = 60000;
 
 	} else {
 
@@ -507,7 +615,18 @@ FUnderfadeSettings ARaceGameStateBase::GetUnderFadeSettings() {
 		settings.Color = FLinearColor(.289, .375, .362, 1);
 
 		return settings;
+
+	} else if (Stage == GameStage::Labyrinth) {
+
+		 settings.Alpha = 0.0;
+		 return settings;
+
+	} else {
+
+		settings.Alpha = 0.0;
+		return settings;
 	}
+
 
 	return settings;
 }

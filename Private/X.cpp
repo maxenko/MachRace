@@ -82,3 +82,37 @@ bool UX::VectorsWithinAngle(FVector a, FVector b, float angle) {
 
 	return deg < angle;
 }
+
+bool UX::IsWithinCameraView(APlayerCameraManager* cm, FVector to, float within) {
+
+	if (!cm) {
+		return false;
+	}
+
+	auto cameraLoc = cm->GetCameraLocation();
+	auto cameraDir = cm->GetCameraRotation().Vector();
+	cameraDir.Normalize();
+
+	FVector directional = cameraLoc - to; // to target normal
+	directional.Normalize();
+
+	// angle between vectors (we're concerned whether or not vector falls inside the visible cone & dist
+	float dProductAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(cameraDir, directional))); // angle to target
+
+	return FMath::Abs(within) > FMath::Abs(180 - dProductAngle);
+}
+
+float UX::SnapToInterval(float interval, float v) {
+	
+	float multiplier = v < 0 ? -1 : 1;
+
+	float absI = FMath::Abs(interval);
+	float absV = FMath::Abs(v);
+
+	if (absV < absI) {
+		return 0;
+	}
+
+	float remainder = FMath::Fmod(absV, absI);
+	return v - remainder * multiplier;
+}

@@ -77,8 +77,8 @@ FCameraSettings AMachGameStateBase::GetCameraSettings(GameStage stage, float spe
 		}
 
 		return settings;
-	}
-
+	
+	} 
 
 	return settings;
 }

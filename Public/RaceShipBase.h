@@ -28,6 +28,8 @@ private:
 	void changeSpeed(float by);
 	bool level1IsShipOutOfBounds(AActor* tile);
 
+	float lastZ = 0;
+
 public:
 
 	ARaceShipBase();
@@ -43,6 +45,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Decelerate", Keywords = "Decelerate the ship."), Category = "MachRace|Gameplay")
 	void Decelerate(float forwardVelocity);
+
+	float MinDistFromGroundCurrent = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float MinDistFromGround = 150;
@@ -63,6 +67,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float MaxVelocityChangeThreshold = 300;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float ShipHoverRealignmentSpeed = .6;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "IsVelocityChangeFatal", Keywords = "Checks wether velocity change between now and last time should be treated as fatal collision."), Category = "MachRace|Gameplay")
 	bool IsVelocityChangeFatal();

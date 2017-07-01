@@ -37,11 +37,17 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Parse DateTime", Keywords = "Parse DateTime in HTTP (RFC 1123) format."), Category = "Machrace|Utility")
 	static bool ParseDateTime(const FString & DateTimeString, FDateTime & OutDateTime) {
-		return FDateTime::ParseHttpDate(DateTimeString, OutDateTime);
+		return FDateTime::ParseHttpDate(DateTimeString, OutDateTime); // pass-through call, as its not exposed to blueprint
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Total Milliseconds Between", Keywords = "Gets total number of milliseconds between two dates."), Category = "Machrace|Utility")
 	static int32 TotalMillisecondsBetween(FDateTime a, FDateTime b) {
 		return (int32)(a - b).GetTotalMilliseconds();
 	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Within Cone", Keywords = "Returns true when vector is within given cone of to the camera."), Category = "Machrace|Utility")
+	static bool IsWithinCameraView(APlayerCameraManager* cm, FVector to, float within);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Snap to Interval", Keywords = "Snaps to the interval segment. Floored to the lowest end."), Category = "Machrace|Utility")
+	static float SnapToInterval(float interval, float v);
 };

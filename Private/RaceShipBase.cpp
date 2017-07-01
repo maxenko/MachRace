@@ -51,6 +51,7 @@ void ARaceShipBase::decayRotationToZero(float delta) {
 // Called when the game starts or when spawned
 void ARaceShipBase::BeginPlay() {
 	Super::BeginPlay();
+	MinDistFromGroundCurrent = MinDistFromGround;
 }
 
 
@@ -73,32 +74,37 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 	}
 
 
-	// float over the ground softly
-
-	// only if game is not in pre-launch stage (no floor)
+	// hovering
 	auto state = GetState();
-	if(state && state->Stage != GameStage::Prelaunch ){
+	if (state) {
 
-		FHitResult hit;
-		CheckGroundDist(hit);
+		auto stage = state->Stage;
 
-		if( hit.IsValidBlockingHit() ) {
+		// interp to target distance from ground (which could be changing frame to frame)
+		MinDistFromGroundCurrent = FMath::FInterpTo(MinDistFromGroundCurrent, MinDistFromGround, DeltaSeconds, ShipHoverRealignmentSpeed);
+
+		if (stage == GameStage::Desert || stage == GameStage::DesertBoss ) { // stages where ship hovers
+
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Current: %f, Target: %f"), MinDistFromGroundCurrent, MinDistFromGround));
+
+			FHitResult hit;
+			CheckGroundDist(hit);
+
+			if (hit.IsValidBlockingHit()) {
+
+				FVector actorLoc = GetActorLocation();
+				lastZ = actorLoc.Z;
+
+				FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGroundCurrent);
+				SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
+			}
+		}
+		else { // stages where ship doesn't hover (it readjusts back to default hover value)
 
 			FVector actorLoc = GetActorLocation();
+			FVector targetPos = FVector(actorLoc.X, actorLoc.Y, MinDistFromGroundCurrent);
+			SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
 
-			if ( hit.Actor->ActorHasTag("Floor") && state->Stage != GameStage::InfiniteHex) {
-
-				if(hit.Actor->ActorHasTag("DesertFloor")) {
-					level1IsShipOutOfBounds(hit.GetActor());
-				}
-				
-				FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGround);
-				SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
-
-			} else if (state->Stage == GameStage::InfiniteHex) {
-
-				SetActorLocation(FMath::VInterpTo(actorLoc, FVector(actorLoc.X, actorLoc.Y,MinDistFromGround), DeltaSeconds, GroundFollowSpeed));
-			}
 		}
 	}
 }
@@ -150,7 +156,7 @@ void ARaceShipBase::changeSpeed(float by) {
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Unable to accelerate ship, physics volume not found."));
 	}
 
-	if (by < 0) {
+	if (by < 0) { // -X is forward, so negative value is acceleration forward
 		OnAccelerate.Broadcast(by);
 	} else {
 		OnDecelerate.Broadcast(by);
@@ -300,7 +306,7 @@ float ARaceShipBase::GetTheoreticalBankingSpeed() {
 		auto velocity = FMath::Abs(physVol->GetPhysicsLinearVelocity().Y);
 		return velocity * GetState()->GetTheoreticalSpeedMultiplier();
 	} else {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Ships root component is not a physics object. Cannot read theoretical speed."));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Ships root component is not a physics object. Cannot read theoretical banking speed."));
 	}
 
 	return 0;
@@ -331,7 +337,7 @@ float ARaceShipBase::GetBankingSpeed() {
 		auto velocity = physVol->GetPhysicsLinearVelocity().Y;
 		return velocity;
 	} else {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Ships root component is not a physics object. Cannot read actual  lateral speed."));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Ships root component is not a physics object. Cannot read actual lateral speed."));
 	}
 
 	return 0;
