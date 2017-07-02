@@ -127,7 +127,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	AActor* Target;
+	AActor* Target = NULL;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool FollowTarget = false;

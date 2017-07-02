@@ -104,6 +104,12 @@ void UAutopilot::decayRadialVelocity() {
 
 // calculates target velocity based on all current settings, and from all applicable velocities
 FVector UAutopilot::getTargetVelocity() {
+
+	// sanity check
+	auto o = GetOwner();
+	if (!o || !Target) {
+		return FVector::ZeroVector;
+	}
 	
 	// get current target actor velocity velocity (zero vector if not following or no target)
 	FVector currentTargetActorVelocity	= Target && FollowTarget ? UX::GetRootLinearVelocity(Target) : FVector::ZeroVector;
@@ -111,7 +117,7 @@ FVector UAutopilot::getTargetVelocity() {
 	currentTargetActorVelocityN.Normalize();
 
 	FVector targetActorLoc	= Target->GetActorLocation();
-	FVector ownerLoc		= GetOwner()->GetActorLocation();
+	FVector ownerLoc		= o->GetActorLocation();
 
 	// factor in target offset location (this can be a moving location in front/behind/side of target)
 	TargetFollowLocation = FVector(FollowOffset, 0 , 0) + targetActorLoc; // follow location is just an X axis offset location
