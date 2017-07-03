@@ -109,7 +109,7 @@ void ARaceContentInstancer::CreateInstance(UStaticMesh* mesh, FTransform t) {
 
 	// try to find existing component with same mesh
 	for (UInstancedStaticMeshComponent* mc : dictionary) {
-		if (mc->StaticMesh == mesh) {
+		if (mc->GetStaticMesh() == mesh) {
 			auto idx = mc->AddInstanceWorldSpace(t);
 			return;
 		}
@@ -138,7 +138,7 @@ void ARaceContentInstancer::CreateInstanceLocally(UStaticMesh* mesh, FTransform 
 
 	// try to find existing component with same mesh
 	for (UInstancedStaticMeshComponent* mc : dictionary) {
-		if (mc->StaticMesh == mesh) {
+		if (mc->GetStaticMesh() == mesh) {
 			auto idx = mc->AddInstance(t);
 			return;
 		}

@@ -4,7 +4,7 @@ using UnrealBuildTool;
 
 public class MachRace : ModuleRules
 {
-	public MachRace(TargetInfo Target)
+	public MachRace(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject", "Engine", "InputCore", "Http", 
