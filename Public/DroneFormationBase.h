@@ -42,7 +42,7 @@ protected:
 private:
 
 	TArray<FVector> getFormationGrid();
-	FName gridMarketTagName = "GridMarker";
+	FName gridMarkerTagName = "GridMarker";
 
 	// changes data
 	int32 previousColumns = 0;

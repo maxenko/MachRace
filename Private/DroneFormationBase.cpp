@@ -106,7 +106,7 @@ void ADroneFormationBase::realignGrid(){
 	}
 
 	// clear old components
-	auto components = GetComponentsByTag(USceneComponent::StaticClass(), gridMarketTagName);
+	auto components = GetComponentsByTag(USceneComponent::StaticClass(), gridMarkerTagName);
 	for (auto r : components) {
 		RemoveOwnedComponent(r);
 	}
@@ -119,7 +119,7 @@ void ADroneFormationBase::realignGrid(){
 		c->RegisterComponent();
 		c->SetRelativeLocation(v);
 		c->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-		c->ComponentTags.Add(gridMarketTagName);
+		c->ComponentTags.Add(gridMarkerTagName);
 		Positions.Add(c);
 	}
 
@@ -128,39 +128,50 @@ void ADroneFormationBase::realignGrid(){
 
 void ADroneFormationBase::relinkDrones() {
 
-	auto desiredDroneCount = Columns * Rows;
 	TArray<AActor*> newDrones;
-	newDrones.Reserve(desiredDroneCount);
+	auto newDroneCount = Columns * Rows;
+	newDrones.Reserve(newDroneCount);
 
-	// re-create links
+	// rebuild links
 	Links.Empty();
-	for (auto i = 0; i < desiredDroneCount; ++i) {
-
+	for (auto i = 0; i < newDroneCount; ++i) {
 		UDroneToFormationLink* link = NewObject<UDroneToFormationLink>(this);
 		Links.Add(link);
-		link->Position = Positions[i]; // position drone will try to follow
+		link->Position = Positions[i]; // positions count would always match here, as this method is called immediate after new positions are generated
+	}
 
-		// assign drone from existing drone set
-		if (Drones.Num() > 0) {
-			if (Drones.IsValidIndex(i)) {
-				if (Drones[i]->IsValidLowLevel()) {
-					newDrones.Add(Drones[i]);
-					OnReassignDrone.Broadcast(Drones[i]);
-				}
+	// link existing drones based on their proximity to new positions
+	for (auto i = 0; i < Positions.Num() && i < Drones.Num(); ++i) {
+
+		auto loc = Positions[i]->GetComponentLocation();
+		auto dist = TNumericLimits<float>::Max();
+		AActor* reassignedDrone = NULL;
+
+		for (auto n = 0; n < Drones.Num(); ++n) {
+			auto droneLoc = Drones[n]->GetActorLocation();
+			auto thisDist = FVector::Dist(loc, droneLoc);
+
+			if (thisDist < dist) {
+				dist = thisDist;
+				reassignedDrone = Drones[n];
 			}
+		}
+
+		// reassign existing drone to new formation layout
+		if (reassignedDrone) {
+			Links[i]->Drone = reassignedDrone;
+			Drones.Remove(reassignedDrone);
+			newDrones.Add(reassignedDrone);
+			OnReassignDrone.Broadcast(reassignedDrone);
 		}
 	}
 
-	// release any unused drones
-	if (Drones.Num() > newDrones.Num()) {
-		for (auto i = 0; i < Drones.Num(); ++i) {
-			if (!newDrones.Contains(Drones[i])) {
-				OnReleaseDrone.Broadcast(Drones[i]);
-			}
-		}
+	// release any leftover drones from the existing set
+	for (auto d : Drones) {
+		OnReleaseDrone.Broadcast(d);
 	}
 
-	Drones = newDrones; // replace old drone set with new drone set
+	Drones = newDrones;
 }
 
 void ADroneFormationBase::LinkDrone(AActor* drone, UDroneToFormationLink* link) {
