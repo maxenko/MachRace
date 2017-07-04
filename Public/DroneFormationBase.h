@@ -7,7 +7,23 @@
 #include "DroneFormationBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridUpdate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFreeSlotAvailable, USceneComponent*, Marker);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReleaseDrone, AActor*, Drone);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReassignDrone, AActor*, Drone);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFreeSlotAvailable, UDroneToFormationLink*, Link);
+
+
+UCLASS()
+class MACHRACE_API UDroneToFormationLink : public UObject {
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
+	AActor* Drone = NULL;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|Debug")
+	USceneComponent* Position;
+};
 
 
 UCLASS()
@@ -35,6 +51,7 @@ private:
 	void detectAndProcessChanges();
 	void realignGrid();
 	void drawDebug();
+	void relinkDrones();
 
 public:	
 	// Called every frame
@@ -42,9 +59,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
 	bool DrawDebug = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	bool IsAutoAimTarget = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	FVector Bounds = FVector(1000,1000,0);
@@ -55,12 +69,27 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	int32 Rows = 5; // X
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<USceneComponent*> Positions;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<AActor*> Drones;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
+	TArray<UDroneToFormationLink*> Links;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
 	FOnGridUpdate OnGridUpdate;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
+	FOnReleaseDrone OnReleaseDrone;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
+	FOnReassignDrone OnReassignDrone;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
+	FOnFreeSlotAvailable OnFreeSlotAvailable;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Link Drone", Keywords = "Links a given actor as a drone to the formation."), Category = "MachRace|Gameplay")
+	void LinkDrone(AActor* drone, UDroneToFormationLink* link);
 };

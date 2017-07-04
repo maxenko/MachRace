@@ -20,10 +20,21 @@ void ADroneFormationBase::BeginPlay(){
 void ADroneFormationBase::Tick(float DeltaTime){
 	Super::Tick(DeltaTime);
 
+	if (Columns == 0 && Rows == 0) {
+		return;
+	}
+
 	detectAndProcessChanges();
 
 	if (DrawDebug) {
 		drawDebug();
+	}
+
+	for (auto link : Links) {
+		if (link->Drone == NULL) {
+			OnFreeSlotAvailable.Broadcast(link);
+			break; // one per frame, to throttle drone spawns
+		}
 	}
 }
 
@@ -36,7 +47,7 @@ void ADroneFormationBase::drawDebug() {
 	}
 
 	for ( USceneComponent* p : Positions ){
-		auto loc = p->GetComponentLocation() + GetActorLocation();
+		auto loc = p->GetComponentLocation();
 		DrawDebugPoint(w, loc, 20, FColor::Red, false, .08);
 	}
 
@@ -107,7 +118,54 @@ void ADroneFormationBase::realignGrid(){
 		auto c = NewObject<USceneComponent>(this);
 		c->RegisterComponent();
 		c->SetRelativeLocation(v);
+		c->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		c->ComponentTags.Add(gridMarketTagName);
 		Positions.Add(c);
+	}
+
+	relinkDrones();
+}
+
+void ADroneFormationBase::relinkDrones() {
+
+	auto desiredDroneCount = Columns * Rows;
+	TArray<AActor*> newDrones;
+	newDrones.Reserve(desiredDroneCount);
+
+	// re-create links
+	Links.Empty();
+	for (auto i = 0; i < desiredDroneCount; ++i) {
+
+		UDroneToFormationLink* link = NewObject<UDroneToFormationLink>(this);
+		Links.Add(link);
+		link->Position = Positions[i]; // position drone will try to follow
+
+		// assign drone from existing drone set
+		if (Drones.Num() > 0) {
+			if (Drones.IsValidIndex(i)) {
+				if (Drones[i]->IsValidLowLevel()) {
+					newDrones.Add(Drones[i]);
+					OnReassignDrone.Broadcast(Drones[i]);
+				}
+			}
+		}
+	}
+
+	// release any unused drones
+	if (Drones.Num() > newDrones.Num()) {
+		for (auto i = 0; i < Drones.Num(); ++i) {
+			if (!newDrones.Contains(Drones[i])) {
+				OnReleaseDrone.Broadcast(Drones[i]);
+			}
+		}
+	}
+
+	Drones = newDrones; // replace old drone set with new drone set
+}
+
+void ADroneFormationBase::LinkDrone(AActor* drone, UDroneToFormationLink* link) {
+	link->Drone = drone;
+	if (!Drones.Contains(drone)) {
+		Drones.Add(drone);
 	}
 }
