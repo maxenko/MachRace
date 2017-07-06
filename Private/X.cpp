@@ -116,3 +116,12 @@ float UX::SnapToInterval(float interval, float v) {
 	float remainder = FMath::Fmod(absV, absI);
 	return v - remainder * multiplier;
 }
+
+FVector UX::RandVecInRange(FVector min, FVector max) {
+
+	auto X = FMath::FRandRange(min.X, max.X);
+	auto Y = FMath::FRandRange(min.Y, max.Y);
+	auto Z = FMath::FRandRange(min.Z, max.Z);
+
+	return FVector(X, Y, Z);
+}

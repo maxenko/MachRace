@@ -50,4 +50,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Snap to Interval", Keywords = "Snaps to the interval segment. Floored to the lowest end."), Category = "Machrace|Utility")
 	static float SnapToInterval(float interval, float v);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Random Vector in Range", Keywords = "Generate random vector in range from min to max."), Category = "Machrace|Utility")
+	static FVector RandVecInRange(FVector min, FVector max);
 };

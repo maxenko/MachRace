@@ -8,8 +8,9 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridUpdate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReleaseDrone, AActor*, Drone);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReassignDrone, AActor*, Drone);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFreeSlotAvailable, UDroneToFormationLink*, Link);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnReassignDrone, AActor*, Drone, USceneComponent*, position);
 
 
 UCLASS()

@@ -22,13 +22,17 @@ protected:
 private:
 	bool abandoning = false;
 
+	FTimerHandle wobbleTimer;
+	FVector wobbleOffset = FVector::ZeroVector;
+	void generateRandomOffset();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	void AssignPosition(USceneComponent* position);
 	
-	void AbandonFormation();
+	void moveTo(FVector to, float delta, FVector speed);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	USceneComponent* Position;
@@ -41,4 +45,20 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	FVector AbandonSpeed = FVector(10, 10, 100);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Abandon Formation", Keywords = "Mark drone as having abandoned the formation."), Category = "MachRace|Gameplay")
+	void AbandonFormation();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool Wobble = false;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	FVector2D WobbleRandomRange = FVector2D(.1, .5);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	FVector WobbleOffsetMin = FVector(-2, -2, -2);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	FVector WobbleOffsetMax = FVector(2, 2, 2);
 };

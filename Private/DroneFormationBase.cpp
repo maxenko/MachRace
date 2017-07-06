@@ -162,7 +162,7 @@ void ADroneFormationBase::relinkDrones() {
 			Links[i]->Drone = reassignedDrone;
 			Drones.Remove(reassignedDrone);
 			newDrones.Add(reassignedDrone);
-			OnReassignDrone.Broadcast(reassignedDrone);
+			OnReassignDrone.Broadcast(reassignedDrone, Links[i]->Position);
 		}
 	}
 
@@ -180,3 +180,4 @@ void ADroneFormationBase::LinkDrone(AActor* drone, UDroneToFormationLink* link) 
 		Drones.Add(drone);
 	}
 }
+

@@ -2,6 +2,7 @@
 
 #include "MachRace.h"
 #include "RaceFormationDroneBase.h"
+#include "X.h"
 
 // Sets default values
 ARaceFormationDroneBase::ARaceFormationDroneBase(){
@@ -14,6 +15,20 @@ ARaceFormationDroneBase::ARaceFormationDroneBase(){
 void ARaceFormationDroneBase::BeginPlay(){
 	Super::BeginPlay();
 
+	// set up wobble
+	auto wobbleFrequency = FMath::FRandRange(WobbleRandomRange.X, WobbleRandomRange.Y);
+	GetWorldTimerManager().SetTimer(wobbleTimer, this, &ARaceFormationDroneBase::generateRandomOffset, wobbleFrequency, true, 2);
+}
+
+void ARaceFormationDroneBase::moveTo(FVector to, float delta, FVector speed) {
+
+	auto currentLoc = GetActorLocation();
+
+	auto x = FMath::FInterpTo(currentLoc.X, to.X, delta, speed.X);
+	auto y = FMath::FInterpTo(currentLoc.Y, to.Y, delta, speed.Y);
+	auto z = FMath::FInterpTo(currentLoc.Z, to.Z, delta, speed.Z);
+
+	SetActorLocation(FVector(x, y, z));
 }
 
 // Called every frame
@@ -30,11 +45,14 @@ void ARaceFormationDroneBase::Tick(float DeltaTime){
 			to = Position->GetComponentLocation() + AbandonOffset;
 		}
 
-		auto x = FMath::FInterpTo(currentLoc.X, to.X, DeltaTime, AbandonSpeed.X);
-		auto y = FMath::FInterpTo(currentLoc.Y, to.Y, DeltaTime, AbandonSpeed.Y);
-		auto z = FMath::FInterpTo(currentLoc.Z, to.Z, DeltaTime, AbandonSpeed.Z);
+		moveTo(to, DeltaTime, AbandonSpeed);
 
-		SetActorLocation(FVector(x, y, z));
+	} else {
+
+		if (Position) {
+			auto offset = Wobble ? wobbleOffset : FVector::ZeroVector;
+			moveTo(Position->GetComponentLocation() + offset, DeltaTime, FollowSpeed);
+		}
 	}
 }
 
@@ -44,4 +62,10 @@ void  ARaceFormationDroneBase::AssignPosition(USceneComponent* position) {
 
 void ARaceFormationDroneBase::AbandonFormation() {
 	abandoning = true;
+}
+
+void ARaceFormationDroneBase::generateRandomOffset() {
+	if (Wobble) {
+		wobbleOffset = UX::RandVecInRange(WobbleOffsetMin, WobbleOffsetMax);
+	}
 }
