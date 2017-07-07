@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "RaceFormationDroneBase.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTargetAcquired, FVector, To, FVector, From);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTargetLost);
+
 UCLASS()
 class MACHRACE_API ARaceFormationDroneBase : public ARaceActorBase
 {
@@ -23,8 +26,12 @@ private:
 	bool abandoning = false;
 
 	FTimerHandle wobbleTimer;
+	FTimerHandle scanForTargetTimer;
 	FVector wobbleOffset = FVector::ZeroVector;
 	void generateRandomOffset();
+	void scanForTarget();
+
+	bool previousTargetStatus = false;
 
 public:	
 	// Called every frame
@@ -33,6 +40,9 @@ public:
 	void AssignPosition(USceneComponent* position);
 	
 	void moveTo(FVector to, float delta, FVector speed);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
+	bool DrawDebug = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	USceneComponent* Position;
@@ -61,4 +71,20 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	FVector WobbleOffsetMax = FVector(2, 2, 2);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float ScanInterval = .3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float FireTriggerYDist = 150;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float FireTriggerZDist = 150;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
+	FOnTargetAcquired OnTargetAcquired;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
+	FOnTargetLost OnTargetLost;
+
 };
