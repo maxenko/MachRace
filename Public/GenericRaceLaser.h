@@ -52,7 +52,7 @@ public:
 	FVector From = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Direction = FVector(-50000, 0, 0);
+	FVector Direction = FVector(50000, 0, 0);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	FVector To = From + Direction;

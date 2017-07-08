@@ -243,9 +243,9 @@ void ARaceLaser::Tick( float DeltaTime ) {
 	// always trace
 	traceAhead();
 
-	if(!BeamPath){
+	if (!BeamPath) {
 		buildBeam();
-	}else if(IsFiring){
+	} else if(IsFiring) {
 		updateBeam();
 	}
 

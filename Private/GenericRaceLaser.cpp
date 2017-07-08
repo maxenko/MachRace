@@ -21,6 +21,13 @@ void AGenericRaceLaser::BeginPlay()
 void AGenericRaceLaser::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (IsFiring) {
+		if (!BeamPath) {
+			buildBeam();
+		}
+		updateBeam();
+	}
 }
 
 void AGenericRaceLaser::buildBeam() {
