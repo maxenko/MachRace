@@ -6,12 +6,8 @@
 #include "RaceActorBase.h"
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
+#include "GenericRaceLaser.h"
 #include "RaceLaser.generated.h"
-
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFireDelegate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEndFireDelegate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHitDelegate, FHitResult, hit);
 
 
 UCLASS()

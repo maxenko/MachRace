@@ -81,6 +81,7 @@ void ARaceFormationDroneBase::generateRandomOffset() {
 //////////////////////////////////////////////////////////////////////////
 void ARaceFormationDroneBase::scanForTarget() {
 
+	// sanity check
 	auto w = GetWorld();
 	if (!w) {
 		return;
@@ -90,17 +91,18 @@ void ARaceFormationDroneBase::scanForTarget() {
 	FHitResult hit;
 	bool trace = w->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation()+FVector(10000,0,0), ECollisionChannel::ECC_Visibility);
 	bool isHit = hit.IsValidBlockingHit();
-	bool isHitOnFormationDrone = false;
+	bool hitIsAnotherDrone = false;
 	bool targetAquired = false;
 
-	// if we hit ship
+	// if we hit something
 	if (isHit) {
 
+		// is it another drone?
 		if (hit.Actor->IsA(ARaceFormationDroneBase::StaticClass())) {
-			isHitOnFormationDrone = true;
+			hitIsAnotherDrone = true;
 		}
 
-	// look for ship, without trace, just by its general location
+	// look for ship, without trace, just by its general location within Y and Z range
 	} else {
 
 		auto state = GetState();
@@ -113,13 +115,13 @@ void ARaceFormationDroneBase::scanForTarget() {
 			bool InYRange = FMath::IsNearlyEqual(shipLoc.Y, droneLoc.Y, FireTriggerYDist);
 			bool InZRange = FMath::IsNearlyEqual(shipLoc.Z, droneLoc.Z, FireTriggerZDist);
 
-			if (InYRange && InZRange && !isHitOnFormationDrone) {
+			if (InYRange && InZRange && !hitIsAnotherDrone) { // target acquired
 
 				OnTargetAcquired.Broadcast(shipLoc, droneLoc);
 				targetAquired = true;
 				previousTargetStatus = true;
 
-			} else {
+			} else { // target lost
 
 				// inform BP of lost target
 				if (previousTargetStatus) {
@@ -130,7 +132,7 @@ void ARaceFormationDroneBase::scanForTarget() {
 			}
 		};
 
-		// do we have race state?
+		// do we have ARaceGameStateBase?
 		if (state) {
 			
 			bool gotShip = false;
@@ -143,13 +145,13 @@ void ARaceFormationDroneBase::scanForTarget() {
 		// if we don't
 		} else {
 
-			// are we in test level?
+			// are we a developer in a test level?
 			TArray<AActor*> ships;
 
 			// find first race ship, and use it
 			UGameplayStatics::GetAllActorsOfClass(w, ARaceShipBase::StaticClass(), ships);
 			if (ships.Num() > 0) {
-				// grab the first one
+				// use the first one
 				auto ship = ships[0];
 				acquireTarget(ship);
 			}
