@@ -23,6 +23,7 @@ public:
 
 private:
 	USplineMeshComponent* beamMesh = NULL;
+	bool previousFireStatus = false;
 
 protected:
 	// Called when the game starts or when spawned
@@ -30,6 +31,7 @@ protected:
 
 	void buildBeam();
 	void updateBeam();
+	void drawDebug(bool onlyIfFiring);
 
 public:	
 	// Called every frame
@@ -38,9 +40,15 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// system
 	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
+	bool DrawDebug = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
+	bool OnlyWhenFiring = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool IsFiring;
+	bool IsFiring = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	USceneComponent* FromMarker;
@@ -48,14 +56,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	USceneComponent* ToMarker;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	FVector From = FVector::ZeroVector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Direction = FVector(50000, 0, 0);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	FVector To = From + Direction;
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set laser destination", Keywords = "Set laser destination."), Category = "MachRace|Gameplay")
+	void SetLaserDestination(FVector toLoc);
 
 	//////////////////////////////////////////////////////////////////////////
 	// visual parameters
@@ -82,21 +84,6 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay events
 	//////////////////////////////////////////////////////////////////////////
-
-	UPROPERTY(BlueprintReadOnly)
-	FHitResult LastHit;
-
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
-	FHitDelegate HasHit;
-
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
-	FFireDelegate HitEnded;
-
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
-	FFireDelegate NoHit;
-
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
-	FFireDelegate FireTriggered;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FFireDelegate StartFiring;

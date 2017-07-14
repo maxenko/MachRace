@@ -53,4 +53,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Random Vector in Range", Keywords = "Generate random vector in range from min to max."), Category = "Machrace|Utility")
 	static FVector RandVecInRange(FVector min, FVector max);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Target Look At Rot", Keywords = "Gets look at target rotation."), Category = "Machrace|Utility")
+	static FRotator GetTargetLookAtRot(FTransform actorT, FVector targetLoc);
 };

@@ -100,6 +100,10 @@ void ARaceFormationDroneBase::scanForTarget() {
 		// is it another drone?
 		if (hit.Actor->IsA(ARaceFormationDroneBase::StaticClass())) {
 			hitIsAnotherDrone = true;
+			if (previousTargetStatus) {
+				previousTargetStatus = false;
+				OnTargetLost.Broadcast();
+			}
 		}
 
 	// look for ship, without trace, just by its general location within Y and Z range
@@ -117,7 +121,7 @@ void ARaceFormationDroneBase::scanForTarget() {
 
 			if (InYRange && InZRange && !hitIsAnotherDrone) { // target acquired
 
-				OnTargetAcquired.Broadcast(shipLoc, droneLoc);
+				OnTargetAcquired.Broadcast(ship);
 				targetAquired = true;
 				previousTargetStatus = true;
 

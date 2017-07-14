@@ -125,3 +125,9 @@ FVector UX::RandVecInRange(FVector min, FVector max) {
 
 	return FVector(X, Y, Z);
 }
+
+FRotator UX::GetTargetLookAtRot(FTransform actorT, FVector targetLoc) {
+	auto direction = -actorT.InverseTransformPosition(targetLoc);
+	FRotator rot = FRotationMatrix::MakeFromX(direction).Rotator();
+	return rot;
+}

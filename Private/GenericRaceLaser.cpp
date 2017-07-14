@@ -23,10 +23,27 @@ void AGenericRaceLaser::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (IsFiring) {
+
 		if (!BeamPath) {
 			buildBeam();
 		}
+
+		if (!previousFireStatus) {
+			previousFireStatus = true;
+			StartFiring.Broadcast();
+		}
+
 		updateBeam();
+
+	} else if (previousFireStatus){
+
+		previousFireStatus = false;
+		EndFiring.Broadcast();
+	
+	} 
+
+	if (DrawDebug) {
+		drawDebug(OnlyWhenFiring);
 	}
 }
 
@@ -64,8 +81,8 @@ void AGenericRaceLaser::updateBeam() {
 	BeamPath->ClearSplinePoints(false);
 	TArray<FVector>points;
 
-	points.Add(From);
-	points.Add(To);
+	points.Add(FromMarker->GetComponentLocation());
+	points.Add(ToMarker->GetComponentLocation());
 
 	BeamPath->SetSplinePoints(points, ESplineCoordinateSpace::World, false);
 	BeamPath->UpdateSpline();
@@ -73,8 +90,36 @@ void AGenericRaceLaser::updateBeam() {
 	beamMesh->SetStartPosition(BeamPath->GetLocationAtDistanceAlongSpline(0, ESplineCoordinateSpace::Local), false);
 	beamMesh->SetStartScale(BeamFromScale);
 
+
 	beamMesh->SetEndPosition(BeamPath->GetLocationAtDistanceAlongSpline(BeamPath->GetSplineLength(), ESplineCoordinateSpace::Local), false);
 	beamMesh->SetEndScale(BeamToScale);
 
 	beamMesh->UpdateMesh();
+}
+
+void AGenericRaceLaser::SetLaserDestination(FVector toLoc) {
+	ToMarker->SetWorldLocation(toLoc);
+}
+
+void AGenericRaceLaser::drawDebug(bool onlyIfFiring) {
+
+	auto draw = [](AActor* a, USceneComponent* from, USceneComponent* to) {
+
+		// sanity check
+		auto w = a->GetWorld();
+		if (!w) {
+			return;
+		}
+
+		DrawDebugSphere(w, from->GetComponentLocation(), 200, 64, FColor::Blue, false, .08, 0, 7.0);
+		DrawDebugSphere(w, to->GetComponentLocation(), 200, 64, FColor::Red, false, .08, 0, 7.0);
+	};
+
+	if (onlyIfFiring) {
+		if (IsFiring) {
+			draw(this,FromMarker,ToMarker);
+		}
+	} else if (DrawDebug) {
+		draw(this, FromMarker, ToMarker);
+	}
 }

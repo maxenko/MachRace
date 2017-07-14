@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "RaceFormationDroneBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTargetAcquired, FVector, To, FVector, From);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTargetAcquired, AActor*, Target);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTargetLost);
 
 UCLASS()
@@ -61,7 +61,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool Wobble = false;
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	FVector2D WobbleRandomRange = FVector2D(.1, .5);
