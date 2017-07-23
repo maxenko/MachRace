@@ -30,7 +30,7 @@ private:
 	FTimerHandle scanForTargetTimer;
 	FVector wobbleOffset = FVector::ZeroVector;
 	void generateRandomOffset();
-	void scanForTarget();
+	//void scanForTarget();
 	bool previousTargetStatus = false;
 	bool previousDesignated = false;
 
@@ -74,7 +74,7 @@ public:
 	void AbandonFormation();
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Is Target Within Cone", Keywords = "Mark drone as having abandoned the formation."), Category = "MachRace|Gameplay")
-	bool IsTargetWithinCone(float dist, float radius);
+	bool IsTargetWithinCone();
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -99,14 +99,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float ScanInterval = .3;
 
+	/** Controls when target can be fired on, based on each axis individual distance */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float FireTriggerXDist = 3000;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float FireTriggerYDist = 150;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float FireTriggerZDist = 150;
+	FVector FireTriggerDistances = FVector(3000, 150, 150);
 
 	//////////////////////////////////////////////////////////////////////////
 	// Events

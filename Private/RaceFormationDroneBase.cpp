@@ -20,7 +20,7 @@ void ARaceFormationDroneBase::BeginPlay(){
 	GetWorldTimerManager().SetTimer(wobbleTimer, this, &ARaceFormationDroneBase::generateRandomOffset, wobbleFrequency, true, 2.0);
 
 	// set up ship detection (which triggers firing at the ship)
-	GetWorldTimerManager().SetTimer(scanForTargetTimer, this, &ARaceFormationDroneBase::scanForTarget, ScanInterval, true, 0.0);
+	//GetWorldTimerManager().SetTimer(scanForTargetTimer, this, &ARaceFormationDroneBase::scanForTarget, ScanInterval, true, 0.0);
 }
 
 void ARaceFormationDroneBase::moveTo(FVector to, float delta, FVector speed) {
@@ -80,16 +80,28 @@ void ARaceFormationDroneBase::generateRandomOffset() {
 	}
 }
 
-bool ARaceFormationDroneBase::IsTargetWithinCone(float dist, float radius) {
+bool ARaceFormationDroneBase::IsTargetWithinCone() {
 	// sanity check
 	if (!Target) {
 		return false;
 	}
 
+	auto targetLoc = Target->GetActorLocation();
+	auto droneLoc = GetActorLocation();
 
+	if (UX::GetXDist(targetLoc, droneLoc) <= FireTriggerDistances.X) {
+		if (UX::GetYDist(targetLoc, droneLoc) <= FireTriggerDistances.Y) {
+			if (UX::GetZDist(targetLoc, droneLoc) <= FireTriggerDistances.Z) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 
+/*
 //////////////////////////////////////////////////////////////////////////
 // multi-tiered scan, which looks to see if there is nothing in front of drone
 // and in that case, tries to see if race ship is in front of the drone (without trace),
@@ -191,3 +203,4 @@ void ARaceFormationDroneBase::scanForTarget() {
 			false, .8, 0, 5);
 	}
 }
+*/

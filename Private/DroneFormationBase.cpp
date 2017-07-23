@@ -232,6 +232,7 @@ bool ADroneFormationBase::AssignClosestDroneIfNoneAreDesignated(AActor* target) 
 		auto closest = GetClosestDroneInAttackPosition(target, success);
 		if (success) {
 			closest->DesignatedDrone = true;
+			closest->Target = target;
 			return true;
 		}
 	}
