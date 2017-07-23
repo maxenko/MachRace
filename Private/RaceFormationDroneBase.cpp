@@ -9,7 +9,6 @@
 ARaceFormationDroneBase::ARaceFormationDroneBase(){
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -58,6 +57,13 @@ void ARaceFormationDroneBase::Tick(float DeltaTime){
 			moveTo(Position->GetComponentLocation() + offset, DeltaTime, FollowSpeed);
 		}
 	}
+
+	// trigger only when drone becomes designated
+	if (previousDesignated != DesignatedDrone) {
+		OnDesignated.Broadcast(DesignatedDrone);
+		previousDesignated = DesignatedDrone;
+	}
+	
 }
 
 void  ARaceFormationDroneBase::AssignPosition(USceneComponent* position) {
@@ -74,12 +80,26 @@ void ARaceFormationDroneBase::generateRandomOffset() {
 	}
 }
 
+bool ARaceFormationDroneBase::IsTargetWithinCone(float dist, float radius) {
+	// sanity check
+	if (!Target) {
+		return false;
+	}
+
+
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 // multi-tiered scan, which looks to see if there is nothing in front of drone
 // and in that case, tries to see if race ship is in front of the drone (without trace),
 // if ship is in front of drone, triggers targeted event, which is then handled in BP
 //////////////////////////////////////////////////////////////////////////
 void ARaceFormationDroneBase::scanForTarget() {
+
+	if (ScanEnabled) {
+		return;
+	}
 
 	// sanity check
 	auto w = GetWorld();

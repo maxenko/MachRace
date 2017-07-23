@@ -1,7 +1,10 @@
 // Copyright 2015 - Max Enko
 
 #include "MachRace.h"
+#include "NumericLimits.h"
+#include "X.h"
 #include "DroneFormationBase.h"
+
 
 
 // Sets default values
@@ -128,7 +131,7 @@ void ADroneFormationBase::realignGrid(){
 
 void ADroneFormationBase::relinkDrones() {
 
-	TArray<AActor*> newDrones;
+	TArray<ARaceFormationDroneBase*> newDrones;
 	auto newDroneCount = Columns * Rows;
 	newDrones.Reserve(newDroneCount);
 
@@ -145,7 +148,7 @@ void ADroneFormationBase::relinkDrones() {
 
 		auto loc = Positions[i]->GetComponentLocation();
 		auto dist = TNumericLimits<float>::Max();
-		AActor* reassignedDrone = NULL;
+		ARaceFormationDroneBase* reassignedDrone = NULL;
 
 		for (auto n = 0; n < Drones.Num(); ++n) {
 			auto droneLoc = Drones[n]->GetActorLocation();
@@ -174,10 +177,64 @@ void ADroneFormationBase::relinkDrones() {
 	Drones = newDrones;
 }
 
-void ADroneFormationBase::LinkDrone(AActor* drone, UDroneToFormationLink* link) {
+void ADroneFormationBase::LinkDrone(ARaceFormationDroneBase* drone, UDroneToFormationLink* link) {
 	link->Drone = drone;
 	if (!Drones.Contains(drone)) {
 		Drones.Add(drone);
 	}
 }
 
+
+ARaceFormationDroneBase* ADroneFormationBase::GetClosestDroneInAttackPosition(AActor* target, bool& success) {
+
+	// sanity check
+	if (!target) {
+		return NULL;
+	}
+
+	ARaceFormationDroneBase* drone = NULL;
+	success = false;
+
+	float previousShortestDist = TNumericLimits<float>::Max();
+
+	for (auto d : Drones) {
+
+		float yDist = UX::GetYDistBetweenActors(target, d);
+
+		// is yDist within threshold?
+		if (yDist < MinYDist) {
+			float dist = target->GetDistanceTo(d);
+			if (dist < previousShortestDist) {
+				previousShortestDist = dist;
+				drone = d;
+				success = true;
+			}
+		}
+	}
+
+	return drone;
+}
+
+
+bool ADroneFormationBase::isThereADesignatedDrone() {
+	for (auto d : Drones) {
+		if (d->DesignatedDrone) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool ADroneFormationBase::AssignClosestDroneIfNoneAreDesignated(AActor* target) {
+	if (!isThereADesignatedDrone()) {
+		bool success = false;
+		auto closest = GetClosestDroneInAttackPosition(target, success);
+		if (success) {
+			closest->DesignatedDrone = true;
+			return true;
+		}
+	}
+
+	return false;
+}

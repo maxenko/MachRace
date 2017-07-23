@@ -35,10 +35,14 @@ void AGenericRaceLaser::Tick(float DeltaTime)
 
 		updateBeam();
 
-	} else if (previousFireStatus){
-
-		previousFireStatus = false;
-		EndFiring.Broadcast();
+	} else {
+		
+		if (previousFireStatus) {
+			previousFireStatus = false;
+			clearBeam();
+			EndFiring.Broadcast();
+			
+		}
 	
 	} 
 
@@ -82,8 +86,24 @@ void AGenericRaceLaser::updateBeam() {
 	TArray<FVector>points;
 
 	points.Add(FromMarker->GetComponentLocation());
-	points.Add(ToMarker->GetComponentLocation());
 
+	if (StopOnBlock) {
+
+		// project between
+
+		FHitResult hit;
+		FCollisionQueryParams params;
+		params.AddIgnoredActor(this);
+
+		bool isAHit = GetWorld()->LineTraceSingleByChannel(hit, FromMarker->GetComponentLocation(), ToMarker->GetComponentLocation(), ECollisionChannel::ECC_Visibility, params);
+
+		if (isAHit) {
+			ToMarker->SetWorldLocation(hit.Location);
+		}
+	}
+
+	points.Add(ToMarker->GetComponentLocation());
+	
 	BeamPath->SetSplinePoints(points, ESplineCoordinateSpace::World, false);
 	BeamPath->UpdateSpline();
 
@@ -95,6 +115,10 @@ void AGenericRaceLaser::updateBeam() {
 	beamMesh->SetEndScale(BeamToScale);
 
 	beamMesh->UpdateMesh();
+}
+
+void AGenericRaceLaser::clearBeam() {
+	BeamPath->ClearSplinePoints(true);
 }
 
 void AGenericRaceLaser::SetLaserDestination(FVector toLoc) {

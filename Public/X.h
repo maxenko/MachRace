@@ -31,6 +31,18 @@ public:
 		return FVector::Dist(a, b);
 	}
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get X Dist.", Keywords = "Get distance between vectors using X axis only."), Category = "Machrace|Utility")
+		static float GetXDist(FVector a, FVector b) {
+		a.Y = a.Z = b.Y = b.Z = 0;
+		return FVector::Dist(a, b);
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Z Dist.", Keywords = "Get distance between vectors using Z axis only."), Category = "Machrace|Utility")
+		static float GetZDist(FVector a, FVector b) {
+		a.X = a.Y = b.X = b.Y = 0;
+		return FVector::Dist(a, b);
+	}
+
 	static UPrimitiveComponent* GetRootAsPrimitive(AActor* a, bool& success);
 	static void DecayRootRotToZero(AActor* a, float delta, float decaySpeed);
 	static bool VectorsWithinAngle(FVector a, FVector b, float angle);
@@ -56,4 +68,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Target Look At Rot", Keywords = "Gets look at target rotation."), Category = "Machrace|Utility")
 	static FRotator GetTargetLookAtRot(FTransform actorT, FVector targetLoc);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Y Dist Actors", Keywords = "Gets distance between two actors but only in Y axis."), Category = "Machrace|Utility")
+	static float GetYDistBetweenActors(AActor* a, AActor* b);
 };

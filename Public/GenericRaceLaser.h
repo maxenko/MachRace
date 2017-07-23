@@ -31,6 +31,7 @@ protected:
 
 	void buildBeam();
 	void updateBeam();
+	void clearBeam();
 	void drawDebug(bool onlyIfFiring);
 
 public:	
@@ -62,6 +63,9 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// visual parameters
 	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	bool StopOnBlock = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
 	FVector2D BeamFromScale = FVector2D(1, 1);

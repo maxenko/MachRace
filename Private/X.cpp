@@ -131,3 +131,17 @@ FRotator UX::GetTargetLookAtRot(FTransform actorT, FVector targetLoc) {
 	FRotator rot = FRotationMatrix::MakeFromX(direction).Rotator();
 	return rot;
 }
+
+float UX::GetYDistBetweenActors(AActor* a, AActor* b) {
+
+	 
+	if (!a || !b) {
+		return -1;
+	}
+
+	// strip out X,Z
+	auto locA = FVector(0, a->GetActorLocation().Y, 0);
+	auto locB = FVector(0, b->GetActorLocation().Y, 0);
+
+	return FVector::Dist(locA, locB);
+}

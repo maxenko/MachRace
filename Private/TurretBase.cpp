@@ -139,7 +139,6 @@ TArray<FHitResult> ATurretBase::Fire() {
 		if (isAHit) {
 			hits.Add(hit);
 			SpawnTrailDecal(hit);
-
 		}
 
 		if (DrawDebug) {

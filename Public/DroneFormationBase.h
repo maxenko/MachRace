@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "RaceFormationDroneBase.h"
 #include "DroneFormationBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridUpdate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReleaseDrone, AActor*, Drone);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReleaseDrone, ARaceFormationDroneBase*, Drone);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFreeSlotAvailable, UDroneToFormationLink*, Link);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnReassignDrone, AActor*, Drone, USceneComponent*, position);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnReassignDrone, ARaceFormationDroneBase*, Drone, USceneComponent*, position);
 
 
 UCLASS()
@@ -19,10 +19,11 @@ class MACHRACE_API UDroneToFormationLink : public UObject {
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
-	AActor* Drone = NULL;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	ARaceFormationDroneBase* Drone = NULL;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|Debug")
+	/** Designated position in formation, a drone will attempt to follow.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	USceneComponent* Position;
 };
 
@@ -53,6 +54,7 @@ private:
 	void realignGrid();
 	void drawDebug();
 	void relinkDrones();
+	bool isThereADesignatedDrone();
 
 public:	
 	// Called every frame
@@ -60,6 +62,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
 	bool DrawDebug = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	float MinDist = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	float MinYDist = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	FVector Bounds = FVector(1000,1000,0);
@@ -74,7 +82,7 @@ public:
 	TArray<USceneComponent*> Positions;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
-	TArray<AActor*> Drones;
+	TArray<ARaceFormationDroneBase*> Drones;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<UDroneToFormationLink*> Links;
@@ -92,5 +100,11 @@ public:
 	FOnFreeSlotAvailable OnFreeSlotAvailable;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Link Drone", Keywords = "Links a given actor as a drone to the formation."), Category = "MachRace|Gameplay")
-	void LinkDrone(AActor* drone, UDroneToFormationLink* link);
+	void LinkDrone(ARaceFormationDroneBase* drone, UDroneToFormationLink* link);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Attack Ready Drone", Keywords = "Gets drone that is in alignment to attack."), Category = "MachRace|Gameplay")
+	ARaceFormationDroneBase* GetClosestDroneInAttackPosition(AActor* target, bool& success);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Assign closest drone.", Keywords = "Assigns closest drone as designated (attack) drone, if there is one."), Category = "MachRace|Gameplay")
+	bool AssignClosestDroneIfNoneAreDesignated(AActor* target);
 };
