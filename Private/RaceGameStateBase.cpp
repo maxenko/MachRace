@@ -19,6 +19,7 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 	Stage = newStage;
 
 	// below is a long list of bureaucracy in dealing with dev and testing, this code is not used by players in game.
+	// its just here to dev hack into various stages in game
 	if (force) {
 		if (newStage == GameStage::DesertBoss) {
 			// force to Level1BossTriggerSpeed
@@ -43,7 +44,6 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			auto ship = GetRaceShip(shipOk);
 			if (shipOk && ship->GetSpeed() < Level1BossTriggerSpeed) {
 				ship->SetShipSpeed(Level1BossTriggerSpeed);
-				OnLevel2Boss.Broadcast();
 			}
 
 			SetLevelOneBossDeafeated();
@@ -54,6 +54,7 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			auto ship = GetRaceShip(shipOk);
 			if (shipOk && ship->GetSpeed() < Level1BossTriggerSpeed) {
 				ship->SetShipSpeed(Level2BossTriggerSpeed);
+				OnLevel2Boss.Broadcast();
 			}
 
 			SetLevelOneBossDeafeated();
@@ -414,7 +415,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.InterpSpeed = 1;
 		settings.Fov = 120;
 		settings.HudScale = 1.3;
-		settings.CameraT.SetTranslation(FVector(230, 0, 750));
+		settings.CameraT.SetTranslation(FVector(230, 0, 950));
 		settings.CameraT.SetRotation(FRotator(-45, -180, 0).Quaternion());
 
 

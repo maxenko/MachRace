@@ -145,6 +145,9 @@ public:
 	bool WaterEnabled = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool DroneFormationSpawned = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	int32 Level2OnStartTilesToKeepFreeOfObstacles = 3;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
