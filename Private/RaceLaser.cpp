@@ -181,7 +181,7 @@ bool ARaceLaser::traceAhead() {
 		}
 
 	//////////////////////////////////////////////////////////////////////////
-	// handle standard (aim straight) logic, this is hit if auto-aim is off or there was no block(ing) hit with auto-aim
+	// handle standard (aim straight) logic, this runs by default if auto-aim is off or there was no block(ing) hit with auto-aim
 	//////////////////////////////////////////////////////////////////////////
 	} else if (!block) {
 		block = w->LineTraceSingleByChannel(hit, From, To, channel);
@@ -194,7 +194,7 @@ bool ARaceLaser::traceAhead() {
 		if (IsFiring) {
 			traceColor = FColor::Red;
 		}
-		DrawDebugLine(w, From, To, traceColor, false, 0.0, 0, 5);
+		DrawDebugLine(w, From, To, traceColor, false, 0.0, 0, 15);
 	}
 
 	if (IsFiring == false && previousIsFiring == true) { // prevents double triggering laser from different keys

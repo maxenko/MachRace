@@ -64,13 +64,10 @@ public:
 	bool DrawDebug = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	float MinDist = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	float MinYDist = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	FVector Bounds = FVector(1000,1000,0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	float AttackTriggerMinYDist = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	int32 Columns = 5; // Y

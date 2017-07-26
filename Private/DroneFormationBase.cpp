@@ -202,7 +202,7 @@ ARaceFormationDroneBase* ADroneFormationBase::GetClosestDroneInAttackPosition(AA
 		float yDist = UX::GetYDistBetweenActors(target, d);
 
 		// is yDist within threshold?
-		if (yDist < MinYDist) {
+		if (yDist < AttackTriggerMinYDist) {
 			float dist = target->GetDistanceTo(d);
 			if (dist < previousShortestDist) {
 				previousShortestDist = dist;
