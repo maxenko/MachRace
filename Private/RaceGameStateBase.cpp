@@ -50,6 +50,9 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 
 		} else if (newStage == GameStage::InfiniteHexBoss){
 
+			EnableAutoAim =
+				Level1BossDefeated = false;
+
 			bool shipOk = false;
 			auto ship = GetRaceShip(shipOk);
 			if (shipOk && ship->GetSpeed() < Level1BossTriggerSpeed) {

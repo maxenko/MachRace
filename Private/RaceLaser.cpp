@@ -29,7 +29,7 @@ void ARaceLaser::buildBeam() {
 	path->RegisterComponent();
 
 	BeamPath = path;
-	
+
 	auto segment = NewObject<USplineMeshComponent>(path);
 	segment->SetMobility(EComponentMobility::Movable);
 	segment->SetStaticMesh(BeamBodyTemplate);
@@ -43,15 +43,15 @@ void ARaceLaser::buildBeam() {
 	beamMesh = segment;
 }
 
-void ARaceLaser::updateBeam(){
-	
+void ARaceLaser::updateBeam() {
+
 	BeamPath->ClearSplinePoints(false);
 	TArray<FVector>points;
 
 	points.Add(From);
 	points.Add(To);
 
-	BeamPath->SetSplinePoints(points,ESplineCoordinateSpace::World,false);
+	BeamPath->SetSplinePoints(points, ESplineCoordinateSpace::World, false);
 	BeamPath->UpdateSpline();
 
 	beamMesh->SetStartPosition(BeamPath->GetLocationAtDistanceAlongSpline(0, ESplineCoordinateSpace::Local), false);
@@ -60,7 +60,7 @@ void ARaceLaser::updateBeam(){
 	beamMesh->SetEndPosition(BeamPath->GetLocationAtDistanceAlongSpline(BeamPath->GetSplineLength(), ESplineCoordinateSpace::Local), false);
 	beamMesh->SetEndScale(BeamToScale);
 
- 	beamMesh->UpdateMesh();
+	beamMesh->UpdateMesh();
 }
 
 bool ARaceLaser::isAutoAimScanDue() {
@@ -106,10 +106,11 @@ bool ARaceLaser::doAutoAimTrace() {
 	if (!sphereSweepHit) {
 		return false;
 
-	} else {
+	}
+	else {
 
 		// are we hitting a target that can be autoaimed?
-		if ( firstClosestHit.GetActor()->IsA(ARaceActorBase::StaticClass()) ) {
+		if (firstClosestHit.GetActor()->IsA(ARaceActorBase::StaticClass())) {
 
 			ARaceActorBase* target = Cast<ARaceActorBase>(firstClosestHit.GetActor());
 			if (!target->IsAutoAimTarget) {
@@ -183,7 +184,8 @@ bool ARaceLaser::traceAhead() {
 	//////////////////////////////////////////////////////////////////////////
 	// handle standard (aim straight) logic, this runs by default if auto-aim is off or there was no block(ing) hit with auto-aim
 	//////////////////////////////////////////////////////////////////////////
-	} else if (!block) {
+	}
+	else if (!block) {
 		block = w->LineTraceSingleByChannel(hit, From, To, channel);
 	}
 
@@ -201,20 +203,23 @@ bool ARaceLaser::traceAhead() {
 
 		EndFiring.Broadcast();
 
-	} else if (IsFiring == true && previousIsFiring == false) { // prevents double triggering laser from different keys
+	}
+	else if (IsFiring == true && previousIsFiring == false) { // prevents double triggering laser from different keys
 
-   		StartFiring.Broadcast();
+		StartFiring.Broadcast();
 	}
 
 	previousIsFiring = IsFiring;
 
 	if (block && IsFiring) { // we hit something while firing!
 
- 		LastHit = hit;
+		LastHit = hit;
 		HasHit.Broadcast(hit); // broadcast hit, only when firing and hitting
+		To = hit.Location;
 		isHitting = true;
 
-	} else {
+	}
+	else {
 
 		if (isHitting == true) {
 			isHitting = false;
@@ -237,15 +242,16 @@ void ARaceLaser::BeginPlay() {
 
 
 // Called every frame
-void ARaceLaser::Tick( float DeltaTime ) {
-	Super::Tick( DeltaTime );
+void ARaceLaser::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
 
 	// always trace
 	traceAhead();
 
 	if (!BeamPath) {
 		buildBeam();
-	} else if(IsFiring) {
+	}
+	else if (IsFiring) {
 		updateBeam();
 	}
 

@@ -33,12 +33,16 @@ void ADroneFormationBase::Tick(float DeltaTime){
 		drawDebug();
 	}
 
-	for (auto link : Links) {
-		if (link->Drone == NULL) {
-			OnFreeSlotAvailable.Broadcast(link);
-			break; // one per frame, to throttle drone spawns
+	if (EnableSpawns) {
+		for (auto link : Links) {
+			if (link->Drone == NULL) {
+				OnFreeSlotAvailable.Broadcast(link);
+				break; // one per frame, to throttle drone spawns
+			}
 		}
 	}
+
+	cleanDestroyedDrones();
 }
 
 void ADroneFormationBase::drawDebug() {
@@ -218,6 +222,14 @@ ARaceFormationDroneBase* ADroneFormationBase::GetClosestDroneInAttackPosition(AA
 
 bool ADroneFormationBase::isThereADesignatedDrone() {
 	for (auto d : Drones) {
+		if (!d) {
+			continue;
+		}
+
+		if (!d->IsValidLowLevel()) {
+			continue;
+		}
+
 		if (d->DesignatedDrone) {
 			return true;
 		}
@@ -238,4 +250,12 @@ bool ADroneFormationBase::AssignClosestDroneIfNoneAreDesignated(AActor* target) 
 	}
 
 	return false;
+}
+
+void ADroneFormationBase::cleanDestroyedDrones() {
+	for (auto d : Drones) {
+		if (d->IsPendingKill()) {
+			Drones.Remove(d);
+		}
+	}
 }

@@ -55,6 +55,7 @@ private:
 	void drawDebug();
 	void relinkDrones();
 	bool isThereADesignatedDrone();
+	void cleanDestroyedDrones();
 
 public:	
 	// Called every frame
@@ -68,6 +69,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float AttackTriggerMinYDist = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	bool EnableSpawns = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	int32 Columns = 5; // Y
