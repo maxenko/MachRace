@@ -74,8 +74,6 @@ private:
 	int32 previousColumns = 0;
 	int32 previousRows = 0;
 
-	TArray<int32> ColumnSizes;
-
 	void detectAndProcessChanges();
 	void realignGrid();
 	void drawDebug();

@@ -200,11 +200,14 @@ void ADroneFormationBase::LinkDrone(ARaceFormationDroneBase* drone, UDroneToForm
 		for (auto& i : Index) {
 			if (i.Marker == link->Position) {
 				i.Drone = link->Drone;
+
+				if (ColumnCounts.Num() <= 0) {
+					ColumnCounts.AddZeroed(Columns);
+				}
+				ColumnCounts[i.Column]++;
 			}
 		}
 	}
-
-
 }
 
 ARaceFormationDroneBase* ADroneFormationBase::GetClosestDroneInAttackPosition( bool& success) {
@@ -272,10 +275,10 @@ bool ADroneFormationBase::AssignClosestDroneIfNoneAreDesignated() {
 
 void ADroneFormationBase::cleanDestroyedDrones() {
 
-
-
 	for (int32 n = Drones.Num(); n-- > 0;) {
+
 		auto d = Drones[n];
+
 		if (d->IsPendingKill()) {
   			Drones.RemoveAt(n);
 			Count--;
@@ -294,8 +297,9 @@ void ADroneFormationBase::cleanDestroyedDrones() {
 			TArray<int32> sizes;
 			sizes.AddZeroed(Columns);
 
-			// recalculate column sizes, this is used for gameplay decisions
-			for (auto i : Index) {
+			// recalculate column sizes
+			// this is used for gameplay decisions
+			for (auto& i : Index) {
 				if (i.Drone) {
 					if(!i.Drone->IsPendingKill()){
 						//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("Drone column index: %i, Row: %i"), i.Column, i.Row));
@@ -303,6 +307,8 @@ void ADroneFormationBase::cleanDestroyedDrones() {
 					}
 				}
 			}
+
+			ColumnCounts = sizes;
 
 			if (DrawDebug) {
 				for (int32 i = 0; i < sizes.Num(); ++i) {
@@ -312,5 +318,4 @@ void ADroneFormationBase::cleanDestroyedDrones() {
 			}
 		}
 	}
-
 }
