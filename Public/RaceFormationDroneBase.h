@@ -30,7 +30,6 @@ private:
 	FTimerHandle scanForTargetTimer;
 	FVector wobbleOffset = FVector::ZeroVector;
 	void generateRandomOffset();
-	//void scanForTarget();
 	bool previousTargetStatus = false;
 	bool previousDesignated = false;
 

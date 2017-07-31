@@ -11,7 +11,6 @@
 ADroneFormationBase::ADroneFormationBase(){
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -33,6 +32,7 @@ void ADroneFormationBase::Tick(float DeltaTime){
 		drawDebug();
 	}
 
+	// if spawns are enabled, fill the empty slots in the formation
 	if (EnableSpawns) {
 		for (auto link : Links) {
 			if (link->Drone == NULL) {
@@ -42,6 +42,7 @@ void ADroneFormationBase::Tick(float DeltaTime){
 		}
 	}
 
+	// clean up null refs
 	cleanDestroyedDrones();
 }
 
@@ -72,10 +73,14 @@ void ADroneFormationBase::detectAndProcessChanges() {
 	}
 }
 
-TArray<FVector> ADroneFormationBase::getFormationGrid(){
+/** Generates new rectangular grid of vectors and col/row positions */
+TArray<FDroneFormationSquareIndex> ADroneFormationBase::getFormationGrid(){
 
 	TArray<FVector> grid;
 	grid.Reserve(Columns*Rows);
+
+	TArray<FDroneFormationSquareIndex> newIndex;
+	newIndex.Reserve(Columns*Rows);
 
 	auto spacingX = (Bounds.X*2)/(Rows-1);		// -1 offsets the fill so coordinates fill entire bounds
 	auto spacingY = (Bounds.Y*2)/(Columns-1);	// with zero as start pos and bound*2 as end pos
@@ -86,28 +91,25 @@ TArray<FVector> ADroneFormationBase::getFormationGrid(){
 			auto cy = (y*spacingY) - Bounds.Y;
 			auto cx = (x*spacingX) - Bounds.X;
 
-			grid.Add(FVector(cx,cy,0));
+			FVector pos = FVector(cx, cy, 0);
+			newIndex.Add(FDroneFormationSquareIndex(pos, y, x));
 		}
 	}
 
-	return grid;
+	return newIndex;
 }
 
 void ADroneFormationBase::realignGrid(){
 
 	// allocate new positions array
 	auto previous = Positions;
-	
-	// resize to new setup
-	TArray<UActorComponent*> next;
-	next.Reserve(Columns*Rows);
 
 	auto grid = getFormationGrid();
 
 	// sanity check
 	if(grid.Num() != Columns*Rows){
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, 
-			FString::Printf(TEXT("DroneFormation system error, grid sizing mismatch. %i != %i"), next.Num(), grid.Num())
+			FString::Printf(TEXT("DroneFormation system error, grid sizing mismatch. %i != %i"), Columns*Rows, grid.Num())
 		);
 		return;
 	}
@@ -120,16 +122,21 @@ void ADroneFormationBase::realignGrid(){
 
 	Positions.Empty();
 
-	// add new positioning tags
-	for	( auto v : grid ){
+	// adds new positioning components using grid index
+	// components are used to align drones to the grid
+	for	( auto& idx : grid ){
 		auto c = NewObject<USceneComponent>(this);
 		c->RegisterComponent();
-		c->SetRelativeLocation(v);
+		c->SetRelativeLocation(idx.Vector);
 		c->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		c->ComponentTags.Add(gridMarkerTagName);
 		Positions.Add(c);
+		idx.Marker = c;
 	}
 
+	Index = grid;
+
+	// relink drones to new positions
 	relinkDrones();
 }
 
@@ -139,7 +146,7 @@ void ADroneFormationBase::relinkDrones() {
 	auto newDroneCount = Columns * Rows;
 	newDrones.Reserve(newDroneCount);
 
-	// rebuild links
+	// rebuild links and position them in relative grid
 	Links.Empty();
 	for (auto i = 0; i < newDroneCount; ++i) {
 		UDroneToFormationLink* link = NewObject<UDroneToFormationLink>(this);
@@ -154,6 +161,7 @@ void ADroneFormationBase::relinkDrones() {
 		auto dist = TNumericLimits<float>::Max();
 		ARaceFormationDroneBase* reassignedDrone = NULL;
 
+		// loop through drones, assign each to the closest position
 		for (auto n = 0; n < Drones.Num(); ++n) {
 			auto droneLoc = Drones[n]->GetActorLocation();
 			auto thisDist = FVector::Dist(loc, droneLoc);
@@ -169,7 +177,7 @@ void ADroneFormationBase::relinkDrones() {
 			Links[i]->Drone = reassignedDrone;
 			Drones.Remove(reassignedDrone);
 			newDrones.Add(reassignedDrone);
-			OnReassignDrone.Broadcast(reassignedDrone, Links[i]->Position);
+			OnReassignDrone.Broadcast(reassignedDrone, Links[i]->Position); // this will be used to reassign the drones in the blueprint that inherits from this class
 		}
 	}
 
@@ -182,17 +190,27 @@ void ADroneFormationBase::relinkDrones() {
 }
 
 void ADroneFormationBase::LinkDrone(ARaceFormationDroneBase* drone, UDroneToFormationLink* link) {
+	
 	link->Drone = drone;
 	if (!Drones.Contains(drone)) {
 		Drones.Add(drone);
+		Count++;
+
+			// update index with drone info
+		for (auto& i : Index) {
+			if (i.Marker == link->Position) {
+				i.Drone = link->Drone;
+			}
+		}
 	}
+
+
 }
 
-
-ARaceFormationDroneBase* ADroneFormationBase::GetClosestDroneInAttackPosition(AActor* target, bool& success) {
+ARaceFormationDroneBase* ADroneFormationBase::GetClosestDroneInAttackPosition( bool& success) {
 
 	// sanity check
-	if (!target) {
+	if (!Target) {
 		return NULL;
 	}
 
@@ -203,11 +221,11 @@ ARaceFormationDroneBase* ADroneFormationBase::GetClosestDroneInAttackPosition(AA
 
 	for (auto d : Drones) {
 
-		float yDist = UX::GetYDistBetweenActors(target, d);
+		float yDist = UX::GetYDistBetweenActors(Target, d);
 
 		// is yDist within threshold?
 		if (yDist < AttackTriggerMinYDist) {
-			float dist = target->GetDistanceTo(d);
+			float dist = Target->GetDistanceTo(d);
 			if (dist < previousShortestDist) {
 				previousShortestDist = dist;
 				drone = d;
@@ -238,13 +256,13 @@ bool ADroneFormationBase::isThereADesignatedDrone() {
 	return false;
 }
 
-bool ADroneFormationBase::AssignClosestDroneIfNoneAreDesignated(AActor* target) {
+bool ADroneFormationBase::AssignClosestDroneIfNoneAreDesignated() {
 	if (!isThereADesignatedDrone()) {
 		bool success = false;
-		auto closest = GetClosestDroneInAttackPosition(target, success);
+		auto closest = GetClosestDroneInAttackPosition(success);
 		if (success) {
 			closest->DesignatedDrone = true;
-			closest->Target = target;
+			closest->Target = Target;
 			return true;
 		}
 	}
@@ -253,9 +271,46 @@ bool ADroneFormationBase::AssignClosestDroneIfNoneAreDesignated(AActor* target) 
 }
 
 void ADroneFormationBase::cleanDestroyedDrones() {
-	for (auto d : Drones) {
+
+
+
+	for (int32 n = Drones.Num(); n-- > 0;) {
+		auto d = Drones[n];
 		if (d->IsPendingKill()) {
-			Drones.Remove(d);
+  			Drones.RemoveAt(n);
+			Count--;
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,FString::Printf(TEXT("Count: %i"), Count));
+
+			// update index with drone info
+			for (auto i : Index) {
+				if (i.Drone == d) {
+					i.Drone = NULL;
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Set destroyed drone index to NULL!"));
+				}
+			}
+
+			// recalculate column sizes
+			TArray<int32> sizes;
+			sizes.AddZeroed(Columns);
+
+			// recalculate column sizes, this is used for gameplay decisions
+			for (auto i : Index) {
+				if (i.Drone) {
+					if(!i.Drone->IsPendingKill()){
+						//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("Drone column index: %i, Row: %i"), i.Column, i.Row));
+						sizes[i.Column]++;
+					}
+				}
+			}
+
+			if (DrawDebug) {
+				for (int32 i = 0; i < sizes.Num(); ++i) {
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
+						FString::Printf(TEXT("Col: %i, size: %i"), i, sizes[i]));
+				}
+			}
 		}
 	}
+
 }
