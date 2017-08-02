@@ -11,6 +11,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridUpdate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReleaseDrone, ARaceFormationDroneBase*, Drone);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFreeSlotAvailable, UDroneToFormationLink*, Link);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnReassignDrone, ARaceFormationDroneBase*, Drone, USceneComponent*, position);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDroneDestroyed, USceneComponent*, Marker);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllDronesDestroyed);
 
 
 USTRUCT(BlueprintType)
@@ -30,6 +32,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Logic")
 	int32 Column = 0;
 
+	/** Position that a drone attempts to stay at. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Logic")
 	USceneComponent* Marker = NULL;
 
@@ -122,8 +125,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<UDroneToFormationLink*> Links;
 
+	/** Keep count of how many drones are in each column. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<int32> ColumnCounts;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Events
+	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
 	FOnGridUpdate OnGridUpdate;
@@ -136,6 +144,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
 	FOnFreeSlotAvailable OnFreeSlotAvailable;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
+	FOnDroneDestroyed OnDroneDestroyed;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
+	FOnAllDronesDestroyed OnAllDronesDestroyed;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Link Drone", Keywords = "Links a given actor as a drone to the formation."), Category = "MachRace|Gameplay")
 	void LinkDrone(ARaceFormationDroneBase* drone, UDroneToFormationLink* link);

@@ -73,11 +73,49 @@ void ADroneFormationBase::detectAndProcessChanges() {
 	}
 }
 
+void ADroneFormationBase::realignGrid() {
+
+	// allocate new positions array
+	auto previous = Positions;
+
+	auto grid = getFormationGrid();
+
+	// sanity check
+	if (grid.Num() != Columns*Rows) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
+			FString::Printf(TEXT("DroneFormation system error, grid sizing mismatch. %i != %i"), Columns*Rows, grid.Num())
+		);
+		return;
+	}
+
+	// clear old components
+	auto components = GetComponentsByTag(USceneComponent::StaticClass(), gridMarkerTagName);
+	for (auto r : components) {
+		RemoveOwnedComponent(r);
+	}
+
+	Positions.Empty();
+
+	// adds new positioning components using grid index
+	// components are used to align drones to the grid
+	for (auto& idx : grid) {
+		auto c = NewObject<USceneComponent>(this);
+		c->RegisterComponent();
+		c->SetRelativeLocation(idx.Vector);
+		c->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		c->ComponentTags.Add(gridMarkerTagName);
+		Positions.Add(c);
+		idx.Marker = c;
+	}
+
+	Index = grid;
+
+	// relink drones to new positions
+	relinkDrones();
+}
+
 /** Generates new rectangular grid of vectors and col/row positions */
 TArray<FDroneFormationSquareIndex> ADroneFormationBase::getFormationGrid(){
-
-	TArray<FVector> grid;
-	grid.Reserve(Columns*Rows);
 
 	TArray<FDroneFormationSquareIndex> newIndex;
 	newIndex.Reserve(Columns*Rows);
@@ -97,47 +135,6 @@ TArray<FDroneFormationSquareIndex> ADroneFormationBase::getFormationGrid(){
 	}
 
 	return newIndex;
-}
-
-void ADroneFormationBase::realignGrid(){
-
-	// allocate new positions array
-	auto previous = Positions;
-
-	auto grid = getFormationGrid();
-
-	// sanity check
-	if(grid.Num() != Columns*Rows){
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, 
-			FString::Printf(TEXT("DroneFormation system error, grid sizing mismatch. %i != %i"), Columns*Rows, grid.Num())
-		);
-		return;
-	}
-
-	// clear old components
-	auto components = GetComponentsByTag(USceneComponent::StaticClass(), gridMarkerTagName);
-	for (auto r : components) {
-		RemoveOwnedComponent(r);
-	}
-
-	Positions.Empty();
-
-	// adds new positioning components using grid index
-	// components are used to align drones to the grid
-	for	( auto& idx : grid ){
-		auto c = NewObject<USceneComponent>(this);
-		c->RegisterComponent();
-		c->SetRelativeLocation(idx.Vector);
-		c->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-		c->ComponentTags.Add(gridMarkerTagName);
-		Positions.Add(c);
-		idx.Marker = c;
-	}
-
-	Index = grid;
-
-	// relink drones to new positions
-	relinkDrones();
 }
 
 void ADroneFormationBase::relinkDrones() {
@@ -166,6 +163,7 @@ void ADroneFormationBase::relinkDrones() {
 			auto droneLoc = Drones[n]->GetActorLocation();
 			auto thisDist = FVector::Dist(loc, droneLoc);
 
+			// is this one closer than the last one?
 			if (thisDist < dist) {
 				dist = thisDist;
 				reassignedDrone = Drones[n];
@@ -178,6 +176,13 @@ void ADroneFormationBase::relinkDrones() {
 			Drones.Remove(reassignedDrone);
 			newDrones.Add(reassignedDrone);
 			OnReassignDrone.Broadcast(reassignedDrone, Links[i]->Position); // this will be used to reassign the drones in the blueprint that inherits from this class
+
+			// link reassigned drone to the new index position
+			for (auto& idx : Index) {
+				if (idx.Marker == Links[i]->Position) {
+					idx.Drone = reassignedDrone;
+				}
+			}
 		}
 	}
 
@@ -201,9 +206,12 @@ void ADroneFormationBase::LinkDrone(ARaceFormationDroneBase* drone, UDroneToForm
 			if (i.Marker == link->Position) {
 				i.Drone = link->Drone;
 
+				// are column counts empty? this is usually the case on first drone link
 				if (ColumnCounts.Num() <= 0) {
 					ColumnCounts.AddZeroed(Columns);
 				}
+
+				// count drone by its column
 				ColumnCounts[i.Column]++;
 			}
 		}
@@ -283,13 +291,21 @@ void ADroneFormationBase::cleanDestroyedDrones() {
   			Drones.RemoveAt(n);
 			Count--;
 
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,FString::Printf(TEXT("Count: %i"), Count));
+			if (Count <= 0) {
+				OnAllDronesDestroyed.Broadcast();
+			}
+
+			if (DrawDebug) {
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Formation Count: %i"), Count));
+			}
 
 			// update index with drone info
 			for (auto i : Index) {
 				if (i.Drone == d) {
 					i.Drone = NULL;
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Set destroyed drone index to NULL!"));
+					//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Set destroyed drone index to NULL!"));
+
+					OnDroneDestroyed.Broadcast(i.Marker);
 				}
 			}
 
