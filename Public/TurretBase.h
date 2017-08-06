@@ -6,7 +6,7 @@
 #include "TurretBase.generated.h"
 
 UCLASS()
-class MACHRACE_API ATurretBase : public AActor
+class MACHRACE_API ATurretBase : public ARaceActorBase
 {
 	GENERATED_BODY()
 

@@ -146,8 +146,6 @@ UPrimitiveComponent* ARaceShipBase::getRootAsPrimitive(bool& success) {
 
 void ARaceShipBase::changeSpeed(float by) {
 
-	//auto absV = FMath::Abs(forwardVelocity);
-
 	bool rootOk = false;
 	auto physVol = getRootAsPrimitive(rootOk);
 

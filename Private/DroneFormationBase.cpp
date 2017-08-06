@@ -327,11 +327,61 @@ void ADroneFormationBase::cleanDestroyedDrones() {
 			ColumnCounts = sizes;
 
 			if (DrawDebug) {
-				for (int32 i = 0; i < sizes.Num(); ++i) {
+				for (int32 i = 0; i < ColumnCounts.Num(); ++i) {
 					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
-						FString::Printf(TEXT("Col: %i, size: %i"), i, sizes[i]));
+						FString::Printf(TEXT("Col: %i, size: %i"), i, ColumnCounts[i]));
 				}
 			}
 		}
 	}
+}
+
+int32 ADroneFormationBase::findLargestColumnSize() {
+
+	// find largest column count
+	int32 largest = 0;
+	for (int32 colSize : ColumnCounts) {
+		if (colSize > largest) {
+			largest = colSize;
+		}
+	}
+
+	if (DrawDebug) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Largest col: %i"), largest));
+	}
+
+	return largest;
+}
+
+float ADroneFormationBase::FindLogicalFormationOffset() {
+
+	// sanity check
+	if (Index.Num() <= 0) {
+		return 0;
+	}
+
+	// finds longest column size
+	int32 longestDroneCol = findLargestColumnSize();
+
+	// select random column from the set of longest columns
+	TArray<int32> largestColIndexes;
+
+	for (int32 i = 0; i < ColumnCounts.Num(); ++i) {
+		if (ColumnCounts[i] == longestDroneCol) {
+			largestColIndexes.Add(i);
+		}
+	}
+
+	// select random
+	int32 randIdx = largestColIndexes[FMath::RandRange(0, largestColIndexes.Num() - 1)];
+
+	// traverse indices, till we find it
+	for (auto idx : Index) {
+		if (idx.Column == randIdx){
+			return idx.Marker->RelativeLocation.Y;
+		}
+	}
+
+	// this should never happen, but compiler complains
+	return 0;
 }

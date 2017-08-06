@@ -83,6 +83,7 @@ private:
 	void relinkDrones();
 	bool isThereADesignatedDrone();
 	void cleanDestroyedDrones();
+	int32 findLargestColumnSize();
 
 public:	
 	// Called every frame
@@ -105,10 +106,10 @@ public:
 	bool EnableSpawns = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	int32 Columns = 5; // Y
+	int32 Columns = 0; // Y
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	int32 Rows = 5; // X
+	int32 Rows = 0; // X
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	int32 Count = 0; 
@@ -151,17 +152,27 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
 	FOnAllDronesDestroyed OnAllDronesDestroyed;
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Link Drone", Keywords = "Links a given actor as a drone to the formation."), Category = "MachRace|Gameplay")
+
+	//////////////////////////////////////////////////////////////////////////
+	// Utility and other functions
+	//////////////////////////////////////////////////////////////////////////
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Link Drone", Keywords = "Links a given actor as a drone to the formation."), Category = "MachRace|System")
 	void LinkDrone(ARaceFormationDroneBase* drone, UDroneToFormationLink* link);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Attack Ready Drone", Keywords = "Gets drone that is in alignment to attack."), Category = "MachRace|Gameplay")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Attack Ready Drone", Keywords = "Gets drone that is in alignment to attack."), Category = "MachRace|System")
 	ARaceFormationDroneBase* GetClosestDroneInAttackPosition(bool& success);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Assign closest drone.", Keywords = "Assigns closest drone as designated (attack) drone, if there is one."), Category = "MachRace|Gameplay")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Assign closest drone.", Keywords = "Assigns closest drone as designated (attack) drone, if there is one."), Category = "MachRace|System")
 	bool AssignClosestDroneIfNoneAreDesignated();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Formation Count", Keywords = "Get total count of slots in the formation."), Category = "MachRace|Gameplay")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Formation Count", Keywords = "Get total count of slots in the formation."), Category = "MachRace|System")
 	int32 GetFormationCount() {
 		return Rows * Columns;
 	}
+
+	/** This attempts to find an offset so the drone formation is position in front of player, with the maximum amount of drones in a column. */
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Find offset.", Keywords = "Finds an offset (from the center of formation) to the random longest column of drones."), Category = "MachRace|Gameplay")
+	float FindLogicalFormationOffset();
+
 };
