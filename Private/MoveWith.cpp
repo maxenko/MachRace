@@ -21,6 +21,8 @@ void UMoveWith::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+
+	SetTickGroup(TG_PrePhysics);
 	
 }
 
@@ -42,15 +44,19 @@ void UMoveWith::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 					FVector ownerLoc = owner->GetActorLocation();
 					FVector desiredLoc = Target->GetActorLocation() + Offset;
 
-					float currX = FMath::FInterpTo(ownerLoc.X, desiredLoc.X, DeltaTime, FollowSpeed.X);
-					float currY = FMath::FInterpTo(ownerLoc.Y, desiredLoc.Y, DeltaTime, FollowSpeed.Y);
-					float currZ = FMath::FInterpTo(ownerLoc.Z, desiredLoc.Z, DeltaTime, FollowSpeed.Z);
+					float x = FMath::FInterpTo(ownerLoc.X, desiredLoc.X, DeltaTime, FollowSpeed.X);
+					float y = FMath::FInterpTo(ownerLoc.Y, desiredLoc.Y, DeltaTime, FollowSpeed.Y);
+					float z = FMath::FInterpTo(ownerLoc.Z, desiredLoc.Z, DeltaTime, FollowSpeed.Z);
 
-					FVector newLoc = FVector(currX, currY, currZ);
+					FVector newLoc = FVector(
+						FollowSpeed.X > 0 ? x : ownerLoc.X, //loc.X + Offset.X,//
+						FollowSpeed.Y > 0 ? y : ownerLoc.Y,
+						FollowSpeed.Z > 0 ? z : ownerLoc.Z
+					);
 
 					owner->SetActorLocation(newLoc);
 
-					//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("x: %f, y: %f, z: %f"), currX, currY, currZ));
+					//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("x: %f, y: %f, z: %f"), x, y, z));
 
 				}
 			}

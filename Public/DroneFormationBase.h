@@ -57,7 +57,7 @@ public:
 
 
 UCLASS()
-class MACHRACE_API ADroneFormationBase : public AActor {
+class MACHRACE_API ADroneFormationBase : public ARaceActorBase {
 	GENERATED_BODY()
 	
 public:	
@@ -111,7 +111,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	int32 Rows = 0; // X
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System")
 	int32 Count = 0; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")

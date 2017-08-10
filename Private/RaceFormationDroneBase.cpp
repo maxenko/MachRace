@@ -17,7 +17,7 @@ void ARaceFormationDroneBase::BeginPlay(){
 
 	// set up wobble
 	auto wobbleFrequency = FMath::FRandRange(WobbleRandomRange.X, WobbleRandomRange.Y);
-	GetWorldTimerManager().SetTimer(wobbleTimer, this, &ARaceFormationDroneBase::generateRandomOffset, wobbleFrequency, true, 2.0);
+	GetWorldTimerManager().SetTimer(wobbleTimer, this, &ARaceFormationDroneBase::generateRandomOffset, wobbleFrequency, true, 2.0); // reset random offset to new one every N seconds
 
 	// set up ship detection (which triggers firing at the ship)
 	//GetWorldTimerManager().SetTimer(scanForTargetTimer, this, &ARaceFormationDroneBase::scanForTarget, ScanInterval, true, 0.0);
@@ -32,6 +32,7 @@ void ARaceFormationDroneBase::moveTo(FVector to, float delta, FVector speed) {
 	auto z = FMath::FInterpTo(currentLoc.Z, to.Z, delta, speed.Z);
 
 	SetActorLocation(FVector(x, y, z));
+	//SetActorLocation(FVector(to.X, to.Y, to.Z));
 }
 
 // Called every frame
