@@ -77,6 +77,8 @@ private:
 	int32 previousColumns = 0;
 	int32 previousRows = 0;
 
+	TArray<UDroneToFormationLink*> toBeSpawned;
+
 	void detectAndProcessChanges();
 	void realignGrid();
 	void drawDebug();
@@ -84,6 +86,9 @@ private:
 	bool isThereADesignatedDrone();
 	void cleanDestroyedDrones();
 	int32 findLargestColumnSize();
+	FTimerHandle spawnTimer;
+
+	void broadcastDroneSpawn();
 
 public:	
 	// Called every frame
@@ -129,6 +134,9 @@ public:
 	/** Keep count of how many drones are in each column. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<int32> ColumnCounts;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	float DroneSpawnFrequence = .2;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Events

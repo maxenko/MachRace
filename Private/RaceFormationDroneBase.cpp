@@ -17,7 +17,7 @@ void ARaceFormationDroneBase::BeginPlay(){
 
 	// set up wobble
 	auto wobbleFrequency = FMath::FRandRange(WobbleRandomRange.X, WobbleRandomRange.Y);
-	GetWorldTimerManager().SetTimer(wobbleTimer, this, &ARaceFormationDroneBase::generateRandomOffset, wobbleFrequency, true, 2.0); // reset random offset to new one every N seconds
+	//GetWorldTimerManager().SetTimer(wobbleTimer, this, &ARaceFormationDroneBase::generateRandomOffset, wobbleFrequency, true, 2.0); // reset random offset to new one every N seconds
 
 	// set up ship detection (which triggers firing at the ship)
 	//GetWorldTimerManager().SetTimer(scanForTargetTimer, this, &ARaceFormationDroneBase::scanForTarget, ScanInterval, true, 0.0);
@@ -31,8 +31,7 @@ void ARaceFormationDroneBase::moveTo(FVector to, float delta, FVector speed) {
 	auto y = FMath::FInterpTo(currentLoc.Y, to.Y, delta, speed.Y);
 	auto z = FMath::FInterpTo(currentLoc.Z, to.Z, delta, speed.Z);
 
-	SetActorLocation(FVector(x, y, z));
-	//SetActorLocation(FVector(to.X, to.Y, to.Z));
+	SetActorLocation(FVector(to.X, y, z));
 }
 
 // Called every frame
@@ -55,7 +54,7 @@ void ARaceFormationDroneBase::Tick(float DeltaTime){
 
 		if (Position) {
 			auto offset = Wobble ? wobbleOffset : FVector::ZeroVector;
-			moveTo(Position->GetComponentLocation() + offset, DeltaTime, FollowSpeed);
+			moveTo(Position->GetComponentLocation() + wobbleOffset, DeltaTime, FollowSpeed);
 		}
 	}
 
@@ -64,7 +63,6 @@ void ARaceFormationDroneBase::Tick(float DeltaTime){
 		OnDesignated.Broadcast(DesignatedDrone);
 		previousDesignated = DesignatedDrone;
 	}
-	
 }
 
 void  ARaceFormationDroneBase::AssignPosition(USceneComponent* position) {

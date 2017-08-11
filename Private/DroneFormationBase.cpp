@@ -16,6 +16,9 @@ ADroneFormationBase::ADroneFormationBase(){
 // Called when the game starts or when spawned
 void ADroneFormationBase::BeginPlay(){
 	Super::BeginPlay();
+
+	GetWorldTimerManager().SetTimer(spawnTimer, this, &ADroneFormationBase::broadcastDroneSpawn, DroneSpawnFrequence, true, 2.0); // issue spawns every DroneSpawnFrequence seconds
+
 }
 
 // Called every frame
@@ -35,9 +38,10 @@ void ADroneFormationBase::Tick(float DeltaTime){
 	// if spawns are enabled, fill the empty slots in the formation
 	if (EnableSpawns) {
 		for (auto link : Links) {
+
 			if (link->Drone == NULL) {
-				OnFreeSlotAvailable.Broadcast(link);
-				break; // one per frame, to throttle drone spawns
+				// add to spawn queue
+				toBeSpawned.AddUnique(link);
 			}
 		}
 	}
@@ -384,4 +388,12 @@ float ADroneFormationBase::FindLogicalFormationOffset() {
 
 	// this should never happen, but compiler complains
 	return 0;
+}
+
+void ADroneFormationBase::broadcastDroneSpawn(){
+	if (toBeSpawned.Num() > 0) {
+
+		OnFreeSlotAvailable.Broadcast(toBeSpawned[0]);
+		toBeSpawned.RemoveAt(0);
+	}
 }
