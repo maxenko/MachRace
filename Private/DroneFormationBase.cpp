@@ -18,7 +18,6 @@ void ADroneFormationBase::BeginPlay(){
 	Super::BeginPlay();
 
 	GetWorldTimerManager().SetTimer(spawnTimer, this, &ADroneFormationBase::broadcastDroneSpawn, DroneSpawnFrequence, true, 2.0); // issue spawns every DroneSpawnFrequence seconds
-
 }
 
 // Called every frame
@@ -250,6 +249,51 @@ ARaceFormationDroneBase* ADroneFormationBase::GetClosestDroneInAttackPosition( b
 	}
 
 	return drone;
+}
+
+ARaceFormationDroneBase* ADroneFormationBase::PickRandomDroneToDesignate(bool& success) {
+
+	// pick random column that has drones
+	auto hasColumnWithDrones = ColumnCounts.ContainsByPredicate([](int32 cnt) {return cnt > 0; });
+
+	if (!hasColumnWithDrones) {
+		success = false;
+		return NULL;
+	}
+
+	TArray<int32> nonEmptyColIndexes;
+
+	for (int32 i = 0; i < ColumnCounts.Num(); ++i) {
+		if (ColumnCounts[i] > 0) {
+			nonEmptyColIndexes.Add(i);
+		}
+	}
+
+	int32 randomNonEmptyCol = FMath::RandRange(0, nonEmptyColIndexes.Num() - 1);
+
+	ARaceFormationDroneBase* pickedDrone = NULL;
+
+	for (auto idx : Index) {
+
+		if (idx.Column != randomNonEmptyCol) {
+			continue;
+		}
+
+		if (IsValid(idx.Drone)) {
+
+			if (pickedDrone == NULL) {
+				pickedDrone = idx.Drone;
+			}
+			else {
+				if (pickedDrone->GetActorLocation().X < idx.Drone->GetActorLocation().X) {
+					pickedDrone = idx.Drone;
+				}
+			}
+		}
+	}
+
+	success = true;
+	return pickedDrone;
 }
 
 

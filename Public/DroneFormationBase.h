@@ -183,4 +183,6 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Find offset.", Keywords = "Finds an offset (from the center of formation) to the random longest column of drones."), Category = "MachRace|Gameplay")
 	float FindLogicalFormationOffset();
 
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Pick random drone to designate.", Keywords = "Picks a random drone at the tail of one of the columns, in columns that have drones."), Category = "MachRace|Gameplay")
+	ARaceFormationDroneBase* PickRandomDroneToDesignate(bool& success);
 };
