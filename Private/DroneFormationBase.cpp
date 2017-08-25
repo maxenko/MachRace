@@ -437,7 +437,20 @@ float ADroneFormationBase::FindLogicalFormationOffset() {
 void ADroneFormationBase::broadcastDroneSpawn(){
 	if (toBeSpawned.Num() > 0) {
 
-		OnFreeSlotAvailable.Broadcast(toBeSpawned[0]);
+		auto link = toBeSpawned[0];
+
+		int32 c = -1;
+		int32 r = -1;
+
+		for (auto i : Index) {
+			if (i.Marker == link->Position) {
+				c = i.Column;
+				r = i.Row;
+				break;
+			}
+		}
+
+		OnFreeSlotAvailable.Broadcast(link, c, r);
 		toBeSpawned.RemoveAt(0);
 	}
 }

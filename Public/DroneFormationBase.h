@@ -9,7 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridUpdate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReleaseDrone, ARaceFormationDroneBase*, Drone);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFreeSlotAvailable, UDroneToFormationLink*, Link);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnFreeSlotAvailable, UDroneToFormationLink*, Link, int32, column, int32, row);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnReassignDrone, ARaceFormationDroneBase*, Drone, USceneComponent*, position);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDroneDestroyed, USceneComponent*, Marker);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllDronesDestroyed);
@@ -122,12 +122,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<USceneComponent*> Positions;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
+	/* Grid index, used by game logic for drone positions / indexes within grid. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|Gameplay")
 	TArray<FDroneFormationSquareIndex> Index;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<ARaceFormationDroneBase*> Drones;
 
+	/* Actual links that link drones to the formation. Used for formation decisions when drones are abandoned or reassigned to new formation. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<UDroneToFormationLink*> Links;
 
@@ -135,6 +137,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<int32> ColumnCounts;
 
+	/* Delay between drone spawns when empty slots are available. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float DroneSpawnFrequence = .2;
 
