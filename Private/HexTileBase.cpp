@@ -203,8 +203,8 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 
 	} else if (state->Stage == GameStage::InfiniteHexBoss) {
 
-		d.Decelerators = .05;
-		d.Accelerators = .05;
+		d.Decelerators = .00;
+		d.Accelerators = .00;
 		d.Collectables = .005;
 		d.ICBM = 0.0;
 		d.Column = 0.0;

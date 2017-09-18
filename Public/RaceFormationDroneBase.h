@@ -98,6 +98,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float ScanInterval = .3;
 
+	/* Designated if the drone has been marked as dead. Which might precede DestroyActor. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool Dead = false;
+
 	/** Controls when target can be fired on, based on each axis individual distance */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	FVector FireTriggerDistances = FVector(3000, 150, 150);

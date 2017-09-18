@@ -38,15 +38,34 @@ void ADroneFormationBase::Tick(float DeltaTime){
 	if (EnableSpawns) {
 		for (auto link : Links) {
 
-			if (link->Drone == NULL) {
+			const auto drone = link->Drone;
+				
+			if ( !IsValid( drone ) ){
 				// add to spawn queue
 				toBeSpawned.AddUnique(link);
 			}
 		}
+
+
 	}
 
 	// clean up null refs
 	cleanDestroyedDrones();
+}
+
+int32 ADroneFormationBase::getEmptySlotsCount() {
+	
+	int32 count = 0;
+	
+	for (auto link : Links) {
+
+		const auto drone = link->Drone;
+		if (!IsValid(drone)) {
+			++count;
+		}
+	}
+
+	return count;
 }
 
 void ADroneFormationBase::drawDebug() {
@@ -57,12 +76,27 @@ void ADroneFormationBase::drawDebug() {
 		return;
 	}
 
-	for ( USceneComponent* p : Positions ){
+	for ( USceneComponent* p : Positions ) {
 		auto loc = p->GetComponentLocation();
 		DrawDebugPoint(w, loc, 20, FColor::Red, false, .08);
 	}
 
-	DrawDebugBox(w, GetActorLocation(), Bounds, FColor::Red, false, .08,0,3.0);
+	DrawDebugBox(w, GetActorLocation(), Bounds, FColor::Red, false, .08, 0, 3.0);
+}
+
+void ADroneFormationBase::updateColumnCounts() {
+	TArray<int32> counts;
+	counts.AddZeroed(Columns);
+
+	for (auto idx : Index) {
+		if (IsValid(idx.Drone)) {
+			if (!idx.Drone->Dead) {
+				counts[idx.Column]++;
+			}
+		}
+	}
+
+	ColumnCounts = counts;
 }
 
 void ADroneFormationBase::detectAndProcessChanges() {
@@ -200,11 +234,12 @@ void ADroneFormationBase::relinkDrones() {
 void ADroneFormationBase::LinkDrone(ARaceFormationDroneBase* drone, UDroneToFormationLink* link) {
 	
 	link->Drone = drone;
-	if (!Drones.Contains(drone)) {
+
+	if (!Drones.Contains(drone) && !link->Drone->Dead) {
 		Drones.Add(drone);
 		Count++;
 
-			// update index with drone info
+		// update index with drone info
 		for (auto& i : Index) {
 			if (i.Marker == link->Position) {
 				i.Drone = link->Drone;
@@ -252,6 +287,8 @@ ARaceFormationDroneBase* ADroneFormationBase::GetClosestDroneInAttackPosition( b
 }
 
 ARaceFormationDroneBase* ADroneFormationBase::PickRandomDroneToDesignate(bool& success) {
+	
+	updateColumnCounts();
 
 	// pick random column that has drones
 	auto hasColumnWithDrones = ColumnCounts.ContainsByPredicate([](int32 cnt) {return cnt > 0; });
@@ -269,6 +306,7 @@ ARaceFormationDroneBase* ADroneFormationBase::PickRandomDroneToDesignate(bool& s
 		}
 	}
 
+	// pick the closest drone
 	int32 randomNonEmptyCol = FMath::RandRange(0, nonEmptyColIndexes.Num() - 1);
 
 	ARaceFormationDroneBase* pickedDrone = NULL;
@@ -281,18 +319,24 @@ ARaceFormationDroneBase* ADroneFormationBase::PickRandomDroneToDesignate(bool& s
 
 		if (IsValid(idx.Drone)) {
 
-			if (pickedDrone == NULL) {
-				pickedDrone = idx.Drone;
-			}
-			else {
-				if (pickedDrone->GetActorLocation().X < idx.Drone->GetActorLocation().X) {
+			if (!idx.Drone->Dead) {
+
+				// if nothing has been picked, assign first available drone
+				if (pickedDrone == NULL) { 
 					pickedDrone = idx.Drone;
+				}
+				else {
+
+					// if it has been picked, assign again only if current loop drone is closer in X
+					if (pickedDrone->GetActorLocation().X < idx.Drone->GetActorLocation().X) {
+						pickedDrone = idx.Drone;
+					}
 				}
 			}
 		}
 	}
 
-	success = true;
+	success = pickedDrone == NULL ? false : true;
 	return pickedDrone;
 }
 

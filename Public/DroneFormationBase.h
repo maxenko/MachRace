@@ -87,8 +87,10 @@ private:
 	void cleanDestroyedDrones();
 	int32 findLargestColumnSize();
 	FTimerHandle spawnTimer;
+	void updateColumnCounts();
 
 	void broadcastDroneSpawn();
+	int32 getEmptySlotsCount(); // figures out how many drones are missing from full formation count
 
 public:	
 	// Called every frame
@@ -180,6 +182,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Formation Count", Keywords = "Get total count of slots in the formation."), Category = "MachRace|System")
 	int32 GetFormationCount() {
 		return Rows * Columns;
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get open slot count", Keywords = "Get total number of slots in the formation that do not have drones assigned."), Category = "MachRace|System")
+	int32 GetOpenSlotCount() {
+		return this->getEmptySlotsCount();
 	}
 
 	/** This attempts to find an offset so the drone formation is position in front of player, with the maximum amount of drones in a column. */
