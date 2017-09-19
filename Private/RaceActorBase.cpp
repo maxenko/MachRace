@@ -37,8 +37,22 @@ void ARaceActorBase::Tick( float DeltaTime ){
 }
 
 // Called every frame
-ARaceGameStateBase* ARaceActorBase::GetState(){
+ARaceGameStateBase* ARaceActorBase::GetState() {
+	return UCustomExtensions::GetRaceState(GetWorld());
+}
+
+
+// Called every frame
+ARaceGameStateBase* ARaceActorBase::GetStateSafe(bool &success){
 	State = UCustomExtensions::GetRaceState(GetWorld());
+
+	if (!State) {
+		success = false;
+	}
+	else {
+		success = true;
+	}
+
 	return State;
 }
 
