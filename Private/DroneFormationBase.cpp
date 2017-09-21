@@ -286,60 +286,37 @@ ARaceFormationDroneBase* ADroneFormationBase::GetClosestDroneInAttackPosition( b
 	return drone;
 }
 
-ARaceFormationDroneBase* ADroneFormationBase::PickRandomDroneToDesignate(bool& success) {
+ARaceFormationDroneBase* ADroneFormationBase::PickRandomDroneToDesignateV2(bool& success) {
 	
-	updateColumnCounts();
-
-	// pick random column that has drones
-	auto hasColumnWithDrones = ColumnCounts.ContainsByPredicate([](int32 cnt) {return cnt > 0; });
-
-	if (!hasColumnWithDrones) {
+	if (Drones.Num() <= 0) {
 		success = false;
 		return NULL;
 	}
+	
+	// make sure all front drones are up to date
+	RediscoverFrontFacingDrones();
 
-	TArray<int32> nonEmptyColIndexes;
+	TArray<ARaceFormationDroneBase*> designatableDrones;
 
-	for (int32 i = 0; i < ColumnCounts.Num(); ++i) {
-		if (ColumnCounts[i] > 0) {
-			nonEmptyColIndexes.Add(i);
-		}
-	}
-
-	// pick the closest drone
-	int32 randomNonEmptyCol = FMath::RandRange(0, nonEmptyColIndexes.Num() - 1);
-
-	ARaceFormationDroneBase* pickedDrone = NULL;
-
-	for (auto idx : Index) {
-
-		if (idx.Column != randomNonEmptyCol) {
-			continue;
-		}
-
-		if (IsValid(idx.Drone)) {
-
-			if (!idx.Drone->Dead) {
-
-				// if nothing has been picked, assign first available drone
-				if (pickedDrone == NULL) { 
-					pickedDrone = idx.Drone;
-				}
-				else {
-
-					// if it has been picked, assign again only if current loop drone is closer in X
-					if (pickedDrone->GetActorLocation().X < idx.Drone->GetActorLocation().X) {
-						pickedDrone = idx.Drone;
-					}
-				}
+	
+	for (auto d : Drones) {
+		if (IsValid(d)) {
+			if (d->Designatable && d->FrontDrone) {
+				designatableDrones.Add(d);
 			}
 		}
 	}
 
-	success = pickedDrone == NULL ? false : true;
-	return pickedDrone;
-}
+	if (designatableDrones.Num() <= 0) {
+		success = false;
+		return NULL;
+	}
 
+	int32 rnd = FMath::RandRange(0, designatableDrones.Num() - 1);
+	success = true;
+	return designatableDrones[rnd];
+
+}
 
 bool ADroneFormationBase::isThereADesignatedDrone() {
 	for (auto d : Drones) {
@@ -497,4 +474,51 @@ void ADroneFormationBase::broadcastDroneSpawn(){
 		OnFreeSlotAvailable.Broadcast(link, c, r);
 		toBeSpawned.RemoveAt(0);
 	}
+}
+
+ARaceFormationDroneBase* ADroneFormationBase::findFrontFacingDrone(int32 colIdx) {
+
+	ARaceFormationDroneBase* fontDrone = NULL;
+	float droneXPosClosestToFront = GetActorLocation().X - Bounds.X * 50; // set position somewhere further ahead of the formation
+
+	for (auto& i : Index) {
+		
+		if (i.Drone) {
+			if ( IsValid(i.Drone) ) {
+				
+				if (i.Column == colIdx) {
+					float x = i.Drone->GetActorLocation().X;
+					if (x > droneXPosClosestToFront) {
+						fontDrone = i.Drone;
+						droneXPosClosestToFront = x;
+					}
+
+				} else {
+					continue;
+				}
+			}
+		}
+	}
+
+	return fontDrone;
+}
+
+void ADroneFormationBase::RediscoverFrontFacingDrones() {
+	// rest FrontDrone mark on all drones;
+	for (auto& i : Index) {
+		if (i.Drone) {
+			if (!i.Drone->IsPendingKill()) {
+				i.Drone->FrontDrone = false;
+			}
+		}
+	}
+
+	// assign front drone for each column
+	for (int32 c = 0; c < Columns; ++c) {
+		auto frontDrone = findFrontFacingDrone(c);
+		if (frontDrone) {
+			frontDrone->FrontDrone = true;
+		}
+	}
+
 }

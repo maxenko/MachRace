@@ -91,6 +91,8 @@ private:
 
 	void broadcastDroneSpawn();
 	int32 getEmptySlotsCount(); // figures out how many drones are missing from full formation count
+	ARaceFormationDroneBase* findFrontFacingDrone(int32 colIdx);
+	
 
 public:	
 	// Called every frame
@@ -193,6 +195,9 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Find offset.", Keywords = "Finds an offset (from the center of formation) to the random longest column of drones."), Category = "MachRace|Gameplay")
 	float FindLogicalFormationOffset();
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Pick random drone to designate.", Keywords = "Picks a random drone at the tail of one of the columns, in columns that have drones."), Category = "MachRace|Gameplay")
-	ARaceFormationDroneBase* PickRandomDroneToDesignate(bool& success);
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Random designatable drone.", Keywords = "Picks a random drone at the tail of one of the columns, in columns that have drones."), Category = "MachRace|Gameplay")
+	ARaceFormationDroneBase* PickRandomDroneToDesignateV2(bool& success);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Rediscover Front Facing drones", Keywords = "Find and mark front facing drones in each column."), Category = "MachRace|System")
+	void RediscoverFrontFacingDrones();
 };

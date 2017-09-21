@@ -50,17 +50,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	USceneComponent* Position;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	FVector AbandonOffset = FVector(0, 0, 10000);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	FVector FollowSpeed = FVector(10, 10, 10);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	FVector AbandonSpeed = FVector(10, 10, 100);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	AActor* Target = NULL;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool Designatable = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	bool FrontDrone = false;
 
 	/** Wither or not this drone is currently designated to shoot the player.
 	When Drone loses target, this property gets reset to false. Drone formation will
