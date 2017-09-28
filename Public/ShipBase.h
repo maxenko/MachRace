@@ -62,15 +62,18 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Reset Overcharge Count", Keywords = "Reset total count of usable overcharges."), Category = "MachRace|Gameplay")
 	int32 ResetOverchargeCount();
 
-	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Take Delta Damage.", Keywords = "Takes damage with delta multiplier applied."), Category = "MachRace|Gameplay")
+	void TakeDeltaDamage(float delta, float dmgAmount);
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FOnShieldCharge OnShieldCharge;
 
-	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FOnShieldDeplete OnShieldDeplete;
 
-	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable,  Category = "MachRace|Gameplay")
 	FOnShieldDepleted OnShieldDepleted;
 
-	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FOnShieldActivity OnShieldActivity;
 };

@@ -85,3 +85,10 @@ int32 AShipBase::ResetOverchargeCount() {
 	OverchargeTotal = 0;
 	return was;
 }
+
+void AShipBase::TakeDeltaDamage(float delta, float dmgAmount) {
+	
+	float dmg = delta*dmgAmount;
+
+	DepleteShield(dmg);
+}

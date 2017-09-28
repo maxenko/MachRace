@@ -84,7 +84,7 @@ void UDamageHandler::TickComponent( float DeltaTime, ELevelTick TickType, FActor
 
 void UDamageHandler::InitializeComponent() {
 
-	// set up delegates
+	// set up delegate for taking damage on the owner actor
 	HandleDamage.BindUFunction(this, TEXT("TakeDamage"));
 
 	AActor* a = GetOwner();

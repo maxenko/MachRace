@@ -6,9 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "RaceFormationDroneBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTargetAcquired, AActor*, Target);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTargetLost);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDesignated, bool, Designated);
+
 
 UCLASS()
 class MACHRACE_API ARaceFormationDroneBase : public ARaceActorBase
@@ -115,12 +114,6 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// Events
 	//////////////////////////////////////////////////////////////////////////
-
-	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
-	FOnTargetAcquired OnTargetAcquired;
-
-	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
-	FOnTargetLost OnTargetLost;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Events")
 	FOnDesignated OnDesignated;
