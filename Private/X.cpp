@@ -2,6 +2,7 @@
 
 #include "MachRace.h"
 #include "X.h"
+#include "Algo/Reverse.h"
 #include "Kismet/KismetMathLibrary.h"
 
 FVector UX::GetRootLinearVelocity(AActor* target) {
@@ -144,4 +145,20 @@ float UX::GetYDistBetweenActors(AActor* a, AActor* b) {
 	auto locB = FVector(0, b->GetActorLocation().Y, 0);
 
 	return FVector::Dist(locA, locB);
+}
+
+TArray<UObject*> UX::CullAtRandom(TArray<UObject*> a, int32 numberToCull) {
+
+	TArray<int32> randomIdxs;
+
+	for (int32 i = 0; i < numberToCull; ++i) {
+
+		if (a.Num() <= 0) {
+			break;
+		}
+
+		a.RemoveAt(FMath::RandRange(0, a.Num()-1));
+	}
+
+	return a;
 }

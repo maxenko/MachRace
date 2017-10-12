@@ -153,7 +153,7 @@ void ARaceGameStateBase::MaintainState() {
 	} else if (Stage == GameStage::InfiniteHexBoss) {
 
 		// did player reached level 3 speed?
-		if (speed >= Level3TriggerSpeed) {
+		if (speed >= Level3TriggerSpeed && !Level3Disable /* has developer disabled level3? */ ) {
 			SetStage(GameStage::Labyrinth);
 			OnLevel3Reached.Broadcast();
 			return;
@@ -165,7 +165,7 @@ void ARaceGameStateBase::MaintainState() {
 	if (Stage != GameStage::CitySubmerged) {
 
 		// did player reached level 4 speed?
-		if (speed >= Level4TriggerSpeed) {
+		if (speed >= Level4TriggerSpeed && !Level4Disable /* has developer disabled level4? */) {
 			SetStage(GameStage::CitySubmerged);
 			OnLevel4Reached.Broadcast();
 		}

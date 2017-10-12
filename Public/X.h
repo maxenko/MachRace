@@ -71,4 +71,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Y Dist Actors", Keywords = "Gets distance between two actors but only in Y axis."), Category = "Machrace|Utility")
 	static float GetYDistBetweenActors(AActor* a, AActor* b);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Cull Array", Keywords = "Takes an array, and removes number of items at random indexes."), Category = "Machrace|Utility")
+	static TArray<UObject*> CullAtRandom(TArray<UObject*> a, int32 numberToCull );
 };

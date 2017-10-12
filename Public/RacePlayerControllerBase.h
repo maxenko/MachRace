@@ -31,6 +31,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
 	bool InputLeftEnabled = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	bool DevHacksEnabled = false;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "GetState", Keywords = "Gets game specific state."), Category = "MachRace|Utility")
 	ARaceGameStateBase* GetState();
 

@@ -68,19 +68,23 @@ FVector ATurretBase::getTargetWorldPosition(bool& found) {
 
 	// get world location from possible cases
 	if(Target){
-		if (Target->GetClass()->IsChildOf(UStaticMeshComponent::StaticClass())) {
 
-			UStaticMeshComponent* sceneComponent = Cast<UStaticMeshComponent>(Target);
-			found = true;
-
-			return sceneComponent->GetComponentLocation();
-
-		} else if (Target->GetClass()->IsChildOf(AActor::StaticClass())) {
+		// actor? get its root component first
+		if (Target->GetClass()->IsChildOf(AActor::StaticClass())) {
 
 			AActor* a	= Cast<AActor>(Target);
 			found		= true;
 
 			return a->GetRootComponent()->GetComponentLocation();
+		}
+
+		// everything else, treat it like a scene component
+		else if (Target->GetClass()->IsChildOf(USceneComponent::StaticClass())) {
+
+			USceneComponent* c = Cast<USceneComponent>(Target);
+			found = true;
+
+			return c->GetComponentLocation();
 		}
 	}
 
