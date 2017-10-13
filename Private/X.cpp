@@ -149,16 +149,22 @@ float UX::GetYDistBetweenActors(AActor* a, AActor* b) {
 
 TArray<UObject*> UX::CullAtRandom(TArray<UObject*> a, int32 numberToCull) {
 
-	TArray<int32> randomIdxs;
+	// sanity check
+	if (numberToCull == 0 || a.Num() == 0) {
+		return a;
+	}
+
+	TArray<UObject*> b;
+	b.Append(a);
 
 	for (int32 i = 0; i < numberToCull; ++i) {
 
-		if (a.Num() <= 0) {
+		if (b.Num() <= 0) {
 			break;
 		}
 
-		a.RemoveAt(FMath::RandRange(0, a.Num()-1));
+		b.RemoveAt(FMath::RandRange(0, b.Num() - 1));
 	}
 
-	return a;
+	return b;
 }
