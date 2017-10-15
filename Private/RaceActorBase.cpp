@@ -38,7 +38,8 @@ void ARaceActorBase::Tick( float DeltaTime ){
 	if (KillSelfIfBehindCamera) {
 		if (GEngine) {
 			FVector loc = GEngine->GetFirstLocalPlayerController(GetWorld())->PlayerCameraManager->GetCameraLocation();
-			if (loc.X < GetActorLocation().X || FVector::Distance(loc, GetActorLocation()) >= 499999.0) {
+			float bufferedThisLocX = GetActorLocation().X - KillSelfIfBehindCameraAdditoonalBufferDistanceX;
+			if (loc.X < bufferedThisLocX || FVector::Distance(loc, GetActorLocation()) >= 499999.0) {
 				Destroy();
 			}
 		}

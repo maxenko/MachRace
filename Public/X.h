@@ -74,4 +74,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Cull Array", Keywords = "Takes an array, and removes number of items at random indexes."), Category = "Machrace|Utility")
 	static TArray<UObject*> CullAtRandom(TArray<UObject*> a, int32 numberToCull );
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Random float from array", Keywords = "Picks a random float from a given array of floats."), Category = "Machrace|Utility")
+	static float PickRandomFloatFrom(TArray<float> floats);
 };

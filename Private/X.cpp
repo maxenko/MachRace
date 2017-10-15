@@ -168,3 +168,8 @@ TArray<UObject*> UX::CullAtRandom(TArray<UObject*> a, int32 numberToCull) {
 
 	return b;
 }
+
+float UX::PickRandomFloatFrom(TArray<float> floats) {
+	int32 randIdx = FMath::RandRange(0, floats.Num() - 1);
+	return floats[randIdx];
+}
