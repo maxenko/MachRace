@@ -36,6 +36,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	bool IsAutoAimTarget = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	bool KillSelfIfBehindCamera = false;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Race State", Keywords = "Get Race State as base class."), Category = "MachRace|Engine")
 	ARaceGameStateBase* GetState();
 

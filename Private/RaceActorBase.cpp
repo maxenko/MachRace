@@ -34,6 +34,15 @@ void ARaceActorBase::BeginPlay(){
 // Called every frame
 void ARaceActorBase::Tick( float DeltaTime ){
 	Super::Tick( DeltaTime );
+
+	if (KillSelfIfBehindCamera) {
+		if (GEngine) {
+			FVector loc = GEngine->GetFirstLocalPlayerController(GetWorld())->PlayerCameraManager->GetCameraLocation();
+			if (loc.X < GetActorLocation().X || FVector::Distance(loc, GetActorLocation()) >= 499999.0) {
+				Destroy();
+			}
+		}
+	}
 }
 
 // Called every frame

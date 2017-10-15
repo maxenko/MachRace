@@ -235,7 +235,6 @@ void ARaceGameStateBase::ResetXYZGrid(float xOffset) {
 		FVector loc = pawn->GetActorLocation();
 		FVector newLoc = FVector(loc.X+xOffset, loc.Y, loc.Z);
 		w->SetNewWorldOrigin(FIntVector(newLoc.X, newLoc.Y, newLoc.Z)+w->OriginLocation);
-		//w->bOriginOffsetThisFrame = true;
 	}
 }
 
