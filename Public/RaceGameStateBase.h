@@ -146,7 +146,7 @@ public:
 	bool Level3Disable = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float Level4TriggerSpeed = 15000;
+	float Level4TriggerSpeed = 20000;
 
 	/** If enabled will prevent level 4 triggering. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")

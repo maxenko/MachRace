@@ -193,8 +193,8 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 	
 		if (speed >= state->Level2ObstacleTriggerspeed) { // check RaceGameStateBase.cpp where this is also used in tandem
 
-			d.Decelerators = .15;
-			d.Accelerators = .15;
+			d.Decelerators = .04;
+			d.Accelerators = .06;
 			d.Collectables = .005;
 			d.ICBM = .003;
 			d.Column = .005;
