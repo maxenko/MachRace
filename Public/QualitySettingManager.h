@@ -15,7 +15,7 @@ enum class QualitySetting : uint8 {
 };
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Config=Game)
 class MACHRACE_API UQualitySettingManager : public UActorComponent
 {
 	GENERATED_BODY()
@@ -23,6 +23,7 @@ class MACHRACE_API UQualitySettingManager : public UActorComponent
 private:
 
 	void executeConsoleCommand(FString cmd);
+	void loadConfig();
 
 public:	
 	// Sets default values for this component's properties
@@ -38,6 +39,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "MachRace|Video Settings")
 	void ApplyPreset(QualitySetting qs);
+
+	//** Default is PCMasterRace */
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Settings")
+	QualitySetting CurrentSetting = QualitySetting::PCMasterRace;
+
+	//** Default is PCMasterRace */
+	UPROPERTY(BlueprintReadOnly, Config, Category = "MachRace|Settings")
+	int32 ConfigQualitySetting;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
 	bool PrintDebug = false;

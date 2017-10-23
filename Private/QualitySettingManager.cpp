@@ -20,8 +20,40 @@ void UQualitySettingManager::BeginPlay()
 {
 	Super::BeginPlay();
 
+	loadConfig();
+
 	// ...
 	
+}
+
+void UQualitySettingManager::loadConfig() {
+
+	if (!GConfig) { return; }
+
+
+	int32 qualitySetting = -1;
+
+	GConfig->GetInt(
+		TEXT("MachRace.Settings"),
+		TEXT("QualitySetting"),
+		qualitySetting,
+		GGameIni
+	);
+
+	if (qualitySetting < 0) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Quality setting not found. Writing default value.");
+
+		GConfig->SetInt(
+			TEXT("MachRace.Settings"),
+			TEXT("QualitySetting"),
+			(int32)CurrentSetting,
+			GGameIni
+		);
+
+	} else {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Quality setting loaded: %s"), *FString::FromInt(qualitySetting)));
+	}
+
 }
 
 
@@ -221,11 +253,9 @@ void UQualitySettingManager::ApplyPreset(QualitySetting qs) {
 
 		default:
 			commands = "";
-
-
-		
 	}
 
+	CurrentSetting = qs;
 	runCommands(parseCommands(FString(ANSI_TO_TCHAR(commands))));
 }
 
