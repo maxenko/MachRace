@@ -48,7 +48,6 @@ TArray<FString> UResolutionSettingManager::GetSupportedResolutions() {
 	// 21:9
 
 	char* resolutions = "\
-		1024x576;\
 		1280x720;\
 		1600x900;\
 		1920x1080;\
