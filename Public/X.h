@@ -77,4 +77,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Random float from array", Keywords = "Picks a random float from a given array of floats."), Category = "Machrace|Utility")
 	static float PickRandomFloatFrom(TArray<float> floats);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Store Int Setting", Keywords = "Store an integer setting to a category."), Category = "Machrace|Settings")
+	static void StoreIntSetting(FString category, FString settingName, int32 setting);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Store Str Setting", Keywords = "Store a string setting to a category."), Category = "Machrace|Settings")
+	static void StoreStringSetting(FString category, FString settingName, FString setting);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Int Setting", Keywords = "Get an integer setting from a category."), Category = "Machrace|Settings")
+	static int32 GetIntSetting(FString category, FString settingName);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get String Setting", Keywords = "Get a string setting from a category."), Category = "Machrace|Settings")
+	static FString GetStringSetting(FString category, FString settingName);
 };

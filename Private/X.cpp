@@ -173,3 +173,55 @@ float UX::PickRandomFloatFrom(TArray<float> floats) {
 	int32 randIdx = FMath::RandRange(0, floats.Num() - 1);
 	return floats[randIdx];
 }
+
+void UX::StoreIntSetting(FString category, FString settingName, int32 setting) {
+
+	if (!GConfig) { return; }
+
+	GConfig->SetInt(
+		*category,
+		*settingName,
+		setting,
+		GGameIni
+	);
+}
+
+void UX::StoreStringSetting(FString category, FString settingName, FString setting) {
+
+	if (!GConfig) { return; }
+
+	GConfig->SetString(
+		*category,
+		*settingName,
+		*setting,
+		GGameIni
+	);
+}
+
+int32 UX::GetIntSetting(FString category, FString settingName) {
+
+	int32 setting = -1;
+
+	GConfig->GetInt(
+		*category,
+		*settingName,
+		setting,
+		GGameIni
+	);
+
+	return setting;
+}
+
+FString UX::GetStringSetting(FString category, FString settingName) {
+
+	FString setting = "";
+
+	GConfig->GetString(
+		*category,
+		*settingName,
+		setting,
+		GGameIni
+	);
+
+	return setting;
+}

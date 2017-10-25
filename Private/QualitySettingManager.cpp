@@ -1,6 +1,7 @@
 // Copyright 2015 - Max Enko
 
 #include "MachRace.h"
+#include "X.h"
 #include "QualitySettingManager.h"
 
 
@@ -30,25 +31,14 @@ void UQualitySettingManager::loadConfig() {
 
 	if (!GConfig) { return; }
 
-
 	int32 qualitySetting = -1;
 
-	GConfig->GetInt(
-		TEXT("MachRace.Settings"),
-		TEXT("QualitySetting"),
-		qualitySetting,
-		GGameIni
-	);
+	qualitySetting = UX::GetIntSetting("MachRace.Settings", "QualitySetting");
 
 	if (qualitySetting < 0) {
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Quality setting not found. Writing default value.");
 
-		GConfig->SetInt(
-			TEXT("MachRace.Settings"),
-			TEXT("QualitySetting"),
-			(int32)CurrentSetting,
-			GGameIni
-		);
+		UX::StoreIntSetting("MachRace.Settings", "QualitySetting", (int32)CurrentSetting);
 
 	} else {
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Quality setting loaded: %s"), *FString::FromInt(qualitySetting)));
@@ -258,4 +248,3 @@ void UQualitySettingManager::ApplyPreset(QualitySetting qs) {
 	CurrentSetting = qs;
 	runCommands(parseCommands(FString(ANSI_TO_TCHAR(commands))));
 }
-
