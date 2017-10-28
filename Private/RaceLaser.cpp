@@ -155,6 +155,7 @@ bool ARaceLaser::traceAhead() {
 	From = FromMarker ? FromMarker->GetComponentLocation() : actorLoc; // figure out where laser is originating from
 	To = From + Direction;
 	bool block = false; // whether trace hit anything or not
+	bool isAutoAimedTrace = false; // wether or not this trace is hitting auto-aim target. For instance its isn't when player is just shooting straight and hitting actors not marked as 'IsAutoaimTarget.
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -178,6 +179,7 @@ bool ARaceLaser::traceAhead() {
 				hit = lastAutoAimHit;
 				block = true;
 				To = lastAutoAimHit.ImpactPoint;
+				isAutoAimedTrace = true;
 			}
 		}
 
@@ -215,7 +217,11 @@ bool ARaceLaser::traceAhead() {
 
 		LastHit = hit;
 		HasHit.Broadcast(hit); // broadcast hit, only when firing and hitting
-		To = hit.Location;
+
+		// we only update .To here if its not auto-aim hit. Otherwise hit should be from previously executed sphere trace.
+		if (!isAutoAimedTrace) {
+			To = hit.Location;
+		}
 		isHitting = true;
 
 	}
