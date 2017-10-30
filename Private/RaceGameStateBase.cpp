@@ -34,6 +34,8 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			DisableDecorativeGeometry =
 			DisableObstacles = true;
 
+			OnSpawnLevel1Boss.Broadcast();
+
 		} else if (newStage == GameStage::InfiniteHex) {
 			// force Level1BossTriggerSpeed + set lvl1 boss death to true
 
@@ -62,14 +64,29 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 
 			SetLevelOneBossDeafeated();
 
-		} else if (newStage == GameStage::Labyrinth) {
+		}
+		else if (newStage == GameStage::Labyrinth) {
 
 			bool shipOk = false;
 			auto ship = GetRaceShip(shipOk);
-			
+
 			ship->SetShipSpeed(Level3TriggerSpeed);
 
 			EnableAutoAim = false;
+			Level1BossDefeated = true;
+
+			SetLevelOneBossDeafeated();
+
+		} else if (newStage == GameStage::LabyrinthBoss) {
+
+			bool shipOk = false;
+			auto ship = GetRaceShip(shipOk);
+
+			ship->SetShipSpeed(Level3Stage3TriggerSpeed+1);
+
+			OnLevel3BossReached.Broadcast();
+
+			//EnableAutoAim = true;
 			Level1BossDefeated = true;
 
 			SetLevelOneBossDeafeated();
@@ -159,6 +176,14 @@ void ARaceGameStateBase::MaintainState() {
 			return;
 		}
 
+	}
+
+	
+	if (Stage == GameStage::Labyrinth) {
+		if (speed >= Level3Stage3TriggerSpeed && speed < Level4TriggerSpeed) {
+			SetStage(GameStage::LabyrinthBoss);
+			OnLevel3BossReached.Broadcast();
+		}
 	}
 
 
@@ -422,10 +447,17 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 
 
-	} else if (Stage == GameStage::Labyrinth) {
+	}
+	else if (Stage == GameStage::Labyrinth) {
 
-		settings.CameraT.SetTranslation(FVector(400, 0, 400));
+		settings.CameraT.SetTranslation(FVector(300, 0, 460));
 		settings.CameraT.SetRotation(FRotator(-32, -180, 0).Quaternion());
+		settings.Fov = 123;
+
+	} else if (Stage == GameStage::LabyrinthBoss) {
+
+		settings.CameraT.SetTranslation(FVector(-500, 0, 1200));
+		settings.CameraT.SetRotation(FRotator(-90, -180, 0).Quaternion());
 		settings.Fov = 123;
 
 	} else if (Stage == GameStage::CitySubmerged) {
@@ -483,7 +515,7 @@ void ARaceGameStateBase::SetAtmosphereByStage() {
 		settings.FogInscatteringColorDirectional = FLinearColor(.25, .25, .125, 1);
 
 
-	} else if (Stage == GameStage::Labyrinth) {
+	} else if (Stage == GameStage::Labyrinth || Stage == GameStage::LabyrinthBoss) {
 		
 		settings.FogDensity = .19;
 		settings.FogHeightFaloff = 0.0001;

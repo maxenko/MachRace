@@ -43,6 +43,7 @@ public:
 	}
 };
 
+
 USTRUCT(BlueprintType)
 struct FTemporaryIndexedRecord {
 	GENERATED_USTRUCT_BODY()
@@ -56,6 +57,7 @@ public:
 	UObject* Parent;
 
 };
+
 
 USTRUCT(BlueprintType)
 struct FComponentDamageRecord {
@@ -73,7 +75,6 @@ public:
 		return
 			Component == Other.Component
 			&& Health == Other.Health;
-
 	}
 };
 
@@ -109,10 +110,9 @@ enum class GameStage : uint8 {
 	InfiniteHex		UMETA(DisplayName = "Infinite Hex"),
 	InfiniteHexBoss	UMETA(DisplayName = "Infinite Hex Boss"),
 	Labyrinth		UMETA(DisplayName = "Mechanical Labyrinth"),
+	LabyrinthBoss	UMETA(DisplayName = "Mechanical Labyrinth Boss"),
 	CitySubmerged	UMETA(DisplayName = "City Submerged"),
 };
-
-
 
 
 USTRUCT(BlueprintType)
@@ -159,7 +159,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float Standard = .955;
 };
-
 
 
 USTRUCT(BlueprintType)
@@ -215,7 +214,6 @@ public:
 };
 
 
-
 USTRUCT(BlueprintType)
 struct FObjectTransformRecord {
 	GENERATED_BODY()
@@ -241,6 +239,7 @@ enum class EHexTileChance : uint8
 	Collectable,
 	ICBM
 };
+
 
 USTRUCT(BlueprintType)
 struct FFlightNavigationRay {

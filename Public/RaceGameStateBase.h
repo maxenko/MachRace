@@ -14,6 +14,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpawnLevel1Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathLevel1Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel2Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel3Reached);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel3Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel4Reached);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnEnemy, GameStage, stage);
 
@@ -181,6 +182,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnLevel3Reached OnLevel3Reached;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnLevel3Boss OnLevel3BossReached;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnLevel4Reached OnLevel4Reached;
