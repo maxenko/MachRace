@@ -137,17 +137,17 @@ public:
 	float Level3TriggerSpeed = 6000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float Level3Stage2TriggerSpeed = 8000;
+	float Level3Stage2TriggerSpeed = 12000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float Level3Stage3TriggerSpeed = 12000;
+	float Level3Stage3TriggerSpeed = 18000;
 
 	/** If enabled will prevent level 3 triggering. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool Level3Disable = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float Level4TriggerSpeed = 20000;
+	float Level4TriggerSpeed = 21000;
 
 	/** If enabled will prevent level 4 triggering. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")

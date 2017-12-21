@@ -1,4 +1,4 @@
-// Copyright 2015 - Max Enko
+ // Copyright 2015 - Max Enko
 
 #include "MachRace.h"
 #include "RaceGameStateBase.h"
@@ -71,6 +71,8 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			auto ship = GetRaceShip(shipOk);
 
 			ship->SetShipSpeed(Level3TriggerSpeed);
+
+			OnLevel3Reached.Broadcast();
 
 			EnableAutoAim = false;
 			Level1BossDefeated = true;
@@ -182,6 +184,7 @@ void ARaceGameStateBase::MaintainState() {
 	if (Stage == GameStage::Labyrinth) {
 		if (speed >= Level3Stage3TriggerSpeed && speed < Level4TriggerSpeed) {
 			SetStage(GameStage::LabyrinthBoss);
+			EnableAutoAim = false;
 			OnLevel3BossReached.Broadcast();
 		}
 	}
@@ -414,7 +417,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.InterpSpeed = .5;
 		settings.Fov = 120;
 		settings.HudScale = 1.3;
-		settings.CameraT.SetTranslation(FVector(245, 0, 220));
+		settings.CameraT.SetTranslation(FVector(245, 0, 320));
 		settings.CameraT.SetRotation(FRotator(-29, -180, 0).Quaternion());
 
 
@@ -424,7 +427,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		} else if (speed > 2500) {
 
-			settings.CameraT.SetTranslation(FVector(260, 0, 220));
+			settings.CameraT.SetTranslation(FVector(260, 0, 320));
 			settings.Fov = 121.5;
 
 			// INFINITE HEX (END)
@@ -444,8 +447,6 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.HudScale = 1.3;
 		settings.CameraT.SetTranslation(FVector(230, 0, 950));
 		settings.CameraT.SetRotation(FRotator(-45, -180, 0).Quaternion());
-
-
 
 	}
 	else if (Stage == GameStage::Labyrinth) {
@@ -542,7 +543,6 @@ void ARaceGameStateBase::SetAtmosphereByStage() {
 	}
 
 	atmosphereSettings = settings;
-
 }
 
 void ARaceGameStateBase::UpdateAtmosphereSettings() {
@@ -706,7 +706,6 @@ FUnderfadeSettings ARaceGameStateBase::GetUnderFadeSettings() {
 		settings.Alpha = 0.0;
 		return settings;
 	}
-
 
 	return settings;
 }

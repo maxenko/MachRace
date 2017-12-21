@@ -73,6 +73,7 @@ void ARaceActorBase::RememberTransform(UObject* obj, FTransform transform) {
 			t.Transform = transform;
 		}
 	}
+
 	FObjectTransformRecord record;
 	record.Object = obj;
 	record.Transform = transform;
