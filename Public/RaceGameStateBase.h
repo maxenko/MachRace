@@ -149,6 +149,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float Level4TriggerSpeed = 21000;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Level5TriggerSpeed = 25020;
+
 	/** If enabled will prevent level 4 triggering. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool Level4Disable = false;
@@ -218,6 +221,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Level 1 Boss as Defeated", Keywords = "Sets level one boss as defeated, affecting related state conditions."), Category = "MachRace|Gameplay")
 	void SetLevelOneBossDeafeated();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Next Stage Speed", Keywords = "Get next stage speed, such as level switch or boss trigger speed."), Category = "MachRace|Gameplay")
+	float GetNextStageSpeed();
 
 	//////////////////////////////////////////////////////////////////////////
 	// presentation 

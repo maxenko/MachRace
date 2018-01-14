@@ -48,7 +48,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Race State Safe", Keywords = "Get Race State as base class."), Category = "MachRace|Engine")
 	ARaceGameStateBase* GetStateSafe(bool &success);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Remember Transform", Keywords = "Records transform of given object at the time of calling this function."), Category = "MachRace|Engine")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Remember Transform", Keywords = "Records transform of given object at the time of calling this function. (Careful when using this in constructor script, as it will only run once per instance.)"), Category = "MachRace|Engine")
 	void RememberTransform(UObject* obj, FTransform transform);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Recall Transform", Keywords = "Recalls transform of the object."), Category = "MachRace|Engine")

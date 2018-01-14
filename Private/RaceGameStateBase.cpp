@@ -709,3 +709,49 @@ FUnderfadeSettings ARaceGameStateBase::GetUnderFadeSettings() {
 
 	return settings;
 }
+
+
+float ARaceGameStateBase::GetNextStageSpeed() {
+
+	bool shipOk = false;
+	auto ship = GetRaceShip(shipOk);
+
+	if (!shipOk) {
+		return 0;
+	}
+
+	float currentSpeed = ship->GetSpeed();
+
+	if ( currentSpeed < Level1BossTriggerSpeed ) {
+
+		return Level1BossTriggerSpeed;
+
+	} else if (currentSpeed < Level2BossTriggerSpeed) {
+
+		return Level2BossTriggerSpeed;
+
+	} else if (currentSpeed < Level3TriggerSpeed) {
+
+		return Level3TriggerSpeed;
+
+	} else if (currentSpeed < Level3Stage2TriggerSpeed) {
+
+		return Level3Stage2TriggerSpeed;
+
+	} else if (currentSpeed < Level3Stage3TriggerSpeed) {
+
+		return Level3Stage3TriggerSpeed;
+
+	} else if (currentSpeed < Level4TriggerSpeed) {
+
+		return Level4TriggerSpeed;
+
+	} else if (currentSpeed < Level5TriggerSpeed) {
+
+		return Level5TriggerSpeed;
+
+	}
+
+	return -1;
+
+}

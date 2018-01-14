@@ -178,7 +178,7 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 
 	auto speed = ship->GetTheoreticalSpeed();
 
-	if(state->Stage == GameStage::InfiniteHex){
+	if(state->Stage == GameStage::InfiniteHex ){
 
 		if (speed < state->Level2ObstacleTriggerspeed) {
 
@@ -201,11 +201,11 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 			return adjust(d);
 		}
 
-	} else if (state->Stage == GameStage::InfiniteHexBoss) {
+	} else {
 
 		d.Decelerators = .00;
 		d.Accelerators = .00;
-		d.Collectables = .005;
+		d.Collectables = .00;
 		d.ICBM = 0.0;
 		d.Column = 0.0;
 		return adjust(d);

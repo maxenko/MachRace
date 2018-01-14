@@ -68,12 +68,16 @@ ARaceGameStateBase* ARaceActorBase::GetStateSafe(bool &success){
 
 void ARaceActorBase::RememberTransform(UObject* obj, FTransform transform) {
 	
+	// exists?
 	for (FObjectTransformRecord t : transformRecord) {
 		if (t.Object == obj) {
 			t.Transform = transform;
+
+			return;
 		}
 	}
 
+	// doesn't exist?
 	FObjectTransformRecord record;
 	record.Object = obj;
 	record.Transform = transform;
