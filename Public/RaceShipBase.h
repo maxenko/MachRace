@@ -8,6 +8,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAccelerate, float, SpeedIncrease);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDecelerate, float, SpeedDecrease);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpeedChange);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMachSpeedChange, int32, MachSpeed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBank, int32, Direction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIgnition, bool, OnOff);
@@ -80,6 +81,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnDecelerate OnDecelerate;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnSpeedChange OnSpeedChange;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnAccelerationFlash OnAccelerateFlash;

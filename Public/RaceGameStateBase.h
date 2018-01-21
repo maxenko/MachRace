@@ -222,7 +222,7 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Level 1 Boss as Defeated", Keywords = "Sets level one boss as defeated, affecting related state conditions."), Category = "MachRace|Gameplay")
 	void SetLevelOneBossDeafeated();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Next Stage Speed", Keywords = "Get next stage speed, such as level switch or boss trigger speed."), Category = "MachRace|Gameplay")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Next Speed Trigger", Keywords = "Get next stage speed, such as level switch or boss trigger speed."), Category = "MachRace|Gameplay")
 	float GetNextStageSpeed();
 
 	//////////////////////////////////////////////////////////////////////////

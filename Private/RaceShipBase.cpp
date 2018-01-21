@@ -161,6 +161,8 @@ void ARaceShipBase::changeSpeed(float by) {
 	} else {
 		OnDecelerate.Broadcast(by);
 	}
+
+	OnSpeedChange.Broadcast();
 }
 
 

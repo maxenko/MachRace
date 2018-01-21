@@ -713,6 +713,7 @@ FUnderfadeSettings ARaceGameStateBase::GetUnderFadeSettings() {
 
 float ARaceGameStateBase::GetNextStageSpeed() {
 
+	// sanity checks
 	bool shipOk = false;
 	auto ship = GetRaceShip(shipOk);
 
@@ -720,8 +721,11 @@ float ARaceGameStateBase::GetNextStageSpeed() {
 		return 0;
 	}
 
-	float currentSpeed = ship->GetSpeed();
+	// current ship speed
+	float currentSpeed = ship->GetTheoreticalSpeed();
 
+
+	// return first occurrence of speed below any preset threshold
 	if ( currentSpeed < Level1BossTriggerSpeed ) {
 
 		return Level1BossTriggerSpeed;
@@ -752,6 +756,6 @@ float ARaceGameStateBase::GetNextStageSpeed() {
 
 	}
 
-	return -1;
+	return -1; // suppress compiler
 
 }
