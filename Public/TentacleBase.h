@@ -8,7 +8,7 @@
 #include "TentacleBase.generated.h"
 
 UCLASS()
-class MACHRACE_API ATentacleBase : public AActor
+class MACHRACE_API ATentacleBase : public ARaceActorBase
 {
 	GENERATED_BODY()
 
