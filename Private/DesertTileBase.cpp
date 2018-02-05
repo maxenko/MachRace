@@ -37,7 +37,7 @@ int32 ADesertTileBase::GetObstacleCount() {
 	auto state = GetState();
 	if (state) {
 
-		// check if override is on
+		// check if override is on, this is likely a boss level, we run empty tiles
 		if (state->DisableObstacles) {
 			return 0;
 		}
@@ -48,27 +48,57 @@ int32 ADesertTileBase::GetObstacleCount() {
 
 			float speed = ship->GetTheoreticalSpeed();
 
-			if (speed <= 1000) {
-				return 0;
-			} else if (speed < 1200) {
-				return 10;
-			} else if (speed < 1500) {
-				return 12;
-			} else if (speed < 1700) {
-				return 13;
-			} else if (speed < 1800) {
-				return 14;
-			} else if (speed < 1900) {
-				return 15;
-			} else if (speed < 2200) {
-				return 10;
-			} else if (speed < 2600) {
-				return 7;
-			} else if (speed > 2600) { // boss time!
-				return 0;
+			// mines tile
+			if (TileType == DesertTileType::Mines) {
+
+				if (speed < 1200) {
+					return 4;
+				}
+				else if (speed < 1500) {
+					return 3;
+				}
+				else if (speed < 2000) {
+					return 2;
+				}
+				else {
+					return 0;
+				}
+
+			// regular tile
+			} else {
+
+				if (speed <= 1000) {
+					return 0;
+				}
+				else if (speed < 1200) {
+					return 10;
+				}
+				else if (speed < 1500) {
+					return 12;
+				}
+				else if (speed < 1700) {
+					return 13;
+				}
+				else if (speed < 1800) {
+					return 14;
+				}
+				else if (speed < 1900) {
+					return 15;
+				}
+				else if (speed < 2200) {
+					return 10;
+				}
+				else if (speed < 2600) {
+					return 7;
+				}
+				else if (speed > 2600) { // boss time!
+					return 0;
+				}
 			}
+
 		}
 	}
 
+	// catch all
 	return 0;
 }

@@ -18,6 +18,9 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UPROPERTY(BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "MachRace|System|Gameplay")
+	DesertTileType TileType;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Instancer", Keywords = "Gets MachRace instancer, same as Sate->GetInstancer."), Category = "MachRace|Utility")
 	ARaceContentInstancer* GetInstancer(bool& success);
 

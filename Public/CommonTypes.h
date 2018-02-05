@@ -115,6 +115,15 @@ enum class GameStage : uint8 {
 };
 
 
+
+UENUM(BlueprintType)
+enum class DesertTileType : uint8 {
+	Empty		UMETA(DisplayName = "Empty"),
+	Regular 	UMETA(DisplayName = "Regular"),
+	Mines 		UMETA(DisplayName = "Mines"),
+};
+
+
 USTRUCT(BlueprintType)
 struct FCameraSettings {
 	GENERATED_BODY()
