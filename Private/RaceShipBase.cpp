@@ -40,8 +40,8 @@ void ARaceShipBase::decayRotationToZero(float delta) {
 	}
 
 	// stop all rotation
-	if (physVol->GetPhysicsAngularVelocity() != FVector::ZeroVector) {
-		physVol->SetPhysicsAngularVelocity(FVector::ZeroVector);
+	if (physVol->GetPhysicsAngularVelocityInRadians() != FVector::ZeroVector) {
+		physVol->SetPhysicsAngularVelocityInRadians(FVector::ZeroVector);
 	}
 
 	physVol->SetWorldRotation(FMath::RInterpTo(physVol->GetComponentRotation(), FRotator(0, 0, 0), delta, 5));
@@ -270,11 +270,11 @@ FVector ARaceShipBase::Spin(FVector impulse, float maxX) {
 	auto finalImpulse = FVector::ZeroVector;
 
 	if (rootOk) {
-		auto currentImpulse = physVol->GetPhysicsAngularVelocity();
+		auto currentImpulse = physVol->GetPhysicsAngularVelocityInRadians();
 		if (maxX == 0 || FMath::Abs( currentImpulse.X ) < maxX) {
-			physVol->AddAngularImpulse(impulse, NAME_None, true);
+			physVol->AddAngularImpulseInRadians(impulse, NAME_None, true);
 		}
-		finalImpulse = physVol->GetPhysicsAngularVelocity();
+		finalImpulse = physVol->GetPhysicsAngularVelocityInRadians();
 	} else {
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Ships root component is not a physics object. Cannot spin ship."));
 	}
@@ -351,7 +351,7 @@ FVector ARaceShipBase::GetFuselageAngularImpulse() {
 	auto physVol = getRootAsPrimitive(rootOk);
 
 	if (rootOk) {
-		return physVol->GetPhysicsAngularVelocity();
+		return physVol->GetPhysicsAngularVelocityInRadians();
 	}
 
 	return FVector::ZeroVector;

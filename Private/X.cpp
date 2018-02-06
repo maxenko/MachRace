@@ -14,7 +14,7 @@ FVector UX::GetRootLinearVelocity(AActor* target) {
 FVector UX::GetRootAngularVelocity(AActor* target) {
 	auto targetRoot = Cast<UStaticMeshComponent>(target->GetRootComponent());
 	if (!targetRoot) { return FVector::ZeroVector; }
-	return targetRoot->GetPhysicsAngularVelocity();
+	return targetRoot->GetPhysicsAngularVelocityInRadians();
 }
 
 void UX::SetRootLinearVelocity(AActor* target, FVector v, bool addTo) {
@@ -30,7 +30,7 @@ void UX::SetRootAngularVelocity(AActor* target, FVector v, bool addTo) {
 	auto targetRoot = Cast<UStaticMeshComponent>(target->GetRootComponent());
 	if (!targetRoot) { return; }
 
-	targetRoot->SetAllPhysicsAngularVelocity(v, addTo);
+	targetRoot->SetAllPhysicsAngularVelocityInRadians(v, addTo);
 }
 
 FVector UX::NullifyY(FVector v) {
@@ -65,8 +65,8 @@ void UX::DecayRootRotToZero(AActor* a, float delta, float decaySpeed) {
 	}
 
 	// stop all rotation
-	if (physVol->GetPhysicsAngularVelocity() != FVector::ZeroVector) {
-		physVol->SetPhysicsAngularVelocity(FVector::ZeroVector);
+	if (physVol->GetPhysicsAngularVelocityInRadians() != FVector::ZeroVector) {
+		physVol->SetPhysicsAngularVelocityInRadians(FVector::ZeroVector);
 	}
 
 	physVol->SetWorldRotation(FMath::RInterpTo(physVol->GetComponentRotation(), FRotator(0, 0, 0), delta, decaySpeed),false,nullptr,ETeleportType::TeleportPhysics);

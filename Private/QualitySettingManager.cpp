@@ -73,7 +73,7 @@ void UQualitySettingManager::ApplyPreset(QualitySetting qs) {
 			executeConsoleCommand(c.Trim().TrimTrailing());
 
 			if(PrintDebug) {
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, c.Trim().TrimTrailing());
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, c.TrimStart().TrimEnd());
 			}
 		}
 	};

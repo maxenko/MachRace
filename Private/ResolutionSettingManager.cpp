@@ -39,7 +39,7 @@ TArray<FString> UResolutionSettingManager::GetSupportedResolutions() {
 		TArray<FString> parsed;
 		delimited.ParseIntoArray(parsed, TEXT(";"), true);
 		for (int i = 0; i < parsed.Num(); ++i) {
-			parsed[i] = parsed[i].Trim().TrimTrailing();
+			parsed[i] = parsed[i].TrimEnd().TrimStart();
 		}
 		return parsed;
 	};
@@ -63,7 +63,7 @@ TArray<FString> UResolutionSettingManager::GetSupportedResolutions() {
 
 
 FString UResolutionSettingManager::GetConfigResolution(bool& success) {
-	FString resolution = UX::GetStringSetting("MachRace.Settings", "Resolution").Trim().TrimTrailing();
+	FString resolution = UX::GetStringSetting("MachRace.Settings", "Resolution").TrimEnd().TrimStart();
 
 	if (resolution.Len() <= 0) {
 		success = false;

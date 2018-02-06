@@ -28,8 +28,8 @@ void AShipBase::SetShipSpeed(float speed) {
 		FVector newV = FVector(
 		
 			-speed / GetState()->GetTheoreticalSpeedMultiplier(),
-			root->GetPhysicsAngularVelocity().Y,
-			root->GetPhysicsAngularVelocity().Z
+			root->GetPhysicsAngularVelocityInRadians().Y,
+			root->GetPhysicsAngularVelocityInRadians().Z
 
 		);
 	
