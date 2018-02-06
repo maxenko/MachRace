@@ -117,8 +117,9 @@ public:
 		return 0.3176;
 	}
 
+
 	//////////////////////////////////////////////////////////////////////////
-	// gameplay related 
+	// gameplay related - speed(s)
 	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
@@ -142,31 +143,36 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float Level3Stage3TriggerSpeed = 18000;
 
-	/** If enabled will prevent level 3 triggering. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	bool Level3Disable = false;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float Level4TriggerSpeed = 21000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float Level5TriggerSpeed = 25020;
 
+
+	//////////////////////////////////////////////////////////////////////////
+	// gameplay related - gameplay global settings
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	float Level1MineDamageAmount = 3000;
+
+	//////////////////////////////////////////////////////////////////////////
+	// gameplay related - disables (dev sh1t)
+	//////////////////////////////////////////////////////////////////////////
+
+	/** If enabled will prevent level 3 triggering. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool Level3Disable = false;
+
 	/** If enabled will prevent level 4 triggering. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool Level4Disable = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	bool Level2GuidanceDroneIntroduced = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	bool WaterEnabled = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	bool DroneFormationSpawned = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	int32 Level2OnStartTilesToKeepFreeOfObstacles = 3;
+	//////////////////////////////////////////////////////////////////////////
+	// gameplay related - gameplay events
+	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnSpawnLevel1Boss OnSpawnLevel1Boss;
@@ -191,6 +197,23 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnLevel4Reached OnLevel4Reached;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// gameplay related - misc triggers / disables / props
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool Level2GuidanceDroneIntroduced = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool WaterEnabled = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool DroneFormationSpawned = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	int32 Level2OnStartTilesToKeepFreeOfObstacles = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	bool IsInGame = false;
