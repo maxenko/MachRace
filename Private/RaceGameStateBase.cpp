@@ -765,16 +765,20 @@ void ARaceGameStateBase::GetLaserEffectiveRange(float& effectiveRange, float& fa
 	// default
 	if (Stage == GameStage::Desert || Stage == GameStage::DesertBoss || Stage == GameStage::Prelaunch) {
 		falloff = Level1LaserFalloff;
+		effectiveRange = Level1LaserEffectiveRange;
 		return;
 	}
 	else if (Stage == GameStage::InfiniteHex || Stage == GameStage::InfiniteHexBoss ) {
 		falloff = Level2LaserFalloff;
+		effectiveRange = Level2LaserEffectiveRange;
 		return;
 	}
 	else if (Stage == GameStage::Labyrinth || Stage == GameStage::LabyrinthBoss) {
 		falloff = Level3LaserFalloff;
+		effectiveRange = Level3LaserEffectiveRange;
 		return;
 	}
 
 	falloff = DefaultLaserFalloff;
+	effectiveRange = DefaultLaserEffectiveRange;
 }

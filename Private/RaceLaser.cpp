@@ -280,6 +280,8 @@ float ARaceLaser::GetCalculatedDamageAmount(float effectiveRange, float falloff,
 	}
 
 	// if inside fall-off range, calculate linear decay
+	if ( distance > fullDamageDist && distance < effectiveRange ) {
+		return FMath::GetRangePct(fullDamageDist, effectiveRange, distance)*damage;
 	}
 
 	// out of range;
