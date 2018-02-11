@@ -45,7 +45,8 @@ public:
 	FOnActorDamageSignature OnActorDamage;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Take Damage", Keywords = "Take Damage and subtract it from Health."), Category = "MachRace|Gameplay")
-	float TakeDamage(AActor* DamagedActor, float Damage, const FVector& HitFromDirection, const FHitResult& HitInfo, AController* EventInstigator, AActor* DamageCauser, TSubclassOf<class UDamageType> DamageTypeClass);
+	float TakeDamage(AActor* DamagedActor, float Damage, AController* InstigatedBy, FVector HitLocation, UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, UDamageType* DamageType, AActor* DamageCauser);
+	//float TakeDamage(AActor* DamagedActor, float Damage, const FVector& HitFromDirection, const FHitResult& HitInfo, AController* EventInstigator, AActor* DamageCauser, TSubclassOf<class UDamageType> DamageTypeClass);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add Health", Keywords = "Add an amount to Health."), Category = "MachRace|Gameplay")
 	float AddHealth(float amount);

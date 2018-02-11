@@ -12,7 +12,7 @@ UDamageHandler::UDamageHandler() {
 	bWantsInitializeComponent = true;
 }
 
-float UDamageHandler::TakeDamage(AActor* DamagedActor, float Damage, const FVector& HitFromDirection, const FHitResult& HitInfo, AController* EventInstigator, AActor* DamageCauser, TSubclassOf<class UDamageType> DamageTypeClass) {
+float UDamageHandler::TakeDamage(AActor* DamagedActor, float Damage, AController* InstigatedBy, FVector HitLocation, UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, UDamageType* DamageType, AActor* DamageCauser) {
 
 	// if there are components present, take damage for component being hit
  	if (DamageableComponents.Num() > 0) {
@@ -24,7 +24,7 @@ float UDamageHandler::TakeDamage(AActor* DamagedActor, float Damage, const FVect
 				continue;
 			}
 
-			if (r.Component == HitInfo.GetComponent()) {
+			if (r.Component == FHitComponent) {
 				// set health
 				r.Health = FMath::Clamp(r.Health - Damage, 0.f, 999999.f);
 				OnComponentDamage.Broadcast(r.Component, r.Health);
@@ -74,7 +74,6 @@ void UDamageHandler::SetHealth(float amount){
 // Called when the game starts
 void UDamageHandler::BeginPlay() {
 	Super::BeginPlay();
-
 }
 
 // Called every frame
