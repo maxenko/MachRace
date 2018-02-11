@@ -261,9 +261,27 @@ void ARaceLaser::Tick(float DeltaTime) {
 		updateBeam();
 	}
 
-	beamMesh->SetVisibility(IsFiring);
+	if (beamMesh) {
+		beamMesh->SetVisibility(IsFiring);
+	}
 
 	// update look at rotation between From and To (as it may shift), useful for various effects on the laser to align.
 	LaserLookAtRot = UKismetMathLibrary::FindLookAtRotation(From, To);
 }
 
+
+float ARaceLaser::GetCalculatedDamageAmount(float effectiveRange, float falloff, float damage, float distance) {
+
+	float fullDamageDist = FMath::Clamp(effectiveRange - falloff, 0.0f, TNumericLimits<float>::Max());
+
+	// if within effective range, do full damage
+	if (distance <= fullDamageDist) {
+		return damage;
+	}
+
+	// if inside fall-off range, calculate linear decay
+	}
+
+	// out of range;
+	return 0.0f;
+}

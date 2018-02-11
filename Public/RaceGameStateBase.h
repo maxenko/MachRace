@@ -117,38 +117,63 @@ public:
 		return 0.3176;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	// gameplay related - dynamic settings
+	//////////////////////////////////////////////////////////////////////////
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Laser Effective Range", Keywords = "Gets effectrive range of the laser, based on various gameplay conditions."), Category = "MachRace|Gameplay")
+	void GetLaserEffectiveRange(float& effectiveRange, float& faloff);
 
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay related - speed(s)
 	//////////////////////////////////////////////////////////////////////////
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level1BossTriggerSpeed = 2600;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level2ObstacleTriggerspeed = 2700;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level2DroneSpawnSpeedLimit = 2800;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level2BossTriggerSpeed = 4500;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level3TriggerSpeed = 6000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level3Stage2TriggerSpeed = 12000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level3Stage3TriggerSpeed = 18000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level4TriggerSpeed = 21000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level5TriggerSpeed = 25020;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
+	float Level1LaserFalloff = 2500;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
+	float Level1LaserEffectiveRange = 3000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
+	float Level2LaserFalloff = 4000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
+	float Level2LaserEffectiveRange = 5500;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
+	float Level3LaserFalloff = 5000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
+	float Level3LaserEffectiveRange = 7500;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
+	float DefaultLaserFalloff = 5000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
+	float DefaultLaserEffectiveRange = 7500;
 
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay related - gameplay global settings

@@ -759,3 +759,22 @@ float ARaceGameStateBase::GetNextStageSpeed() {
 	return -1; // suppress compiler
 
 }
+
+
+void ARaceGameStateBase::GetLaserEffectiveRange(float& effectiveRange, float& falloff) {
+	// default
+	if (Stage == GameStage::Desert || Stage == GameStage::DesertBoss || Stage == GameStage::Prelaunch) {
+		falloff = Level1LaserFalloff;
+		return;
+	}
+	else if (Stage == GameStage::InfiniteHex || Stage == GameStage::InfiniteHexBoss ) {
+		falloff = Level2LaserFalloff;
+		return;
+	}
+	else if (Stage == GameStage::Labyrinth || Stage == GameStage::LabyrinthBoss) {
+		falloff = Level3LaserFalloff;
+		return;
+	}
+
+	falloff = DefaultLaserFalloff;
+}

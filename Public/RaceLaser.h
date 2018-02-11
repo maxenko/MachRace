@@ -131,6 +131,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	int32 AutoAimScanInterval = 100;
 
+
+	//////////////////////////////////////////////////////////////////////////
+	// gameplay
+	//////////////////////////////////////////////////////////////////////////
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Calculated Damage Amount", Keywords = "Gets calculated damage based on distance and faloff."), Category = "MachRace|Gameplay")
+	float GetCalculatedDamageAmount(float effectiveRange, float falloff, float damage, float distance);
+
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
