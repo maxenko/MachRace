@@ -198,7 +198,7 @@ void UQualitySettingManager::ApplyPreset(QualitySetting qs) {
 				r.RefractionQuality = 2;\
 				r.SSR = 0;\
 				r.SceneColorFormat = 3;\
-				r.DetailMode = 1;\
+				r.DetailMode = 2;\
 				r.TranslucencyVolumeBlur = 1;\
 				r.MaterialQualityLevel = 1";
 			break;

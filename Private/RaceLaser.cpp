@@ -155,11 +155,11 @@ bool ARaceLaser::traceAhead() {
 	From = FromMarker ? FromMarker->GetComponentLocation() : actorLoc; // figure out where laser is originating from
 	To = From + Direction;
 	bool block = false; // whether trace hit anything or not
-	bool isAutoAimedTrace = false; // wether or not this trace is hitting auto-aim target. For instance its isn't when player is just shooting straight and hitting actors not marked as 'IsAutoaimTarget.
+	bool isAutoAimedTrace = false; // whether or not this trace is hitting auto-aim target. For instance its isn't when player is just shooting straight and hitting actors not marked as 'IsAutoaimTarget.
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// handle auto-aim logic if autoaim is on on this level
+	// handle auto-aim logic if auto-aim is on on this level
 	//////////////////////////////////////////////////////////////////////////
 	if (state->EnableAutoAim) {
 

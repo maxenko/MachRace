@@ -185,6 +185,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level1MineHitpoints = 50;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	float Level1ObstacleHitpoints = 15;
+
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay related - disables (dev sh1t)
 	//////////////////////////////////////////////////////////////////////////

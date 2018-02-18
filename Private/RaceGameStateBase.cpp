@@ -757,7 +757,6 @@ float ARaceGameStateBase::GetNextStageSpeed() {
 	}
 
 	return -1; // suppress compiler
-
 }
 
 
