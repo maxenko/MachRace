@@ -134,10 +134,25 @@ public:
 	float Level2ObstacleTriggerspeed = 2700;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	float Level2ObstacleTriggerspeedThreshold1 = 3200;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	float Level2ObstacleTriggerspeedThreshold2 = 3800;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	float Level2ObstacleTriggerspeedThreshold3 = 4400;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	float Level2ObstacleTriggerspeedThreshold4 = 4700;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	float Level2ObstacleTriggerspeedThreshold5 = 5200;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level2DroneSpawnSpeedLimit = 2800;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
-	float Level2BossTriggerSpeed = 4500;
+	float Level2BossTriggerSpeed = 6000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level3TriggerSpeed = 6000;
@@ -153,7 +168,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level5TriggerSpeed = 25020;
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
 	float Level1LaserFalloff = 2500;
@@ -297,5 +311,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
 	AExponentialHeightFog* ExponentialFog;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	FVector2D Level2RaisedTowerRange = FVector2D(100,500);
 
 };

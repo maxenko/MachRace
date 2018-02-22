@@ -55,7 +55,7 @@ void AHexTileBase::BeginPlay() {
 
 }
 
-
+// Generate grid transforms for cell placement
 void AHexTileBase::projectGrid() {
 
 	float cellHeight = CellSize * 2;
@@ -86,6 +86,8 @@ void AHexTileBase::projectGrid() {
 	}
 }
 
+
+// Check if coordinate is within threshold, used to see if cell needs to be spawned.
 bool AHexTileBase::isWithinThreshold(FVector v) {
 
 	auto dist = FVector::Dist(v, cameraLoc );
@@ -108,6 +110,7 @@ void AHexTileBase::GenerateCoordinateGrid() {
 	this->projectGrid();
 }
 
+// Loop through the grid coordinates, and see if any need to be spawned, triggering the AvailableIndex event.
 void AHexTileBase::ScanVisibleGrid(bool triggerSpawns) {
 	for (FTransform t : Grid) {
 		auto worldLoc = t.GetLocation() + GetActorLocation();
@@ -178,7 +181,7 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 
 	auto speed = ship->GetTheoreticalSpeed();
 
-	if(state->Stage == GameStage::InfiniteHex ){
+	if(state->Stage == GameStage::InfiniteHex || state->Stage == GameStage::Desert || state->Stage == GameStage::DesertBoss ){
 
 		if (speed < state->Level2ObstacleTriggerspeed) {
 
@@ -188,16 +191,45 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 			d.ICBM		   = .000;
 			d.Column	   = .000;
 		
-			return adjust(d);
-		}
-	
-		if (speed >= state->Level2ObstacleTriggerspeed) { // check RaceGameStateBase.cpp where this is also used in tandem
+		}else if (speed >= state->Level2ObstacleTriggerspeed) { // check RaceGameStateBase.cpp where this is also used in tandem
 
-			d.Decelerators = .04;
-			d.Accelerators = .06;
-			d.Collectables = .005;
-			d.ICBM = .003;
-			d.Column = .005;
+			if (speed < state->Level2ObstacleTriggerspeedThreshold1) {
+				d.Decelerators = .04;
+				d.Accelerators = .06;
+				d.Collectables = .005;
+				d.ICBM = .005;
+				d.Column = .02;
+			}
+			else if (speed < state->Level2ObstacleTriggerspeedThreshold2) {
+				d.Decelerators = .04;
+				d.Accelerators = .06;
+				d.Collectables = .005;
+				d.ICBM = .003;
+				d.Column = .015;
+			}
+			else if (speed < state->Level2ObstacleTriggerspeedThreshold3) {
+				d.Decelerators = .04;
+				d.Accelerators = .06;
+				d.Collectables = .005;
+				d.ICBM = .002;
+				d.Column = .01;
+			}
+			else if (speed < state->Level2ObstacleTriggerspeedThreshold4) {
+				d.Decelerators = .04;
+				d.Accelerators = .06;
+				d.Collectables = .005;
+				d.ICBM = .002;
+				d.Column = .008;
+			}
+			else if (speed < state->Level2ObstacleTriggerspeedThreshold5) {
+				d.Decelerators = .04;
+				d.Accelerators = .06;
+				d.Collectables = .005;
+				d.ICBM = .001;
+				d.Column = .005;
+			}
+
+
 			return adjust(d);
 		}
 
