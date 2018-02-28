@@ -19,7 +19,9 @@ public:
 	static FVector GetRootAngularVelocity(AActor* target);
 	static void SetRootLinearVelocity(AActor* target, FVector v, bool addTo = false);
 	static void SetRootAngularVelocity(AActor* target, FVector v, bool addTo = false);
+	static FVector NullifyX(FVector v);
 	static FVector NullifyY(FVector v);
+	static FVector NullifyZ(FVector v);
 
 	static int32 GetYDirMult(FVector a, FVector b) {
 		return a.Y < b.Y ? -1 : 1;
@@ -42,6 +44,9 @@ public:
 		a.X = a.Y = b.X = b.Y = 0;
 		return FVector::Dist(a, b);
 	}
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Dist Sans X", Keywords = "Distance between points without counting X component."), Category = "MachRace|Utility|Math")
+	static float DistSansX(FVector from, FVector to);
 
 	static UPrimitiveComponent* GetRootAsPrimitive(AActor* a, bool& success);
 	static void DecayRootRotToZero(AActor* a, float delta, float decaySpeed);

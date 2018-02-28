@@ -33,8 +33,17 @@ void UX::SetRootAngularVelocity(AActor* target, FVector v, bool addTo) {
 	targetRoot->SetAllPhysicsAngularVelocityInRadians(v, addTo);
 }
 
+
+FVector UX::NullifyX(FVector v) {
+	return FVector(0, v.Y, v.Z);
+}
+
 FVector UX::NullifyY(FVector v) {
 	return FVector(v.X, 0, v.Z);
+}
+
+FVector UX::NullifyZ(FVector v) {
+	return FVector(v.X, v.Y, 0);
 }
 
 UPrimitiveComponent* UX::GetRootAsPrimitive(AActor* a, bool& success) {
@@ -224,4 +233,8 @@ FString UX::GetStringSetting(FString category, FString settingName) {
 	);
 
 	return setting;
+}
+
+float UX::DistSansX(FVector from, FVector to) {
+	return FVector::Dist(FVector(0, from.Y, to.Z), FVector(0, to.Y, to.Z));
 }
