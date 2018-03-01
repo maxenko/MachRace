@@ -18,24 +18,17 @@ UAutoPilotV2::UAutoPilotV2()
 
 
 // Called when the game starts
-void UAutoPilotV2::BeginPlay()
-{
+void UAutoPilotV2::BeginPlay(){
 	Super::BeginPlay();
-
-	// get root component
-	auto root = GetOwner()->GetRootComponent();
-
-	// is root 
-	
+	root = GetOwner()->GetRootComponent();
 }
 
 
 // Called every frame
-void UAutoPilotV2::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
+void UAutoPilotV2::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction){
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	ownerLoc = GetOwner()->GetActorLocation();
 }
 
 TArray<FHitResult> UAutoPilotV2::sphereTrace(FVector from, FVector to, float sphereRadius, TArray<AActor*> ignoredActors) {
@@ -78,7 +71,75 @@ TArray<FHitResult> UAutoPilotV2::sphereTrace(FVector from, FVector to, float sph
 }
 
 
-TArray<FHitResult> UAutoPilotV2::Scan() {
+bool UAutoPilotV2::Scan() {
+
+	if (scanWidth <= 0) {
+
+		// do SINGLE column trace
+		auto forwardScan = sphereTrace(ownerLoc, ownerLoc + FVector(-ScanDistance, 0, 0), ScanRadius, IgnoreList);
+		if (forwardScan.Num()) {
+
+			// forward is clear
+			scanWidth = 0; // reset scan width for next scan
+			Status = AutopilotStatus::Clear;
+
+		} else {
+
+			// increase scan width for next scan
+			scanWidth++;
+			Status = AutopilotStatus::Blocked;
+		}
+
+	} else {
+
+		// do DOUBLE column trace
+
+		FVector originA = ownerLoc + FVector(0, ScanRadius*scanWidth, 0);
+		FVector originB = ownerLoc - FVector(0, ScanRadius*scanWidth, 0);
+
+		FVector destinationA = originA + FVector(ScanDistance, 0, 0);
+		FVector destinationB = originB + FVector(ScanDistance, 0, 0);
+
+		auto traceA = sphereTrace(originA, destinationA, ScanRadius, IgnoreList);
+		auto traceB = sphereTrace(originB, destinationB, ScanRadius, IgnoreList);
+
+		auto hitCountA = traceA.Num();
+		auto hitCountB = traceB.Num();
+
+		// if both scans are blocked
+		if (hitCountA && hitCountB) {
+
+			scanWidth++;
+			Status = AutopilotStatus::Blocked;
+			return false;
+
+		} else {
+
+			// in case there is no hits on either scan (both paths are clear)
+			if ( !(hitCountA + hitCountB) ) {
+
+				// pick a random line forward out of the two
+				auto chooseA = FMath::RandRange(0, 1);
+				if (chooseA) {
+					ClearPathVector = destinationA;
+				} else {
+					ClearPathVector = destinationB;
+				}
+
+			} else {
+				if (!hitCountA) {
+					ClearPathVector = destinationA;
+				} else if (!hitCountB) {
+					ClearPathVector = destinationB;
+				}
+			}
+		}
+	}
+
+	Status = AutopilotStatus::Dodging;
+	return true;
+
+	/*
 
 	auto currentLocation = GetOwner()->GetActorLocation();
 	auto forward = sphereTrace(currentLocation, currentLocation + FVector(-ScanDistance, 0, 0), ScanRadius, IgnoreList);
@@ -89,9 +150,9 @@ TArray<FHitResult> UAutoPilotV2::Scan() {
 	for(auto hit : forward) {
 		auto dist = UX::DistSansX(hit.ImpactPoint, currentLocation);
 
-		if (dist > SafetyRadius) {
+		if (dist > ScanRadius) {
 			continue;
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Skipping: %f"), dist));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Skipping: %f"), dist));
 		}
 
 		blockingHits.Add(hit);
@@ -100,6 +161,8 @@ TArray<FHitResult> UAutoPilotV2::Scan() {
 	NavigateDirection = calculateNavigationDirection(blockingHits);
 
 	return blockingHits;
+
+	*/
 }
 
 FVector UAutoPilotV2::calculateNavigationDirection(TArray<FHitResult> blockingHits) {
@@ -111,17 +174,14 @@ FVector UAutoPilotV2::calculateNavigationDirection(TArray<FHitResult> blockingHi
 	auto average = FVector::ZeroVector;
 
 	for (auto h : blockingHits) {
-		// adjust for distance, so further away targets have less effect on navigation than closer targets
-		float weight = FMath::GetMappedRangeValueClamped(FVector2D(ScanDistance,0.0), FVector2D(0.0, 1.0), h.Distance);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Weight: %f"), weight));
-		average += (weight * h.ImpactPoint);
+		average += h.ImpactPoint / ((float)blockingHits.Num());
 	}
 
 	// current owner actor loc
 	auto loc = UX::NullifyX( GetOwner()->GetActorLocation() );
-	auto avg = UX::NullifyX(average / blockingHits.Num());
+	auto avg = UX::NullifyX( average );
 
-	DrawDebugPoint(GetWorld(), average, 20.0, DebugHitPointColor, false, 3);
+	DrawDebugPoint(GetWorld(), average, 20.0, DebugAverageHitPointColor, false, 3);
 
 	auto dir = UKismetMathLibrary::FindLookAtRotation(avg, loc).Vector();
 

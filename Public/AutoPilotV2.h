@@ -6,6 +6,14 @@
 #include "Components/ActorComponent.h"
 #include "AutoPilotV2.generated.h"
 
+UENUM(BlueprintType)
+enum class AutopilotStatus : uint8 {
+	Blocked			UMETA(DisplayName = "Blocked"),
+	Clear 			UMETA(DisplayName = "Clear"),
+	Dodging 		UMETA(DisplayName = "Dodging"),
+	Chasing 		UMETA(DisplayName = "ChasingTarget"),
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNavigate, FVector, Direction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnObstaclesDetected, TArray<FVector>, ObstacleHitLocations);
 
@@ -21,6 +29,9 @@ protected:
 	virtual void BeginPlay() override;
 	TArray<FHitResult> sphereTrace(FVector from, FVector to, float sphereRadius, TArray<AActor*> ignoredActors);
 	FVector calculateNavigationDirection(TArray<FHitResult> blockingHits);
+	FVector ownerLoc = FVector::ZeroVector;
+	USceneComponent* root = NULL;
+	int32 scanWidth = 0;
 
 public:	
 	// Called every frame
@@ -39,19 +50,27 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Debug")
 	FColor DebugHitPointColor = FColor::Orange;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Debug")
+	FColor DebugAverageHitPointColor = FColor::Blue;
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Navigation
 	//////////////////////////////////////////////////////////////////////////
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
-	float SafetyRadius = 50.0;
+	AutopilotStatus Status = AutopilotStatus::Clear;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	float ScanRadius = 200.0;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Navigation")
 	TArray<FVector> DetectedObstacleHits;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Navigation")
+	float ClosestHitWeight = 0.0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Navigation")
+	FVector ClearPathVector = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	float ManuveringAccelerationMultiplier = 1;
@@ -72,6 +91,6 @@ public:
 	FVector NavigateDirection = FVector::ZeroVector;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Scan", Keywords = "Scan around the actor, to find obstacles. Triggers OnObstaclesDetected when obstacles are found."), Category = "MachRace|Gameplay|Navigation")
-	TArray<FHitResult> Scan();
+	bool Scan();
 
 };
