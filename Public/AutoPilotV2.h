@@ -7,42 +7,68 @@
 #include "AutoPilotV2.generated.h"
 
 UENUM(BlueprintType)
-enum class AutopilotStatus : uint8 {
+enum class AutopilotPathStatus : uint8 {
 	Blocked			UMETA(DisplayName = "Blocked"),
-	Clear 			UMETA(DisplayName = "Clear"),
-	Dodging 		UMETA(DisplayName = "Dodging"),
-	Chasing 		UMETA(DisplayName = "ChasingTarget"),
+	PathFound 		UMETA(DisplayName = "PathFound"),
 };
 
+UENUM(BlueprintType)
+enum class AutopilotStatus : uint8 {
+	Scanning		UMETA(DisplayName = "Scanning"),
+	Chasing 		UMETA(DisplayName = "Chasing"),
+	Dodging 		UMETA(DisplayName = "Dodging"),
+	Idle 			UMETA(DisplayName = "Idle"),
+};
+
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNavigate, FVector, Direction);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnObstaclesDetected, TArray<FVector>, ObstacleHitLocations);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnObstaclesDetected, TArray<FHitResult>, ObstacleHitLocations);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatusChange, AutopilotStatus, Status);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPathStatusChange, AutopilotPathStatus, PathStatus);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class MACHRACE_API UAutoPilotV2 : public UActorComponent
-{
+class MACHRACE_API UAutoPilotV2 : public UActorComponent {
+
 	GENERATED_BODY()
 
 public:	
 	UAutoPilotV2();
 
 protected:
-	virtual void BeginPlay() override;
-	TArray<FHitResult> sphereTrace(FVector from, FVector to, float sphereRadius, TArray<AActor*> ignoredActors);
-	FVector calculateNavigationDirection(TArray<FHitResult> blockingHits);
+
+
 	FVector ownerLoc = FVector::ZeroVector;
 	USceneComponent* root = NULL;
 	int32 scanWidth = 0;
+	bool scanIsRunning = false;
+	bool scanInitiated = false;
+
+	virtual void BeginPlay() override;
+	TArray<FHitResult> sphereTrace(FVector from, FVector to, float sphereRadius, TArray<AActor*> ignoredActors);
+	FVector calculateNavigationDirection(TArray<FHitResult> blockingHits);
+
+	void resetScan();
+	bool findPath_singleSphereTrace();
+	bool findPath_doubleSphereTrace();
+
+	FVector calculateDodgeVelocity();
+
+	bool shouldChase();
 
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+
 	//////////////////////////////////////////////////////////////////////////
 	// Debug
 	//////////////////////////////////////////////////////////////////////////
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Debug")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
 	bool ShowDebug = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
+	bool ShowDebugExtra = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Debug")
 	float DebugHitPointSize = 50.0;
@@ -58,7 +84,29 @@ public:
 	// Navigation
 	//////////////////////////////////////////////////////////////////////////
 
-	AutopilotStatus Status = AutopilotStatus::Clear;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	UStaticMeshComponent* OwnerPhysicsComponent = NULL;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System|Navigation")
+	AutopilotStatus Status = AutopilotStatus::Idle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System|Navigation")
+	AutopilotPathStatus PathStatus = AutopilotPathStatus::Blocked;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|System|Navigation")
+	FOnStatusChange OnStatusChange;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|System|Navigation")
+	FOnPathStatusChange OnPathStatusChange;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|System|Navigation")
+	FOnObstaclesDetected OnObstaclesDetected;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	bool NavigateEachTick = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	bool ChaseTarget = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	float ScanRadius = 200.0;
@@ -76,10 +124,18 @@ public:
 	float ManuveringAccelerationMultiplier = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	float MaximumManuveringSpeed = 1000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	float ManuveringDecayRadius = 300;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	float ScanDistance = 5000;
 
-	UPROPERTY(BlueprintAssignable, Category = "MachRace|System|Navigation")
-	FOnObstaclesDetected OnObstaclesDetected;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	float AlignmentThreshold = 10;
+
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	TArray<TEnumAsByte<EObjectTypeQuery>> DetectableObjectTypes;
@@ -90,7 +146,26 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Navigation")
 	FVector NavigateDirection = FVector::ZeroVector;
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Scan", Keywords = "Scan around the actor, to find obstacles. Triggers OnObstaclesDetected when obstacles are found."), Category = "MachRace|Gameplay|Navigation")
-	bool Scan();
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Find Path", Keywords = "Find clear path in given direction. Triggers OnObstaclesDetected when obstacles are found. Returns true when path is found, false otherwise. Should only run once per tick."), Category = "MachRace|Gameplay|Navigation")
+	bool FindPath();
 
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Scan", Keywords = "Runs a scan sequence."), Category = "MachRace|Gameplay|Navigation")
+	void RunScanSequence();
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Desired Velocity", Keywords = "Runs a scan sequence."), Category = "MachRace|Gameplay|Navigation")
+	FVector CalculateDesiredVelocity();
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Navigate", Keywords = "Umbrella navigation method. Either dodges objects or follows target."), Category = "MachRace|Gameplay|Navigation")
+	void Navigate();
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Gameplay
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	AActor* Target = NULL;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	FVector TargetOffset = FVector::ZeroVector;
 };
