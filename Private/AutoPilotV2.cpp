@@ -16,12 +16,25 @@ UAutoPilotV2::UAutoPilotV2() {
 void UAutoPilotV2::BeginPlay() {
 	Super::BeginPlay();
 	root = GetOwner()->GetRootComponent();
+
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindUFunction(this, FName("RunScanSequence"));
+
+	GetWorld()->GetTimerManager().SetTimer(ScanTimerHandle, TimerDelegate, ScanInterval, true);
+}
+
+void UAutoPilotV2::EndPlay(const EEndPlayReason::Type reason) {
+	ScanTimerHandle.Invalidate();
+
+	Super::EndPlay(reason);
 }
 
 
 // Called every frame
 void UAutoPilotV2::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	delta = DeltaTime;
 
 	ownerLoc = GetOwner()->GetActorLocation();
 
@@ -78,23 +91,23 @@ TArray<FHitResult> UAutoPilotV2::sphereTrace(FVector from, FVector to, float sph
 	return hits;
 }
 
-bool UAutoPilotV2::findPath_singleSphereTrace() {
+int32 UAutoPilotV2::findPath_singleSphereTrace() {
 
 	// do SINGLE column trace
 	auto destination = ownerLoc + FVector(ScanDistance, 0, 0);
 	auto forwardScan = sphereTrace(ownerLoc, destination, ScanRadius, IgnoreList);
+	auto hitsN = forwardScan.Num();
 
 	// no hits? then we're clear!
-	if (!forwardScan.Num()) {
+	if (hitsN <= 0) {
 		ClearPathVector = destination;
-		return true;
 	} 
 
 	// path is blocked
-	return false;
+	return hitsN;
 }
 
-bool UAutoPilotV2::findPath_doubleSphereTrace() {
+int32 UAutoPilotV2::findPath_doubleSphereTrace(bool &pathFound) {
 	// do DOUBLE column trace (one on the left one on the right at ScanRadius distance)
 
 	FVector originA = ownerLoc + FVector(0, ScanRadius*scanWidth, 0);
@@ -120,29 +133,31 @@ bool UAutoPilotV2::findPath_doubleSphereTrace() {
 
 		scanWidth++;
 
-		return false; // both traces found blocking hits
+		pathFound = false;
 
 	} else {
 
-		// in case there is no hits on either scan (both paths are clear, we'll pick a random one)
+		pathFound = true;
+
+		// in case there is no hits on either scan (both paths are clear, we'll pick the closest one)
 		if ( (hitCountA + hitCountB) <= 0) {
 
-			// pick a random line forward out of the two
-			auto chooseA = FMath::RandRange(0, 99) > 49; // 0,1 range has bias
+			// pick the closer path of the two
+			auto distA = UX::GetYDist(destinationA, ownerLoc);
+			auto distB = UX::GetYDist(destinationB, ownerLoc);
 
-			if (chooseA) {
+			if (distA <= distB) {
 				ClearPathVector = destinationA;
-			}
-			else {
+			} else {
 				ClearPathVector = destinationB;
 			}
 
+		// otherwise pick the clear one
 		} else {
 
-			if (!hitCountA) {
+			if (hitCountA <= 0) {
 				ClearPathVector = destinationA;
-			}
-			else if (!hitCountB) {
+			} else if (hitCountB <= 0) {
 				ClearPathVector = destinationB;
 			}
 		}
@@ -151,9 +166,9 @@ bool UAutoPilotV2::findPath_doubleSphereTrace() {
 		if (ShowDebug) {
 			DrawDebugDirectionalArrow(GetWorld(), FVector(ownerLoc.X, ClearPathVector.Y, ClearPathVector.Z), ClearPathVector, 300, FColor::Green, false, 1, 0, 10);
 		}
-
-		return true; // both or one of the traces found clear path
 	}
+
+	return hitCountA + hitCountB;
 }
 
 
@@ -169,13 +184,13 @@ bool UAutoPilotV2::FindPath() {
 	// first Scan() run? Single sphere trace.
 	if (scanWidth <= 0) {
 
-		auto pathFound = findPath_singleSphereTrace();
+		auto hitCount = findPath_singleSphereTrace();
 
-		if (!pathFound) {
+		if (hitCount > 0) {
 			scanWidth++; // next scan is double sphere trace
 
-			if (PathStatus != AutopilotPathStatus::Blocked) {
-				PathStatus = AutopilotPathStatus::Blocked;
+			if (PathStatus != AutopilotPathStatus::NoPath) {
+				PathStatus = AutopilotPathStatus::NoPath;
 				OnPathStatusChange.Broadcast(PathStatus);
 			}
 
@@ -183,25 +198,24 @@ bool UAutoPilotV2::FindPath() {
 			// path is clear
 			resetScan();
 
-			if (PathStatus != AutopilotPathStatus::PathFound) {
-				PathStatus = AutopilotPathStatus::PathFound;
+			if (PathStatus != AutopilotPathStatus::Clear) {
+				PathStatus = AutopilotPathStatus::Clear;
 				OnPathStatusChange.Broadcast(PathStatus);
 			}
-
 		}
-		OnPathStatusChange.Broadcast(PathStatus);
-
-		return pathFound;
+		
+		return hitCount <= 0;
 
 	// double Scan() run? Double sphere scan?
 	} else {
 
-		auto pathFound = findPath_doubleSphereTrace();
+		bool pathFound;
+		auto hitCount = findPath_doubleSphereTrace(pathFound);
 
 		if (!pathFound) {
 
-			if (PathStatus != AutopilotPathStatus::Blocked) {
-				PathStatus = AutopilotPathStatus::Blocked;
+			if (PathStatus != AutopilotPathStatus::NoPath) {
+				PathStatus = AutopilotPathStatus::NoPath;
 				OnPathStatusChange.Broadcast(PathStatus);
 			}
 
@@ -210,8 +224,8 @@ bool UAutoPilotV2::FindPath() {
 		} else {
 
 			resetScan();
-			if (PathStatus != AutopilotPathStatus::PathFound) {
-				PathStatus = AutopilotPathStatus::PathFound;
+			if (PathStatus != AutopilotPathStatus::Path) {
+				PathStatus = AutopilotPathStatus::Path;
 				OnPathStatusChange.Broadcast(PathStatus);
 			}
 
@@ -263,24 +277,27 @@ bool UAutoPilotV2::shouldChase() {
 	return (ChaseTarget && Target);
 }
 
-// calculates dodge velocity given current clear path vector (Y component is what we care about)
-FVector UAutoPilotV2::calculateDodgeVelocity() {
+bool UAutoPilotV2::isStableY() {
+	return FMath::IsNearlyZero(OwnerPhysicsComponent->GetPhysicsLinearVelocity().Y);
+}
+
+// calculates Y alignment velocity given current clear path vector (Y component is what we care about)
+FVector UAutoPilotV2::calculateYAlignmentVelocity(FVector destination) {
 
 	// dist to clear vector
-	auto yDist = UX::GetYDist(ownerLoc, ClearPathVector);
-	auto dir = ClearPathVector - ownerLoc; // non-normalized, we use the amplitude for velocity
+	auto yDist = UX::GetYDist(ownerLoc, destination);
+	auto dir = destination - ownerLoc; // non-normalized, we use the amplitude for velocity
 
 	// calc decay multiplier, so when owner is closer to its ideal vector, it slows down, otherwise it jitters back and forth.
 	auto decayMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, ManuveringDecayRadius), FVector2D(0, 1), yDist);
 
-	// dodge force in y
+	// alignment force in y
 	auto yForce = FMath::Clamp(dir.Y * ManuveringAccelerationMultiplier, -MaximumManuveringSpeed, MaximumManuveringSpeed)*decayMultiplier;
 	
 	auto force = FVector(0, yForce, 0);
 
 	if (ShowDebug && ShowDebugExtra) {
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Calculated dodge velocity: dir y: %f, force y: %f"), dir.Y, force.Y));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Calculated Y velocity: dir y: %f, force y: %f"), dir.Y, force.Y));
 		DrawDebugDirectionalArrow(GetWorld(), ownerLoc, ownerLoc + FVector(0, dir.Y, 0), 50, FColor::Green, false, 1, 0, 5);
 	}
 
@@ -302,6 +319,44 @@ FVector UAutoPilotV2::CalculateDesiredVelocity() {
 	return FVector::ZeroVector;
 }
 
+void UAutoPilotV2::chase() {
+	// nudge owner into Y alignment with Target
+
+	Status = AutopilotStatus::Chasing;
+
+	auto followVelocity = calculateYAlignmentVelocity(Target->GetActorLocation());
+	auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
+	auto desiredVelocity = FMath::VInterpTo(currentVelocity, followVelocity, delta, ManuveringAdjustmentSpeed); // softly adjust into it
+
+	OwnerPhysicsComponent->SetPhysicsLinearVelocity(desiredVelocity);
+}
+
+void UAutoPilotV2::manuver() {
+	auto aligned = FMath::IsNearlyEqual(ownerLoc.Y, ClearPathVector.Y, AlignmentThreshold);
+
+	// just because there is a clear path doesn't mean we're in alignment with the clear path!
+	if (!aligned) { // not in alignment check
+
+		auto dodgeVelocity = calculateYAlignmentVelocity(ClearPathVector);
+		auto finalVelocity = dodgeVelocity; // temp
+
+		auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
+		auto desiredVelocity = FMath::VInterpTo(currentVelocity, finalVelocity, delta, ManuveringAdjustmentSpeed); // softly adjust into it
+
+		OwnerPhysicsComponent->SetPhysicsLinearVelocity(desiredVelocity);
+
+	// otherwise we are in alignment, 
+	} else if (aligned) {
+
+		// so lets change state to idle, so autopilot can make other decisions next tick
+		if (Status != AutopilotStatus::Idle && Status != AutopilotStatus::Chasing && aligned ) {
+
+			Status = AutopilotStatus::Idle;
+			OnStatusChange.Broadcast(Status);
+		} 
+	}
+}
+
 void UAutoPilotV2::Navigate() {
 
 	// sanity check, do we have a physics component we can use?
@@ -313,45 +368,25 @@ void UAutoPilotV2::Navigate() {
 		return;
 	}
 
+	// scan should be running concurrently, setting PathStatus
 
-	if (PathStatus == AutopilotPathStatus::Blocked) {
+	if (PathStatus == AutopilotPathStatus::NoPath || PathStatus == AutopilotPathStatus::Path) {
 
-		if (Status != AutopilotStatus::Dodging) {
-			Status = AutopilotStatus::Dodging; // if path is blocked, we are dodging!
+		if (Status != AutopilotStatus::Manuvering) {
+			Status = AutopilotStatus::Manuvering;
 			OnStatusChange.Broadcast(Status);
 		}
 
-		return; // do nothing, as autopilot should be scanning for a path in following ticks
+		manuver();
 
-	} else if (PathStatus == AutopilotPathStatus::PathFound) { 
-		
-		auto aligned = FMath::IsNearlyEqual(ownerLoc.Y, ClearPathVector.Y, AlignmentThreshold);
+	} else if (PathStatus == AutopilotPathStatus::Clear) {
 
-		// just because there is a clear path doesn't mean we're in alignment with the clear path!
-		if (!aligned) { // not in alignment check
-			
-			auto dodgeVelocity = calculateDodgeVelocity();
-			auto finalVelocity = dodgeVelocity; // temp
-
-			OwnerPhysicsComponent->SetPhysicsLinearVelocity(finalVelocity);
-
-			return;
-
-		// otherwise we are in alignment, so lets change state to idle,
-		// so autopilot cane make other decisions next tick
-		} else if (aligned && Status != AutopilotStatus::Idle && Status != AutopilotStatus::Chasing){
-			
-			Status = AutopilotStatus::Idle;
+		if (Status != AutopilotStatus::Chasing) {
+			Status = AutopilotStatus::Chasing;
 			OnStatusChange.Broadcast(Status);
-
-		} else if (aligned && Status == AutopilotStatus::Idle) {
-			
-			// if we're already idle, start chasing if we should
-			if ( shouldChase() ) {
-				Status = AutopilotStatus::Chasing;
-				OnStatusChange.Broadcast(Status);
-			}
 		}
+
+		chase();
 
 	}
 }

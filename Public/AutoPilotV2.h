@@ -8,15 +8,15 @@
 
 UENUM(BlueprintType)
 enum class AutopilotPathStatus : uint8 {
-	Blocked			UMETA(DisplayName = "Blocked"),
-	PathFound 		UMETA(DisplayName = "PathFound"),
+	NoPath			UMETA(DisplayName = "NoPath"),	// completely blocked
+	Path	 		UMETA(DisplayName = "Path"),	// obstacles on the way, but need to go around them
+	Clear			UMETA(DisplayName = "Clear"),	// no obstacles whatsoever
 };
 
 UENUM(BlueprintType)
 enum class AutopilotStatus : uint8 {
-	Scanning		UMETA(DisplayName = "Scanning"),
 	Chasing 		UMETA(DisplayName = "Chasing"),
-	Dodging 		UMETA(DisplayName = "Dodging"),
+	Manuvering 		UMETA(DisplayName = "Manuvering"),
 	Idle 			UMETA(DisplayName = "Idle"),
 };
 
@@ -44,16 +44,24 @@ protected:
 	bool scanInitiated = false;
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type reason) override;
+
 	TArray<FHitResult> sphereTrace(FVector from, FVector to, float sphereRadius, TArray<AActor*> ignoredActors);
 	FVector calculateNavigationDirection(TArray<FHitResult> blockingHits);
 
 	void resetScan();
-	bool findPath_singleSphereTrace();
-	bool findPath_doubleSphereTrace();
+	int32 findPath_singleSphereTrace();
+	int32 findPath_doubleSphereTrace(bool &pathFound);
 
-	FVector calculateDodgeVelocity();
+	FVector calculateYAlignmentVelocity(FVector destination);
 
 	bool shouldChase();
+	bool isStableY();
+
+	void chase();
+	void manuver();
+
+	float delta = 0.f;
 
 public:	
 	// Called every frame
@@ -91,7 +99,7 @@ public:
 	AutopilotStatus Status = AutopilotStatus::Idle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System|Navigation")
-	AutopilotPathStatus PathStatus = AutopilotPathStatus::Blocked;
+	AutopilotPathStatus PathStatus = AutopilotPathStatus::NoPath;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|System|Navigation")
 	FOnStatusChange OnStatusChange;
@@ -130,12 +138,16 @@ public:
 	float ManuveringDecayRadius = 300;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	float ManuveringAdjustmentSpeed = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	float ScanDistance = 5000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	float AlignmentThreshold = 10;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	float StabilizationSpeed = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	TArray<TEnumAsByte<EObjectTypeQuery>> DetectableObjectTypes;
@@ -148,6 +160,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Find Path", Keywords = "Find clear path in given direction. Triggers OnObstaclesDetected when obstacles are found. Returns true when path is found, false otherwise. Should only run once per tick."), Category = "MachRace|Gameplay|Navigation")
 	bool FindPath();
+
+	FTimerHandle ScanTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float ScanInterval = .2f;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Scan", Keywords = "Runs a scan sequence."), Category = "MachRace|Gameplay|Navigation")
 	void RunScanSequence();
