@@ -20,11 +20,17 @@ enum class AutopilotStatus : uint8 {
 	Idle 			UMETA(DisplayName = "Idle"),
 };
 
+UENUM(BlueprintType)
+enum class AutopilotChasingStatus : uint8 {
+	NotAlignedWithTarget 		UMETA(DisplayName = "Not Aligned With Target"),
+	AlignedWithTarget 			UMETA(DisplayName = "Aligned With Target"),
+};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNavigate, FVector, Direction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnObstaclesDetected, TArray<FHitResult>, ObstacleHitLocations);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatusChange, AutopilotStatus, Status);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPathStatusChange, AutopilotPathStatus, PathStatus);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOrientationEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MACHRACE_API UAutoPilotV2 : public UActorComponent {
@@ -58,10 +64,24 @@ protected:
 	bool shouldChase();
 	bool isStableY();
 
-	void chase();
-	void manuver();
+	FVector calcChaseVelocity();
+	FVector calcManuverVelocity();
+
+	void setAngularImpulseAndRotationFlags();
+
+	FVector decayAngularVelocity();
 
 	float delta = 0.f;
+
+	bool wasJustHit = false;
+	bool decayAngularVelocityToZero = false;
+	bool restoreRotationToVisualOrientation = false;
+
+	FRotator previousVisualOrientation = FRotator::ZeroRotator;
+	bool hasBroadcast_CanRestoreOrientation = false;
+
+	UFUNCTION()
+	void onOwnerHit();
 
 public:	
 	// Called every frame
@@ -110,44 +130,35 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|System|Navigation")
 	FOnObstaclesDetected OnObstaclesDetected;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "Wether or not Navigation algorithm should run every tick. If false it will not run at all, unless manually called."))
 	bool NavigateEachTick = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
-	bool ChaseTarget = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "Radius of the sphere traces used in scans."))
 	float ScanRadius = 200.0;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Navigation")
 	TArray<FVector> DetectedObstacleHits;
 
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Navigation")
-	float ClosestHitWeight = 0.0;
-
-	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Navigation")
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Navigation", meta = (ToolTip = "What autopilot things is a clear path to follow. This is end if the sphere trace."))
 	FVector ClearPathVector = FVector::ZeroVector;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "Normally speed is adjusted by distance to the desired Y component, but it can be multiplied with this."))
 	float ManuveringAccelerationMultiplier = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	float MaximumManuveringSpeed = 1000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "Distance at which autopilot starts to decay speed during a manuver."))
 	float ManuveringDecayRadius = 300;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
-	float ManuveringAdjustmentSpeed = 10;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "Speed at which autopilot will manuver into place (vinterp)."))
+	float ManuveringSpeed = 10;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
-	float ScanDistance = 5000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "How far sphere traces are cast in X axis. Negative or positive."))
+	float ScanDistance = -5000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "Distance at which autopilot will consider itself aligned. This is used to make decisions during dodging."))
 	float AlignmentThreshold = 10;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
-	float StabilizationSpeed = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	TArray<TEnumAsByte<EObjectTypeQuery>> DetectableObjectTypes;
@@ -161,16 +172,16 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Find Path", Keywords = "Find clear path in given direction. Triggers OnObstaclesDetected when obstacles are found. Returns true when path is found, false otherwise. Should only run once per tick."), Category = "MachRace|Gameplay|Navigation")
 	bool FindPath();
 
-	FTimerHandle ScanTimerHandle;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float ScanInterval = .2f;
+
+	FTimerHandle ScanTimerHandle;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Scan", Keywords = "Runs a scan sequence."), Category = "MachRace|Gameplay|Navigation")
 	void RunScanSequence();
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Desired Velocity", Keywords = "Runs a scan sequence."), Category = "MachRace|Gameplay|Navigation")
-	FVector CalculateDesiredVelocity();
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Ambient Velocity", Keywords = "Calculates other velocities in addition to manuver or chase velocity."), Category = "MachRace|Gameplay|Navigation")
+	FVector CalculateAmbientVelocity();
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Navigate", Keywords = "Umbrella navigation method. Either dodges objects or follows target."), Category = "MachRace|Gameplay|Navigation")
 	void Navigate();
@@ -184,5 +195,52 @@ public:
 	AActor* Target = NULL;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	FVector TargetOffset = FVector::ZeroVector;
+	FVector TargetFollowOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Factor of Target speed by which autopilot can accelerate to catch up with the target."))
+	float FollowTargetAccelerationFactor = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Distance at which follow acceleration will start to decay."))
+	float FollowTargetAccelerationDecayDistance = 300;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Distance in Y axis at which autopilot will think its aligned with Target (if its chasing)."))
+	float AlignedWithTargetDist = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Maximum speed at which autopilot will attempt to follow Target, including speeding to catch up. This is essentially a clamp on total speed."))
+	float FollowSpeed = 1000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Maximum speed at which autopilot will attempt to follow Target, including speeding to catch up. This is essentially a clamp on total speed."))
+	float MaxFollowPhysicsSpeed = 10000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Maximum speed used to catch up in addition to Target velocity."))
+	float MaxAccelerationPhysicsSpeed = 500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Wether or not Target should be chased (if its set). Chasing mean following target in X axis."))
+	bool ChaseTarget = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Wether or not Target should be followed (if its set). Following means flying at the same speed as the target with TargetFollowOffset offset."))
+	bool FollowTarget = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Range of bob travel - in Z."))
+	FVector2D BobRange = FVector2D(0, 0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Speed of bob travel."))
+	float BobSpeed = 1;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Presentation
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation", meta = (ToolTip = "Where should "))
+	FRotator VisualOrientation = FRotator::ZeroRotator;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Presentation")
+	FOnOrientationEvent OnCanRestoreOrientation;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Presentation")
+	FOnOrientationEvent OnOrientationRestored;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Proximity at which restore will consider itself complete."))
+	float RestoreVisualOrientationNearTo = 0.001f;
+
 };

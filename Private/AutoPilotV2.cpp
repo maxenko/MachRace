@@ -11,6 +11,9 @@ UAutoPilotV2::UAutoPilotV2() {
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
+void UAutoPilotV2::onOwnerHit() {
+	wasJustHit = true;
+}
 
 // Called when the game starts
 void UAutoPilotV2::BeginPlay() {
@@ -21,6 +24,13 @@ void UAutoPilotV2::BeginPlay() {
 	TimerDelegate.BindUFunction(this, FName("RunScanSequence"));
 
 	GetWorld()->GetTimerManager().SetTimer(ScanTimerHandle, TimerDelegate, ScanInterval, true);
+
+	// bind to hit event on owners physics root
+	if (OwnerPhysicsComponent) {
+		FScriptDelegate hitDelegate;
+		hitDelegate.BindUFunction(this, "onOwnerHit");
+		OwnerPhysicsComponent->OnComponentHit.Add(hitDelegate);
+	}
 }
 
 void UAutoPilotV2::EndPlay(const EEndPlayReason::Type reason) {
@@ -45,6 +55,7 @@ void UAutoPilotV2::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	if (NavigateEachTick) {
 		Navigate();
 	}
+
 }
 
 #pragma region path finding  
@@ -281,6 +292,16 @@ bool UAutoPilotV2::isStableY() {
 	return FMath::IsNearlyZero(OwnerPhysicsComponent->GetPhysicsLinearVelocity().Y);
 }
 
+FVector UAutoPilotV2::decayAngularVelocity() {
+	auto current = OwnerPhysicsComponent->GetPhysicsAngularVelocityInRadians();
+
+	if (current == FVector::ZeroVector) {
+		return FVector::ZeroVector;
+	}
+
+	return FMath::VInterpTo(current, FVector::ZeroVector, delta, 1.0f);
+}
+
 // calculates Y alignment velocity given current clear path vector (Y component is what we care about)
 FVector UAutoPilotV2::calculateYAlignmentVelocity(FVector destination) {
 
@@ -304,46 +325,69 @@ FVector UAutoPilotV2::calculateYAlignmentVelocity(FVector destination) {
 	return force;
 }
 
-FVector UAutoPilotV2::CalculateDesiredVelocity() {
+//#pragma optimize("", off)
+FVector UAutoPilotV2::CalculateAmbientVelocity() {
 
-	/*
-	auto forwardVelocity	= FVector::ZeroVector;	// temporary placeholder
-	auto dodgeVelocity		= FVector::ZeroVector;	// temporary placeholder
-	auto followVelocity		= FVector::ZeroVector;	// temporary placeholder
+	FVector followVelocity = FVector::ZeroVector;
 
-	auto yDist = UX::GetYDist(ownerLoc, ClearPathVector);
-	auto decayMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, ManuveringDecayRadius), FVector2D(0, 1), yDist);
+	// calculate follow velocity
+	if(Target && FollowTarget){
 
-	//OwnerPhysicsComponent->SetAllPhysicsLinearVelocity()
-	*/
-	return FVector::ZeroVector;
+		auto desiredPosition = Target->GetActorLocation() + TargetFollowOffset;
+		
+		auto distX = UX::GetXDist(ownerLoc, desiredPosition);
+		auto distZ = UX::GetZDist(ownerLoc, desiredPosition);
+
+		auto accelerationMultiplierX = FMath::GetMappedRangeValueClamped(FVector2D(0, FollowTargetAccelerationDecayDistance), FVector2D(0, FollowTargetAccelerationFactor), distX); // figure out multiplier, so we can speed up or slow down
+		auto accelerationMultiplierZ = FMath::GetMappedRangeValueClamped(FVector2D(0, FollowTargetAccelerationDecayDistance), FVector2D(0, FollowTargetAccelerationFactor), distZ); // figure out multiplier, so we can speed up or slow down
+		
+		// is target in front or behind? We'll use this to set direction of X velocity, to either catch up or slow down
+		auto multX = desiredPosition.X <= ownerLoc.X ? -1 : 1;
+		auto multZ = desiredPosition.Z <= ownerLoc.Z ? -1 : 1;
+
+		auto targetVelocity = UX::GetRootLinearVelocity(Target);
+		auto accelerationSpeedX = accelerationMultiplierX * MaxAccelerationPhysicsSpeed;
+		auto accelerationSpeedZ = accelerationMultiplierZ * MaxAccelerationPhysicsSpeed;
+
+		followVelocity = (targetVelocity + FVector((accelerationSpeedX * multX), 0, (accelerationSpeedZ * multZ)));
+	}
+
+	auto x = FMath::Clamp(followVelocity.X, -MaxFollowPhysicsSpeed, MaxFollowPhysicsSpeed);
+	auto z = FMath::Clamp(followVelocity.Z, -MaxFollowPhysicsSpeed, MaxFollowPhysicsSpeed);
+
+	return FVector(x, 0, z);
 }
+//#pragma optimize("", on)
 
-void UAutoPilotV2::chase() {
+FVector UAutoPilotV2::calcChaseVelocity() {
 	// nudge owner into Y alignment with Target
 
 	Status = AutopilotStatus::Chasing;
 
 	auto followVelocity = calculateYAlignmentVelocity(Target->GetActorLocation());
 	auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
-	auto desiredVelocity = FMath::VInterpTo(currentVelocity, followVelocity, delta, ManuveringAdjustmentSpeed); // softly adjust into it
+	auto desiredVelocity = FMath::VInterpTo(currentVelocity, followVelocity, delta, ManuveringSpeed); // softly adjust into it
 
-	OwnerPhysicsComponent->SetPhysicsLinearVelocity(desiredVelocity);
+	//OwnerPhysicsComponent->SetPhysicsLinearVelocity(desiredVelocity);
+
+	return desiredVelocity;
 }
 
-void UAutoPilotV2::manuver() {
+FVector UAutoPilotV2::calcManuverVelocity() {
 	auto aligned = FMath::IsNearlyEqual(ownerLoc.Y, ClearPathVector.Y, AlignmentThreshold);
+	FVector ret = FVector::ZeroVector;
 
-	// just because there is a clear path doesn't mean we're in alignment with the clear path!
-	if (!aligned) { // not in alignment check
+	// not aligned to clear path?
+	if (!aligned) {
 
 		auto dodgeVelocity = calculateYAlignmentVelocity(ClearPathVector);
 		auto finalVelocity = dodgeVelocity; // temp
 
 		auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
-		auto desiredVelocity = FMath::VInterpTo(currentVelocity, finalVelocity, delta, ManuveringAdjustmentSpeed); // softly adjust into it
+		auto desiredVelocity = FMath::VInterpTo(currentVelocity, finalVelocity, delta, ManuveringSpeed); // softly adjust into it
 
-		OwnerPhysicsComponent->SetPhysicsLinearVelocity(desiredVelocity);
+		//OwnerPhysicsComponent->SetPhysicsLinearVelocity(desiredVelocity);
+		ret = desiredVelocity;
 
 	// otherwise we are in alignment, 
 	} else if (aligned) {
@@ -355,6 +399,28 @@ void UAutoPilotV2::manuver() {
 			OnStatusChange.Broadcast(Status);
 		} 
 	}
+
+	return ret;
+}
+#pragma optimize("", off)
+void UAutoPilotV2::setAngularImpulseAndRotationFlags() {
+
+	if (wasJustHit) {
+		decayAngularVelocityToZero = true;
+	}
+
+	if (OwnerPhysicsComponent->GetPhysicsAngularVelocityInRadians() == FVector::ZeroVector) {
+
+		decayAngularVelocityToZero = false;
+		wasJustHit = false;
+
+		auto ownerRot = GetOwner()->GetActorRotation();
+		auto e = !ownerRot.Equals(VisualOrientation, RestoreVisualOrientationNearTo);
+		if (e) {
+			restoreRotationToVisualOrientation = true;
+		}
+
+	}
 }
 
 void UAutoPilotV2::Navigate() {
@@ -363,12 +429,13 @@ void UAutoPilotV2::Navigate() {
 	if (!OwnerPhysicsComponent) {
 
 		if (ShowDebug) {
-			// spew some error text here, so the dev knows
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf( TEXT("OwnerPhysicsComponent is not set on: %s's AutoPilot component. Autopilot cannot function without it."), *GetOwner()->GetName()));
 		}
 		return;
 	}
 
-	// scan should be running concurrently, setting PathStatus
+
+	FVector chaseOrManuverVelocity = FVector::ZeroVector;
 
 	if (PathStatus == AutopilotPathStatus::NoPath || PathStatus == AutopilotPathStatus::Path) {
 
@@ -377,7 +444,7 @@ void UAutoPilotV2::Navigate() {
 			OnStatusChange.Broadcast(Status);
 		}
 
-		manuver();
+		chaseOrManuverVelocity = calcManuverVelocity();
 
 	} else if (PathStatus == AutopilotPathStatus::Clear) {
 
@@ -386,7 +453,52 @@ void UAutoPilotV2::Navigate() {
 			OnStatusChange.Broadcast(Status);
 		}
 
-		chase();
-
+		chaseOrManuverVelocity = calcChaseVelocity();
 	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// Set linear velocity
+	//////////////////////////////////////////////////////////////////////////
+
+	// calc ambient velocity (includes follow speed)
+	auto ambient = CalculateAmbientVelocity();
+	auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
+
+	auto desiredAmbientVelocity = FMath::VInterpTo(currentVelocity, ambient, delta, FollowSpeed);
+
+	// add all velocities together
+	auto aggregateLinearVelocity =
+		desiredAmbientVelocity +					// follow velocity
+		FVector(0, chaseOrManuverVelocity.Y, 0);	// we only care about Y component
+
+	OwnerPhysicsComponent->SetAllPhysicsLinearVelocity(aggregateLinearVelocity);
+
+	//////////////////////////////////////////////////////////////////////////
+	// Set angular velocity
+	//////////////////////////////////////////////////////////////////////////
+
+	setAngularImpulseAndRotationFlags();
+
+	if (decayAngularVelocityToZero) {
+		OwnerPhysicsComponent->SetAllPhysicsAngularVelocityInRadians(decayAngularVelocity());
+	}
+
+	if (restoreRotationToVisualOrientation) {
+
+		if (!hasBroadcast_CanRestoreOrientation) {
+			OnCanRestoreOrientation.Broadcast();
+			hasBroadcast_CanRestoreOrientation = true;
+		} 
+		
+		if( GetOwner()->GetActorRotation().Equals(VisualOrientation, RestoreVisualOrientationNearTo)) {
+		
+			hasBroadcast_CanRestoreOrientation = false;
+			restoreRotationToVisualOrientation = false;
+
+			OnOrientationRestored.Broadcast();
+		}
+	}
+
+	previousVisualOrientation = GetOwner()->GetActorRotation();
 }
+#pragma optimize("", on)
