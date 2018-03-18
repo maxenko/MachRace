@@ -62,7 +62,6 @@ protected:
 	FVector calculateYAlignmentVelocity(FVector destination);
 
 	bool shouldChase();
-	bool isStableY();
 
 	FVector calcChaseVelocity();
 	FVector calcManuverVelocity();
@@ -77,7 +76,6 @@ protected:
 	bool decayAngularVelocityToZero = false;
 	bool restoreRotationToVisualOrientation = false;
 
-	FRotator previousVisualOrientation = FRotator::ZeroRotator;
 	bool hasBroadcast_CanRestoreOrientation = false;
 
 	UFUNCTION()
@@ -111,6 +109,9 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// Navigation
 	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	TArray<FName> TagsToIgnoreDuringPathFinding;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	UStaticMeshComponent* OwnerPhysicsComponent = NULL;
@@ -206,7 +207,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Distance in Y axis at which autopilot will think its aligned with Target (if its chasing)."))
 	float AlignedWithTargetDist = 50;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Maximum speed at which autopilot will attempt to follow Target, including speeding to catch up. This is essentially a clamp on total speed."))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Follow adjustment speed. This gets fed into VInterp."))
 	float FollowSpeed = 1000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Maximum speed at which autopilot will attempt to follow Target, including speeding to catch up. This is essentially a clamp on total speed."))

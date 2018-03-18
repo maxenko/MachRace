@@ -88,18 +88,46 @@ TArray<FHitResult> UAutoPilotV2::sphereTrace(FVector from, FVector to, float sph
 		true
 	);
 
+	auto hasTags = [this](TArray<FName> tags) {
+		
+		for ( auto t : TagsToIgnoreDuringPathFinding) {
+			if (tags.Contains(t)) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	// filter hits
+	TArray<FHitResult> filteredHits;
+	for (FHitResult h : hits) {
+
+		bool actorShouldBeIgnored = hasTags(h.Actor->Tags);
+		bool componentShouldBeIgnored = hasTags(h.Component->ComponentTags);
+
+		if (actorShouldBeIgnored || componentShouldBeIgnored) {
+			continue;
+		} else {
+			filteredHits.Add(h);
+		}
+
+	}
+
 	if (ShowDebug && anything) {
 
-		for (FHitResult h : hits) {
+		for (FHitResult h : filteredHits) {
 
 			FVector l = h.ImpactPoint;
 			float weight = FMath::GetMappedRangeValueClamped(FVector2D(ScanDistance, 0.0), FVector2D(0.0, 1.0), h.Distance);
 			DrawDebugPoint(w, l, DebugHitPointSize*weight, DebugHitPointColor, false, .5);
 
+			if (ShowDebugExtra) {
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, h.Component->GetFullName());
+			}
 		}
 	}
 
-	return hits;
+	return filteredHits;
 }
 
 int32 UAutoPilotV2::findPath_singleSphereTrace() {
@@ -288,10 +316,6 @@ bool UAutoPilotV2::shouldChase() {
 	return (ChaseTarget && Target);
 }
 
-bool UAutoPilotV2::isStableY() {
-	return FMath::IsNearlyZero(OwnerPhysicsComponent->GetPhysicsLinearVelocity().Y);
-}
-
 FVector UAutoPilotV2::decayAngularVelocity() {
 	auto current = OwnerPhysicsComponent->GetPhysicsAngularVelocityInRadians();
 
@@ -368,8 +392,6 @@ FVector UAutoPilotV2::calcChaseVelocity() {
 	auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
 	auto desiredVelocity = FMath::VInterpTo(currentVelocity, followVelocity, delta, ManuveringSpeed); // softly adjust into it
 
-	//OwnerPhysicsComponent->SetPhysicsLinearVelocity(desiredVelocity);
-
 	return desiredVelocity;
 }
 
@@ -386,7 +408,6 @@ FVector UAutoPilotV2::calcManuverVelocity() {
 		auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
 		auto desiredVelocity = FMath::VInterpTo(currentVelocity, finalVelocity, delta, ManuveringSpeed); // softly adjust into it
 
-		//OwnerPhysicsComponent->SetPhysicsLinearVelocity(desiredVelocity);
 		ret = desiredVelocity;
 
 	// otherwise we are in alignment, 
@@ -402,7 +423,7 @@ FVector UAutoPilotV2::calcManuverVelocity() {
 
 	return ret;
 }
-#pragma optimize("", off)
+//#pragma optimize("", off)
 void UAutoPilotV2::setAngularImpulseAndRotationFlags() {
 
 	if (wasJustHit) {
@@ -469,7 +490,7 @@ void UAutoPilotV2::Navigate() {
 	// add all velocities together
 	auto aggregateLinearVelocity =
 		desiredAmbientVelocity +					// follow velocity
-		FVector(0, chaseOrManuverVelocity.Y, 0);	// we only care about Y component
+		FVector(0, chaseOrManuverVelocity.Y, 0);	// we only care about X  component
 
 	OwnerPhysicsComponent->SetAllPhysicsLinearVelocity(aggregateLinearVelocity);
 
@@ -498,7 +519,5 @@ void UAutoPilotV2::Navigate() {
 			OnOrientationRestored.Broadcast();
 		}
 	}
-
-	previousVisualOrientation = GetOwner()->GetActorRotation();
 }
-#pragma optimize("", on)
+//#pragma optimize("", on)

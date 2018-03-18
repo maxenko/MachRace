@@ -6,20 +6,20 @@
 #include "Kismet/KismetMathLibrary.h"
 
 FVector UX::GetRootLinearVelocity(AActor* target) {
-	auto targetRoot = Cast<UStaticMeshComponent>(target->GetRootComponent());
+	auto targetRoot = Cast<UPrimitiveComponent>(target->GetRootComponent());
 	if (!targetRoot) { return FVector::ZeroVector; }
 	return targetRoot->GetPhysicsLinearVelocity();
 }
 
 FVector UX::GetRootAngularVelocity(AActor* target) {
-	auto targetRoot = Cast<UStaticMeshComponent>(target->GetRootComponent());
+	auto targetRoot = Cast<UPrimitiveComponent>(target->GetRootComponent());
 	if (!targetRoot) { return FVector::ZeroVector; }
 	return targetRoot->GetPhysicsAngularVelocityInRadians();
 }
 
 void UX::SetRootLinearVelocity(AActor* target, FVector v, bool addTo) {
 
-	auto targetRoot = Cast<UStaticMeshComponent>(target->GetRootComponent());
+	auto targetRoot = Cast<UPrimitiveComponent>(target->GetRootComponent());
 	if (!targetRoot) { return; }
 
 	targetRoot->SetAllPhysicsLinearVelocity(v, addTo);
@@ -27,7 +27,7 @@ void UX::SetRootLinearVelocity(AActor* target, FVector v, bool addTo) {
 
 void UX::SetRootAngularVelocity(AActor* target, FVector v, bool addTo) {
 
-	auto targetRoot = Cast<UStaticMeshComponent>(target->GetRootComponent());
+	auto targetRoot = Cast<UPrimitiveComponent>(target->GetRootComponent());
 	if (!targetRoot) { return; }
 
 	targetRoot->SetAllPhysicsAngularVelocityInRadians(v, addTo);
