@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "CommonTypes.h"
 #include "AutoPilotV2.generated.h"
 
 UENUM(BlueprintType)
@@ -56,8 +57,10 @@ protected:
 	FVector calculateNavigationDirection(TArray<FHitResult> blockingHits);
 
 	void resetScan();
+	TArray<FHitResult> filterHits(TArray<FHitResult> hits);
 	int32 findPath_singleSphereTrace();
 	int32 findPath_doubleSphereTrace(bool &pathFound);
+	bool sideIsBlocked(Side side);
 
 	FVector calculateYAlignmentVelocity(FVector destination);
 
@@ -111,7 +114,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
-	TArray<FName> TagsToIgnoreDuringPathFinding;
+	AActor* Target = NULL;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	UStaticMeshComponent* OwnerPhysicsComponent = NULL;
@@ -143,24 +146,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Navigation", meta = (ToolTip = "What autopilot things is a clear path to follow. This is end if the sphere trace."))
 	FVector ClearPathVector = FVector::ZeroVector;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "Normally speed is adjusted by distance to the desired Y component, but it can be multiplied with this."))
-	float ManuveringAccelerationMultiplier = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
-	float MaximumManuveringSpeed = 1000;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "Distance at which autopilot starts to decay speed during a manuver."))
-	float ManuveringDecayRadius = 300;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "Speed at which autopilot will manuver into place (vinterp)."))
-	float ManuveringSpeed = 10;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "How far sphere traces are cast in X axis. Negative or positive."))
-	float ScanDistance = -5000;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation", meta = (ToolTip = "Distance at which autopilot will consider itself aligned. This is used to make decisions during dodging."))
-	float AlignmentThreshold = 10;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	TArray<TEnumAsByte<EObjectTypeQuery>> DetectableObjectTypes;
 
@@ -173,18 +158,29 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Find Path", Keywords = "Find clear path in given direction. Triggers OnObstaclesDetected when obstacles are found. Returns true when path is found, false otherwise. Should only run once per tick."), Category = "MachRace|Gameplay|Navigation")
 	bool FindPath();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	float ScanInterval = .2f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	float SideScanInterval = .3f;
 
 	FTimerHandle ScanTimerHandle;
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Scan", Keywords = "Runs a scan sequence."), Category = "MachRace|Gameplay|Navigation")
+	FTimerHandle SideScanTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	float SideScanDistance = 300;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
+	FVector SideScanBoxExtent = FVector(1000, 100, 100);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Scan", Keywords = "Runs a scan sequence."), Category = "MachRace|System|Navigation")
 	void RunScanSequence();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Ambient Velocity", Keywords = "Calculates other velocities in addition to manuver or chase velocity."), Category = "MachRace|Gameplay|Navigation")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Ambient Velocity", Keywords = "Calculates other velocities in addition to manuver or chase velocity."), Category = "MachRace|System|Navigation")
 	FVector CalculateAmbientVelocity();
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Navigate", Keywords = "Umbrella navigation method. Either dodges objects or follows target."), Category = "MachRace|Gameplay|Navigation")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Navigate", Keywords = "Umbrella navigation method. Either dodges objects or follows target."), Category = "MachRace|System|Navigation")
 	void Navigate();
 
 
@@ -192,8 +188,26 @@ public:
 	// Gameplay
 	//////////////////////////////////////////////////////////////////////////
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Normally speed is adjusted by distance to the desired Y component, but it can be multiplied with this."))
+	float ManuveringAccelerationMultiplier = 1;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	AActor* Target = NULL;
+	float MaximumManuveringSpeed = 1000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Distance at which autopilot starts to decay speed during a manuver."))
+	float ManuveringDecayRadius = 300;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Speed at which autopilot will manuver into place (vinterp)."))
+	float ManuveringSpeed = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "How far sphere traces are cast in X axis. Negative or positive."))
+	float ScanDistance = -5000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Distance at which autopilot will consider itself aligned. This is used to make decisions during dodging."))
+	float AlignmentThreshold = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Actors and components that have these tags - will be filitered out from detection by autopilot."))
+	TArray<FName> TagsToIgnoreDuringPathFinding;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	FVector TargetFollowOffset = FVector::ZeroVector;
@@ -222,11 +236,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Wether or not Target should be followed (if its set). Following means flying at the same speed as the target with TargetFollowOffset offset."))
 	bool FollowTarget = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Range of bob travel - in Z."))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Not Implemented", meta = (ToolTip = "Range of bob travel - in Z."))
 	FVector2D BobRange = FVector2D(0, 0);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Speed of bob travel."))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Not Implemented", meta = (ToolTip = "Speed of bob travel."))
 	float BobSpeed = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Not Implemented")
+	FVector FlyAwayOffset = FVector::ZeroVector;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "MachRace|Not Implemented", Keywords = "Flys away in the direction specified by FlyAwayOffset."), Category = "MachRace|System|Navigation")
+	void FlyAway() {}
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Presentation
@@ -243,5 +264,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Proximity at which restore will consider itself complete."))
 	float RestoreVisualOrientationNearTo = 0.001f;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// dev stuff
+	//////////////////////////////////////////////////////////////////////////
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "TestSomething", Keywords = "Developers test function... don't use this unless you're the developer."), Category = "MachRace|Dev")
+	void TestSomething();
 
 };

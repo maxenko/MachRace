@@ -114,8 +114,6 @@ enum class GameStage : uint8 {
 	CitySubmerged	UMETA(DisplayName = "City Submerged"),
 };
 
-
-
 UENUM(BlueprintType)
 enum class DesertTileType : uint8 {
 	Empty		UMETA(DisplayName = "Empty"),
@@ -123,6 +121,11 @@ enum class DesertTileType : uint8 {
 	Mines 		UMETA(DisplayName = "Mines"),
 };
 
+UENUM(BlueprintType)
+enum class Side : uint8 {
+	Left		UMETA(DisplayName = "Left"),
+	Right 	UMETA(DisplayName = "Right"),
+};
 
 USTRUCT(BlueprintType)
 struct FCameraSettings {

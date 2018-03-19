@@ -5,7 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "AutoPilotV2.h"
 
-
+#pragma optimize("", off)
 // Sets default values for this component's properties
 UAutoPilotV2::UAutoPilotV2() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -60,6 +60,35 @@ void UAutoPilotV2::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 #pragma region path finding  
 
+TArray<FHitResult> UAutoPilotV2::filterHits(TArray<FHitResult> hits) {
+
+	TArray<FHitResult> filtered;
+
+	auto hasTags = [this](TArray<FName> tags) {
+
+		for (auto t : TagsToIgnoreDuringPathFinding) {
+			if (tags.Contains(t)) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	for (FHitResult h : hits) {
+
+		bool actorShouldBeIgnored = hasTags(h.Actor->Tags);
+		bool componentShouldBeIgnored = hasTags(h.Component->ComponentTags);
+
+		if (actorShouldBeIgnored || componentShouldBeIgnored) {
+			continue;
+		} else {
+			filtered.Add(h);
+		}
+	}
+
+	return filtered;
+}
+
 TArray<FHitResult> UAutoPilotV2::sphereTrace(FVector from, FVector to, float sphereRadius, TArray<AActor*> ignoredActors) {
 
 	// sanity check
@@ -88,30 +117,9 @@ TArray<FHitResult> UAutoPilotV2::sphereTrace(FVector from, FVector to, float sph
 		true
 	);
 
-	auto hasTags = [this](TArray<FName> tags) {
-		
-		for ( auto t : TagsToIgnoreDuringPathFinding) {
-			if (tags.Contains(t)) {
-				return true;
-			}
-		}
-		return false;
-	};
 
 	// filter hits
-	TArray<FHitResult> filteredHits;
-	for (FHitResult h : hits) {
-
-		bool actorShouldBeIgnored = hasTags(h.Actor->Tags);
-		bool componentShouldBeIgnored = hasTags(h.Component->ComponentTags);
-
-		if (actorShouldBeIgnored || componentShouldBeIgnored) {
-			continue;
-		} else {
-			filteredHits.Add(h);
-		}
-
-	}
+	TArray<FHitResult> filteredHits = filterHits(hits);
 
 	if (ShowDebug && anything) {
 
@@ -312,6 +320,8 @@ void UAutoPilotV2::RunScanSequence() {
 
 #pragma endregion  
 
+#pragma region manuvering
+
 bool UAutoPilotV2::shouldChase() {
 	return (ChaseTarget && Target);
 }
@@ -349,7 +359,6 @@ FVector UAutoPilotV2::calculateYAlignmentVelocity(FVector destination) {
 	return force;
 }
 
-//#pragma optimize("", off)
 FVector UAutoPilotV2::CalculateAmbientVelocity() {
 
 	FVector followVelocity = FVector::ZeroVector;
@@ -381,7 +390,7 @@ FVector UAutoPilotV2::CalculateAmbientVelocity() {
 
 	return FVector(x, 0, z);
 }
-//#pragma optimize("", on)
+
 
 FVector UAutoPilotV2::calcChaseVelocity() {
 	// nudge owner into Y alignment with Target
@@ -423,7 +432,46 @@ FVector UAutoPilotV2::calcManuverVelocity() {
 
 	return ret;
 }
-//#pragma optimize("", off)
+
+bool UAutoPilotV2::sideIsBlocked(Side side) {
+
+	TArray<FHitResult> hits;
+	FCollisionObjectQueryParams params1 = FCollisionObjectQueryParams::AllObjects;
+
+	for (auto t : DetectableObjectTypes) {
+		//params1.AddObjectTypesToQuery((ECollisionChannel)t.GetValue());
+	}
+
+	FCollisionShape shape;
+	shape.SetBox(SideScanBoxExtent);
+	FCollisionQueryParams params2;
+	params2.AddIgnoredActor(GetOwner());
+	params2.AddIgnoredActors(IgnoreList);
+
+
+	if (side == Side::Left) {
+
+		// ray cast left (Y)
+		GetWorld()->SweepMultiByObjectType(hits, ownerLoc, ownerLoc + FVector(0, SideScanDistance, 0), FQuat::Identity, params1, shape, params2);
+
+	} else if (side == Side::Right) {
+
+		// ray cast right (-Y)
+		GetWorld()->SweepMultiByObjectType(hits, ownerLoc, ownerLoc + FVector(0, -SideScanDistance, 0), FQuat::Identity, params1, shape, params2);
+
+	}
+
+	auto filteredHits = filterHits(hits);
+	return filteredHits.Num() > 0;
+}
+
+void UAutoPilotV2::TestSomething() {
+	auto left = sideIsBlocked(Side::Left);
+	if (left) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "left is blocked");
+	}
+}
+
 void UAutoPilotV2::setAngularImpulseAndRotationFlags() {
 
 	if (wasJustHit) {
@@ -440,9 +488,10 @@ void UAutoPilotV2::setAngularImpulseAndRotationFlags() {
 		if (e) {
 			restoreRotationToVisualOrientation = true;
 		}
-
 	}
 }
+
+#pragma endregion  
 
 void UAutoPilotV2::Navigate() {
 
@@ -455,7 +504,10 @@ void UAutoPilotV2::Navigate() {
 		return;
 	}
 
-
+	//////////////////////////////////////////////////////////////////////////
+	// Calculate maneuver/chase velocity
+	//////////////////////////////////////////////////////////////////////////
+	
 	FVector chaseOrManuverVelocity = FVector::ZeroVector;
 
 	if (PathStatus == AutopilotPathStatus::NoPath || PathStatus == AutopilotPathStatus::Path) {
@@ -520,4 +572,4 @@ void UAutoPilotV2::Navigate() {
 		}
 	}
 }
-//#pragma optimize("", on)
+#pragma optimize("", on)
