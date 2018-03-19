@@ -38,11 +38,7 @@ class MACHRACE_API UAutoPilotV2 : public UActorComponent {
 
 	GENERATED_BODY()
 
-public:	
-	UAutoPilotV2();
-
 protected:
-
 
 	FVector ownerLoc = FVector::ZeroVector;
 	USceneComponent* root = NULL;
@@ -85,6 +81,9 @@ protected:
 	void onOwnerHit();
 
 public:	
+
+	UAutoPilotV2();
+
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -191,14 +190,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Normally speed is adjusted by distance to the desired Y component, but it can be multiplied with this."))
 	float ManuveringAccelerationMultiplier = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float MaximumManuveringSpeed = 1000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Maximum physical force in Y axis at which autopilot will dodge obstacles."))
+	float MaximumManuveringPhysicsForce = 1000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Distance at which autopilot starts to decay speed during a manuver."))
 	float ManuveringDecayRadius = 300;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Speed at which autopilot will manuver into place (vinterp)."))
-	float ManuveringSpeed = 10;
+	float ManuveringInterpSpeed = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "How far sphere traces are cast in X axis. Negative or positive."))
 	float ScanDistance = -5000;
@@ -228,7 +227,7 @@ public:
 	float MaxFollowPhysicsSpeed = 10000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Maximum speed used to catch up in addition to Target velocity."))
-	float MaxAccelerationPhysicsSpeed = 500.0f;
+	float MaxAdditionalAccelerationPhysicsSpeed = 500.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Wether or not Target should be chased (if its set). Chasing mean following target in X axis."))
 	bool ChaseTarget = true;

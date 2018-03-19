@@ -347,7 +347,7 @@ FVector UAutoPilotV2::calculateYAlignmentVelocity(FVector destination) {
 	auto decayMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, ManuveringDecayRadius), FVector2D(0, 1), yDist);
 
 	// alignment force in y
-	auto yForce = FMath::Clamp(dir.Y * ManuveringAccelerationMultiplier, -MaximumManuveringSpeed, MaximumManuveringSpeed)*decayMultiplier;
+	auto yForce = FMath::Clamp(dir.Y * ManuveringAccelerationMultiplier, -MaximumManuveringPhysicsForce, MaximumManuveringPhysicsForce)*decayMultiplier;
 	
 	auto force = FVector(0, yForce, 0);
 
@@ -379,8 +379,8 @@ FVector UAutoPilotV2::CalculateAmbientVelocity() {
 		auto multZ = desiredPosition.Z <= ownerLoc.Z ? -1 : 1;
 
 		auto targetVelocity = UX::GetRootLinearVelocity(Target);
-		auto accelerationSpeedX = accelerationMultiplierX * MaxAccelerationPhysicsSpeed;
-		auto accelerationSpeedZ = accelerationMultiplierZ * MaxAccelerationPhysicsSpeed;
+		auto accelerationSpeedX = accelerationMultiplierX * MaxAdditionalAccelerationPhysicsSpeed;
+		auto accelerationSpeedZ = accelerationMultiplierZ * MaxAdditionalAccelerationPhysicsSpeed;
 
 		followVelocity = (targetVelocity + FVector((accelerationSpeedX * multX), 0, (accelerationSpeedZ * multZ)));
 	}
@@ -399,7 +399,7 @@ FVector UAutoPilotV2::calcChaseVelocity() {
 
 	auto followVelocity = calculateYAlignmentVelocity(Target->GetActorLocation());
 	auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
-	auto desiredVelocity = FMath::VInterpTo(currentVelocity, followVelocity, delta, ManuveringSpeed); // softly adjust into it
+	auto desiredVelocity = FMath::VInterpTo(currentVelocity, followVelocity, delta, ManuveringInterpSpeed); // softly adjust into it
 
 	return desiredVelocity;
 }
@@ -415,7 +415,7 @@ FVector UAutoPilotV2::calcManuverVelocity() {
 		auto finalVelocity = dodgeVelocity; // temp
 
 		auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
-		auto desiredVelocity = FMath::VInterpTo(currentVelocity, finalVelocity, delta, ManuveringSpeed); // softly adjust into it
+		auto desiredVelocity = FMath::VInterpTo(currentVelocity, finalVelocity, delta, ManuveringInterpSpeed); // softly adjust into it
 
 		ret = desiredVelocity;
 
@@ -427,7 +427,7 @@ FVector UAutoPilotV2::calcManuverVelocity() {
 
 			Status = AutopilotStatus::Idle;
 			OnStatusChange.Broadcast(Status);
-		} 
+		}
 	}
 
 	return ret;
