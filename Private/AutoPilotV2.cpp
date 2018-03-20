@@ -157,28 +157,29 @@ int32 UAutoPilotV2::findPath_singleSphereTrace() {
 int32 UAutoPilotV2::findPath_doubleSphereTrace(bool &pathFound) {
 	// do DOUBLE column trace (one on the left one on the right at ScanRadius distance)
 
-	FVector originA = ownerLoc + FVector(0, ScanRadius*scanWidth, 0);
-	FVector originB = ownerLoc - FVector(0, ScanRadius*scanWidth, 0);
+	FVector originL = ownerLoc + FVector(0, ScanRadius*scanWidth, 0);
+	FVector originR = ownerLoc - FVector(0, ScanRadius*scanWidth, 0);
 
-	FVector destinationA = originA + FVector(ScanDistance, 0, 0);
-	FVector destinationB = originB + FVector(ScanDistance, 0, 0);
+	FVector destinationL = originL + FVector(ScanDistance, 0, 0);
+	FVector destinationR = originR + FVector(ScanDistance, 0, 0);
 
-	auto traceA = sphereTrace(originA, destinationA, ScanRadius, IgnoreList);
-	auto traceB = sphereTrace(originB, destinationB, ScanRadius, IgnoreList);
+	auto traceL = sphereTrace(originL, destinationL, ScanRadius, IgnoreList);
+	auto traceR = sphereTrace(originR, destinationR, ScanRadius, IgnoreList);
 
-	auto hitCountA = traceA.Num();
-	auto hitCountB = traceB.Num();
+	auto hitCountL = traceL.Num();
+	auto hitCountR = traceR.Num();
+
 
 	// if both scans are blocked, we can't do much but keep scanning next frame with ++scanWidth
-	if (hitCountA && hitCountB) {
+	if (hitCountL && hitCountR) {
 
 		TArray<FHitResult> hits;
 
-		hits.Append(traceA);
-		hits.Append(traceB);
+		hits.Append(traceL);
+		hits.Append(traceR);
 		OnObstaclesDetected.Broadcast(hits);
 
-		scanWidth++;
+		scanWidth++; // increase scan width for next tick
 
 		pathFound = false;
 
@@ -187,25 +188,25 @@ int32 UAutoPilotV2::findPath_doubleSphereTrace(bool &pathFound) {
 		pathFound = true;
 
 		// in case there is no hits on either scan (both paths are clear, we'll pick the closest one)
-		if ( (hitCountA + hitCountB) <= 0) {
+		if ( (hitCountL + hitCountR) <= 0) {
 
 			// pick the closer path of the two
-			auto distA = UX::GetYDist(destinationA, ownerLoc);
-			auto distB = UX::GetYDist(destinationB, ownerLoc);
+			auto distA = UX::GetYDist(destinationL, ownerLoc);
+			auto distB = UX::GetYDist(destinationR, ownerLoc);
 
 			if (distA <= distB) {
-				ClearPathVector = destinationA;
+				ClearPathVector = destinationL;
 			} else {
-				ClearPathVector = destinationB;
+				ClearPathVector = destinationR;
 			}
 
 		// otherwise pick the clear one
 		} else {
 
-			if (hitCountA <= 0) {
-				ClearPathVector = destinationA;
-			} else if (hitCountB <= 0) {
-				ClearPathVector = destinationB;
+			if (hitCountL <= 0) {
+				ClearPathVector = destinationL;
+			} else if (hitCountR <= 0) {
+				ClearPathVector = destinationR;
 			}
 		}
 
@@ -215,7 +216,7 @@ int32 UAutoPilotV2::findPath_doubleSphereTrace(bool &pathFound) {
 		}
 	}
 
-	return hitCountA + hitCountB;
+	return hitCountL + hitCountR;
 }
 
 
@@ -404,6 +405,16 @@ FVector UAutoPilotV2::calcChaseVelocity() {
 	return desiredVelocity;
 }
 
+Side UAutoPilotV2::pathYSide(FVector path) {
+	if (path.Y > ownerLoc.Y) {
+		return Side::Left;
+	} else if (path.Y < ownerLoc.Y) {
+		return Side::Right;
+	}
+
+	return Side::Center;
+}
+
 FVector UAutoPilotV2::calcManuverVelocity() {
 	auto aligned = FMath::IsNearlyEqual(ownerLoc.Y, ClearPathVector.Y, AlignmentThreshold);
 	FVector ret = FVector::ZeroVector;
@@ -411,12 +422,17 @@ FVector UAutoPilotV2::calcManuverVelocity() {
 	// not aligned to clear path?
 	if (!aligned) {
 
+		// check to see if we are blocked in close proximity
+		bool blockedByCloseObject = sideIsBlocked(pathYSide(ClearPathVector));
+
 		auto dodgeVelocity = calculateYAlignmentVelocity(ClearPathVector);
 		auto finalVelocity = dodgeVelocity; // temp
 
 		auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
 		auto desiredVelocity = FMath::VInterpTo(currentVelocity, finalVelocity, delta, ManuveringInterpSpeed); // softly adjust into it
 
+		// if blocked, don't move, decrease velocity (todo: this may actually need to be reverse velocity if there is already movement in that direction)
+		//ret = blockedByCloseObject ? FVector(desiredVelocity.X, 0, desiredVelocity.Z) : desiredVelocity;
 		ret = desiredVelocity;
 
 	// otherwise we are in alignment, 
@@ -543,6 +559,8 @@ void UAutoPilotV2::Navigate() {
 	auto aggregateLinearVelocity =
 		desiredAmbientVelocity +					// follow velocity
 		FVector(0, chaseOrManuverVelocity.Y, 0);	// we only care about X  component
+
+	auto y = aggregateLinearVelocity.Y;
 
 	OwnerPhysicsComponent->SetAllPhysicsLinearVelocity(aggregateLinearVelocity);
 

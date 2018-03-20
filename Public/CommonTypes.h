@@ -116,15 +116,16 @@ enum class GameStage : uint8 {
 
 UENUM(BlueprintType)
 enum class DesertTileType : uint8 {
-	Empty		UMETA(DisplayName = "Empty"),
-	Regular 	UMETA(DisplayName = "Regular"),
-	Mines 		UMETA(DisplayName = "Mines"),
+	Empty			UMETA(DisplayName = "Empty"),
+	Regular 		UMETA(DisplayName = "Regular"),
+	Mines 			UMETA(DisplayName = "Mines"),
 };
 
 UENUM(BlueprintType)
 enum class Side : uint8 {
-	Left		UMETA(DisplayName = "Left"),
-	Right 	UMETA(DisplayName = "Right"),
+	Left			UMETA(DisplayName = "Left"),
+	Right 			UMETA(DisplayName = "Right"),
+	Center			UMETA(DisplayName = "Center"),
 };
 
 USTRUCT(BlueprintType)

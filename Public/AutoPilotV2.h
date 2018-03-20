@@ -69,6 +69,8 @@ protected:
 
 	FVector decayAngularVelocity();
 
+	Side pathYSide(FVector path);
+
 	float delta = 0.f;
 
 	bool wasJustHit = false;
