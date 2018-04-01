@@ -8,7 +8,7 @@
 #include "RaceActorBase.generated.h"
 
 UCLASS()
-class MACHRACE_API ARaceActorBase : public APawn {
+class MACHRACE_API ARaceActorBase : public AActor {
 	GENERATED_BODY()
 
 private:

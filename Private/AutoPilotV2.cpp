@@ -334,7 +334,7 @@ FVector UAutoPilotV2::decayAngularVelocity() {
 		return FVector::ZeroVector;
 	}
 
-	return FMath::VInterpTo(current, FVector::ZeroVector, delta, 1.0f);
+	return FMath::VInterpTo(current, FVector::ZeroVector, delta, DecayAngularVelocitySpeed);
 }
 
 // calculates Y alignment velocity given current clear path vector (Y component is what we care about)
@@ -370,26 +370,31 @@ FVector UAutoPilotV2::CalculateAmbientVelocity() {
 		auto desiredPosition = Target->GetActorLocation() + TargetFollowOffset;
 		
 		auto distX = UX::GetXDist(ownerLoc, desiredPosition);
+		auto distY = UX::GetXDist(ownerLoc, desiredPosition);
 		auto distZ = UX::GetZDist(ownerLoc, desiredPosition);
 
 		auto accelerationMultiplierX = FMath::GetMappedRangeValueClamped(FVector2D(0, FollowTargetAccelerationDecayDistance), FVector2D(0, FollowTargetAccelerationFactor), distX); // figure out multiplier, so we can speed up or slow down
+		auto accelerationMultiplierY = FMath::GetMappedRangeValueClamped(FVector2D(0, FollowTargetAccelerationDecayDistance), FVector2D(0, FollowTargetAccelerationFactor), distY); // figure out multiplier, so we can speed up or slow down
 		auto accelerationMultiplierZ = FMath::GetMappedRangeValueClamped(FVector2D(0, FollowTargetAccelerationDecayDistance), FVector2D(0, FollowTargetAccelerationFactor), distZ); // figure out multiplier, so we can speed up or slow down
 		
 		// is target in front or behind? We'll use this to set direction of X velocity, to either catch up or slow down
 		auto multX = desiredPosition.X <= ownerLoc.X ? -1 : 1;
+		auto multY = desiredPosition.Y <= ownerLoc.Y ? -1 : 1;
 		auto multZ = desiredPosition.Z <= ownerLoc.Z ? -1 : 1;
 
 		auto targetVelocity = UX::GetRootLinearVelocity(Target);
 		auto accelerationSpeedX = accelerationMultiplierX * MaxAdditionalAccelerationPhysicsSpeed;
+		auto accelerationSpeedY = accelerationMultiplierY * MaxAdditionalAccelerationPhysicsSpeed;
 		auto accelerationSpeedZ = accelerationMultiplierZ * MaxAdditionalAccelerationPhysicsSpeed;
 
-		followVelocity = (targetVelocity + FVector((accelerationSpeedX * multX), 0, (accelerationSpeedZ * multZ)));
+		followVelocity = (targetVelocity + FVector(accelerationSpeedX * multX, accelerationSpeedY * multY, accelerationSpeedZ * multZ));
 	}
 
 	auto x = FMath::Clamp(followVelocity.X, -MaxFollowPhysicsSpeed, MaxFollowPhysicsSpeed);
+	auto y = FMath::Clamp(followVelocity.Y, -MaxFollowPhysicsSpeed, MaxFollowPhysicsSpeed);
 	auto z = FMath::Clamp(followVelocity.Z, -MaxFollowPhysicsSpeed, MaxFollowPhysicsSpeed);
 
-	return FVector(x, 0, z);
+	return FVector(x, DontFollowInY ? 0 : y, z);
 }
 
 
@@ -398,7 +403,7 @@ FVector UAutoPilotV2::calcChaseVelocity() {
 
 	Status = AutopilotStatus::Chasing;
 
-	auto followVelocity = calculateYAlignmentVelocity(Target->GetActorLocation());
+	auto followVelocity = calculateYAlignmentVelocity(Target->GetActorLocation() + TargetChaseOffset);
 	auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
 	auto desiredVelocity = FMath::VInterpTo(currentVelocity, followVelocity, delta, ManuveringInterpSpeed); // softly adjust into it
 
@@ -536,13 +541,15 @@ void UAutoPilotV2::Navigate() {
 		chaseOrManuverVelocity = calcManuverVelocity();
 
 	} else if (PathStatus == AutopilotPathStatus::Clear) {
+		if (ChaseTarget) {
 
-		if (Status != AutopilotStatus::Chasing) {
-			Status = AutopilotStatus::Chasing;
-			OnStatusChange.Broadcast(Status);
+			if (Status != AutopilotStatus::Chasing && ChaseTarget) {
+				Status = AutopilotStatus::Chasing;
+				OnStatusChange.Broadcast(Status);
+			}
+
+			chaseOrManuverVelocity = calcChaseVelocity();
 		}
-
-		chaseOrManuverVelocity = calcChaseVelocity();
 	}
 
 	//////////////////////////////////////////////////////////////////////////

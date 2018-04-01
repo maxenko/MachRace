@@ -211,7 +211,13 @@ public:
 	TArray<FName> TagsToIgnoreDuringPathFinding;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool DontFollowInY = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	FVector TargetFollowOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	FVector TargetChaseOffset = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Factor of Target speed by which autopilot can accelerate to catch up with the target."))
 	float FollowTargetAccelerationFactor = 2;
@@ -266,6 +272,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Proximity at which restore will consider itself complete."))
 	float RestoreVisualOrientationNearTo = 0.001f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Speed at which Owner will stop spinning if it is spinning due to angular velocity."))
+	float DecayAngularVelocitySpeed = 1;
 
 	//////////////////////////////////////////////////////////////////////////
 	// dev stuff
