@@ -6,7 +6,11 @@ public class MachRace : ModuleRules
 {
 	public MachRace(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PublicDependencyModuleNames.AddRange(new string[] {
+
+        //MinFilesUsingPrecompiledHeaderOverride = 1;
+        //bFasterWithoutUnity = true;
+
+        PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject", "Engine", "InputCore", "Http", 
 
             // steam

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "RaceActorBase.h"
 #include "RaceFormationDroneBase.h"
 #include "DroneFormationBase.generated.h"
 

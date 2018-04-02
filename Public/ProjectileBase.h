@@ -7,22 +7,32 @@
 #include "ProjectileBase.generated.h"
 
 UCLASS()
-class MACHRACE_API AProjectileBase : public AActor
-{
+class MACHRACE_API AProjectileBase : public AActor {
 	GENERATED_BODY()
-	
-public:	
+
+
+
+	public:
 	// Sets default values for this actor's properties
 	AProjectileBase();
 
-protected:
+	protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+	private:
+	
+	FDateTime lifeBeganTime;
+
+	public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
-	
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Fire Projectile", Keywords = "Sets the volocity to the projectile, firing it. Returns false if physics component of the projectile could not be found."), Category = "MachRace|System")
+	bool SetProjectileVelocity(FVector velocity);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	float MaxLifeTime = 5.0f;
+
 };

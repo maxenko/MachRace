@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "RaceActorBase.h"
 #include "TurretBase.generated.h"
 
 UCLASS()
