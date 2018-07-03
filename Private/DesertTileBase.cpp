@@ -16,7 +16,11 @@ ADesertTileBase::ADesertTileBase() {
 void ADesertTileBase::BeginPlay() {
 	Super::BeginPlay();
 
-	GetState()->AddIgnoredByLaserTrace(this);
+	auto state = GetState();
+	
+	if (state){
+		state->AddIgnoredByLaserTrace(this);
+	}
 }
 
 

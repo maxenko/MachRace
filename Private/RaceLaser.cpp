@@ -101,13 +101,45 @@ bool ARaceLaser::doAutoAimTrace() {
 	FCollisionShape shape;
 	shape.SetSphere(AutoAimRadius);
 
-	bool sphereSweepHit = w->SweepSingleByObjectType(firstClosestHit, From, To, FQuat::Identity, objParams, shape, params);
+	TArray<FHitResult> multiHits;
 
+	bool sphereSweepHit = w->SweepSingleByObjectType(firstClosestHit, From, To, FQuat::Identity, objParams, shape, params);
+	//bool sphereSweepHits = w->SweepMultiByObjectType(multiHits, From, To, FQuat::Identity, objParams, shape, params);
+
+	/*
+
+	if (!sphereSweepHits) {
+		return false;
+	}
+
+	
+	for (auto h : multiHits) {
+
+		auto a = h.GetActor();
+		if (a->IsValidLowLevel()) {
+			if (a->ActorHasTag("IgnoredByLaser")) {
+				continue;
+			} else if( a->IsA(ARaceActorBase::StaticClass()) ) {
+
+				ARaceActorBase* target = Cast<ARaceActorBase>(a);
+				if (target->IsAutoAimTarget) {
+					autoAimTarget = target;
+					break;
+					return true;
+				}
+			}
+		}
+
+		if (ShowDebug) {
+			DrawDebugPoint(w, firstClosestHit.ImpactPoint, 50, FColor::White, false, .16, 0);
+		}
+	}*/
+
+	
 	if (!sphereSweepHit) {
 		return false;
 
-	}
-	else {
+	} else {
 
 		// are we hitting a target that can be autoaimed?
 		if (firstClosestHit.GetActor()->IsA(ARaceActorBase::StaticClass())) {

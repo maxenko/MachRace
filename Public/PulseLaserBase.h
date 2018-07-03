@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "RaceActorBase.h"
 #include "ProjectileBase.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "PulseLaserBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPulseFire, FVector, Velocity);
@@ -32,6 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	AActor* Target = NULL;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	FVector TargetOffset = FVector::ZeroVector;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	USceneComponent* EmitOrigin = NULL;
 
@@ -54,20 +58,19 @@ public:
 	USoundCue* FireSound = NULL;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Fire Direction", Keywords = "Gets directional vector (normilized) from the EmnitOrigin to the Target."), Category = "MachRace|System")
-	FVector GetDirectionToTarget() {
+	FRotator GetDirectionToTarget(FRotator offset) {
 
 		if (!Target) {
-			return FVector::ZeroVector;
+			return FRotator::ZeroRotator;
 		}
 
 		if (!EmitOrigin) {
-			return FVector::ZeroVector;
+			return FRotator::ZeroRotator;
 		}
 
-		auto dir = (Target->GetActorLocation() - EmitOrigin->GetComponentLocation());
-		dir.Normalize();
+		FRotator lookAtRot = UKismetMathLibrary::FindLookAtRotation(EmitOrigin->GetComponentLocation(), Target->GetActorLocation() + TargetOffset);
 
-		return dir;
+		return lookAtRot + offset;
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Projectile Velocity", Keywords = "Calculates velocity of the projectile toward the Target."), Category = "MachRace|System")
@@ -77,6 +80,10 @@ public:
 			return FVector::ZeroVector;
 		}
 
-		return (ProjectileSpeed * GetDirectionToTarget()) + OwnerPhysicsComponent->GetPhysicsLinearVelocity();
+		auto direction = (Target->GetActorLocation() + TargetOffset) - EmitOrigin->GetComponentLocation();
+		direction.Normalize();
+
+		return (ProjectileSpeed * direction) + FVector( OwnerPhysicsComponent->GetPhysicsLinearVelocity().X, 0, 0);
+													//  ^ only use X, otherwise owners can affect projectile velocity as they (i.e. drones) dodge obstacles
 	}
 };

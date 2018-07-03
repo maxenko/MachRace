@@ -17,6 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel3Reached);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel3Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel4Reached);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnEnemy, GameStage, stage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCCAdded, int32, amount);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnIntroduceDrone);
 
@@ -243,6 +244,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnLevel4Reached OnLevel4Reached;
 
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnCCAdded OnCCAdded;
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay related - misc triggers / disables / props
@@ -292,6 +296,19 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Next Speed Trigger", Keywords = "Get next stage speed, such as level switch or boss trigger speed."), Category = "MachRace|Gameplay")
 	float GetNextStageSpeed();
+
+	//////////////////////////////////////////////////////////////////////////
+	// gameplay related - finance / cc
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(BlueprintReadWrite, Category = "MachRace|Gameplay|CC")
+	int32 CurrentSessionCC = 0;
+
+	UPROPERTY(BlueprintReadWrite, Category = "MachRace|Gameplay|CC")
+	int32 TotalCC = 0;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "InRaceCollectCC", Keywords = "Adds CC as collected during normal gameplay."), Category = "MachRace|Gameplay")
+	bool InRaceCollectCC(int32 amount);
 
 	//////////////////////////////////////////////////////////////////////////
 	// presentation 

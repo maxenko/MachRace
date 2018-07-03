@@ -7,7 +7,7 @@
 #include "ProjectileBase.generated.h"
 
 UCLASS()
-class MACHRACE_API AProjectileBase : public AActor {
+class MACHRACE_API AProjectileBase : public ARaceActorBase {
 	GENERATED_BODY()
 
 

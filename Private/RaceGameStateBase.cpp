@@ -227,13 +227,13 @@ void ARaceGameStateBase::Tick(float DeltaTime) {
 
 	MaintainState();
 
-	// clean up enemies array
+	// clean up invalids utility method
 	auto removeInvalids = [](const AActor* a) {
 		return a == NULL || !UKismetSystemLibrary::IsValid(a);
 	};
 
-	ActiveEnemies.RemoveAll(removeInvalids);
-	IgnoredByLaserTrace.RemoveAll(removeInvalids);
+	ActiveEnemies.RemoveAll(removeInvalids); // remove invalid enemy actors
+	IgnoredByLaserTrace.RemoveAll(removeInvalids); // remove invalid ignored by laser actors
 }
 
 void ARaceGameStateBase::AddIgnoredByLaserTrace(AActor* actorToIgnore) {
@@ -397,7 +397,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.InterpSpeed = 2;
 		settings.HudScale = .9;
 		settings.Fov = 110;
-		settings.CameraT.SetTranslation(FVector(200, 0, 120));
+		settings.CameraT.SetTranslation(FVector(300, 0, 120));
 
 		//return settings;
 
@@ -780,4 +780,15 @@ void ARaceGameStateBase::GetLaserEffectiveRange(float& effectiveRange, float& fa
 
 	falloff = DefaultLaserFalloff;
 	effectiveRange = DefaultLaserEffectiveRange;
+}
+
+
+bool ARaceGameStateBase::InRaceCollectCC(int32 amount) {
+	CurrentSessionCC += amount;
+
+	OnCCAdded.Broadcast(amount);
+
+	// todo: verification routine here, basic stuff like: is this amount consistent with the current stage? speed? 
+
+	return true;
 }

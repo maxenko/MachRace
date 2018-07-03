@@ -62,6 +62,11 @@ public:
 		return (int32)(a - b).GetTotalMilliseconds();
 	}
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "ParseInt", Keywords = "Convert string to int. String must already be in int format."), Category = "Machrace|Utility")
+	static int32 StringToInt(FString intNum) {
+		return FCString::Atoi(*intNum);
+	}
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Within Cone", Keywords = "Returns true when vector is within given cone of to the camera."), Category = "Machrace|Utility")
 	static bool IsWithinCameraView(APlayerCameraManager* cm, FVector to, float within);
 
