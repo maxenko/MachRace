@@ -17,7 +17,7 @@ enum class AutopilotPathStatus : uint8 {
 UENUM(BlueprintType)
 enum class AutopilotStatus : uint8 {
 	Chasing 		UMETA(DisplayName = "Chasing"),
-	Manuvering 		UMETA(DisplayName = "Manuvering"),
+	Manuvering 		UMETA(DisplayName = "Maneuvering"),
 	Idle 			UMETA(DisplayName = "Idle"),
 };
 
@@ -201,6 +201,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Speed at which autopilot will manuver into place (vinterp)."))
 	float ManuveringInterpSpeed = 10;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Speed at which autopilot will manuver into place in Y-axis (vinterp)."))
+	float ManuveringInterpSpeedY = ManuveringInterpSpeed;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "How far sphere traces are cast in X axis. Negative or positive."))
 	float ScanDistance = -5000;
 
@@ -228,7 +231,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Distance in Y axis at which autopilot will think its aligned with Target (if its chasing)."))
 	float AlignedWithTargetDist = 50;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Follow adjustment speed. This gets fed into VInterp."))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Follow adjustment speed (VInterp)."))
 	float FollowSpeed = 1000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Maximum speed at which autopilot will attempt to follow Target, including speeding to catch up. This is essentially a clamp on total speed."))
@@ -274,12 +277,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay", meta = (ToolTip = "Speed at which Owner will stop spinning if it is spinning due to angular velocity."))
 	float DecayAngularVelocitySpeed = 1;
-
-	//////////////////////////////////////////////////////////////////////////
-	// dev stuff
-	//////////////////////////////////////////////////////////////////////////
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "TestSomething", Keywords = "Developers test function... don't use this unless you're the developer."), Category = "MachRace|Dev")
-	void TestSomething();
-
 };

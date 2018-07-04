@@ -39,7 +39,6 @@ void UAutoPilotV2::EndPlay(const EEndPlayReason::Type reason) {
 	Super::EndPlay(reason);
 }
 
-
 // Called every frame
 void UAutoPilotV2::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -219,7 +218,6 @@ int32 UAutoPilotV2::findPath_doubleSphereTrace(bool &pathFound) {
 	return hitCountL + hitCountR;
 }
 
-
 bool UAutoPilotV2::FindPath() {
 	
 	// only mark scan as initiated first time its triggered (which is when scanInitiated is not true)
@@ -397,7 +395,6 @@ FVector UAutoPilotV2::CalculateAmbientVelocity() {
 	return FVector(x, DontFollowInY ? 0 : y, z);
 }
 
-
 FVector UAutoPilotV2::calcChaseVelocity() {
 	// nudge owner into Y alignment with Target
 
@@ -436,9 +433,12 @@ FVector UAutoPilotV2::calcManuverVelocity() {
 		auto currentVelocity = OwnerPhysicsComponent->GetPhysicsLinearVelocity();
 		auto desiredVelocity = FMath::VInterpTo(currentVelocity, finalVelocity, delta, ManuveringInterpSpeed); // softly adjust into it
 
+		// calculate Y movement separately
+		float desiredVelocityY = FMath::FInterpTo(currentVelocity.Y, desiredVelocity.Y, delta, ManuveringInterpSpeedY);
+
 		// if blocked, don't move, decrease velocity (todo: this may actually need to be reverse velocity if there is already movement in that direction)
 		//ret = blockedByCloseObject ? FVector(desiredVelocity.X, 0, desiredVelocity.Z) : desiredVelocity;
-		ret = desiredVelocity;
+		ret = FVector(desiredVelocity.X, desiredVelocityY, desiredVelocity.Z);
 
 	// otherwise we are in alignment, 
 	} else if (aligned) {
@@ -484,13 +484,6 @@ bool UAutoPilotV2::sideIsBlocked(Side side) {
 
 	auto filteredHits = filterHits(hits);
 	return filteredHits.Num() > 0;
-}
-
-void UAutoPilotV2::TestSomething() {
-	auto left = sideIsBlocked(Side::Left);
-	if (left) {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "left is blocked");
-	}
 }
 
 void UAutoPilotV2::setAngularImpulseAndRotationFlags() {
@@ -541,9 +534,9 @@ void UAutoPilotV2::Navigate() {
 		chaseOrManuverVelocity = calcManuverVelocity();
 
 	} else if (PathStatus == AutopilotPathStatus::Clear) {
-		if (ChaseTarget) {
+		if (shouldChase()) {
 
-			if (Status != AutopilotStatus::Chasing && ChaseTarget) {
+			if (Status != AutopilotStatus::Chasing) {
 				Status = AutopilotStatus::Chasing;
 				OnStatusChange.Broadcast(Status);
 			}
