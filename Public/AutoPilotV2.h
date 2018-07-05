@@ -7,12 +7,6 @@
 #include "CommonTypes.h"
 #include "AutoPilotV2.generated.h"
 
-UENUM(BlueprintType)
-enum class AutopilotPathStatus : uint8 {
-	NoPath			UMETA(DisplayName = "NoPath"),	// completely blocked
-	Path	 		UMETA(DisplayName = "Path"),	// obstacles on the way, but need to go around them
-	Clear			UMETA(DisplayName = "Clear"),	// no obstacles whatsoever
-};
 
 UENUM(BlueprintType)
 enum class AutopilotStatus : uint8 {

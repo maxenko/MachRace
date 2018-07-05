@@ -275,3 +275,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
 	FHitResult Hit;
 };
+
+UENUM(BlueprintType)
+enum class AutopilotPathStatus : uint8 {
+	NoPath			UMETA(DisplayName = "NoPath"),	// completely blocked
+	Path	 		UMETA(DisplayName = "Path"),	// obstacles on the way, but need to go around them
+	Clear			UMETA(DisplayName = "Clear"),	// no obstacles whatsoever
+};
+
+UENUM(BlueprintType)
+enum class AutopilotPathCondition : uint8 {
+	Blocked			UMETA(DisplayName = "Blocked"),	// completely blocked
+	Clear			UMETA(DisplayName = "Clear"),	// no obstacles whatsoever
+};
+
+UENUM(BlueprintType)
+enum class AutopilotIntent : uint8 {
+	DodgeObstacles			UMETA(DisplayName = "DodgeObstacles"),			// completely blocked
+	ResumeNonDodgeBehavior	UMETA(DisplayName = "ResumeNonDodgeBehavior"),	// no obstacles whatsoever
+};
