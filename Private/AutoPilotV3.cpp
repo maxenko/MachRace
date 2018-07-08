@@ -10,7 +10,6 @@ UAutoPilotV3::UAutoPilotV3() {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
 }
 
 
@@ -55,7 +54,6 @@ float UAutoPilotV3::getVelocityX(float targetSpeed, float ownerSpeed, FVector ta
 
 	return easeInValue;
 }
-#pragma optimize("", on)
 
 float UAutoPilotV3::getFollowTargetVelocityY(float ownerSpeed, FVector targetLoc, FVector ownerLoc) {
 
@@ -63,7 +61,9 @@ float UAutoPilotV3::getFollowTargetVelocityY(float ownerSpeed, FVector targetLoc
 		return 0.0;
 	}
 
-	float dist = UX::GetYDist(targetLoc+TargetOffset, ownerLoc);
+	auto offsetTarget = targetLoc + TargetOffset;
+
+	float dist = UX::GetYDist(offsetTarget, ownerLoc);
 
 	float thresholdMultiplier = 1.0; // by default, accelerate at full speed
 
@@ -71,12 +71,14 @@ float UAutoPilotV3::getFollowTargetVelocityY(float ownerSpeed, FVector targetLoc
 		thresholdMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, AccelerationYThreshold), FVector2D(0.0, 1.0), dist);
 	}
 
-	float direction = (targetLoc.Y + TargetOffset.Y) < ownerLoc.Y ? -1 : 1; // reverse speed adjustment, depending if we're ahead or behind Target+TargetOffset
+	float direction = offsetTarget.Y < ownerLoc.Y ? -1 : 1; // reverse speed adjustment, depending if we're ahead or behind Target+TargetOffset
 	float desiredSpeedY = MaxAccelerationY * thresholdMultiplier * direction;
 	float easeInValue = FMath::FInterpTo(ownerSpeed, desiredSpeedY, delta, VelocityAdjustmentSpeedY);
 
 	return easeInValue;
 }
+
+#pragma optimize("", on)
 
 float UAutoPilotV3::getDodgeVelocityY(float ownerSpeed, FVector ownerLoc) {
 
@@ -100,8 +102,9 @@ float UAutoPilotV3::getVelocityZ(float ownerSpeed, FVector targetLoc, FVector ow
 	if (!AlignWithTargetInZ) {
 		return 0.0;
 	}
+	auto offsetTarget = targetLoc + TargetOffset;
 
-	float dist = UX::GetZDist(targetLoc + TargetOffset, ownerLoc);
+	float dist = UX::GetZDist(offsetTarget, ownerLoc);
 
 	float thresholdMultiplier = 1.0; // by default, accelerate at full speed
 
@@ -109,7 +112,7 @@ float UAutoPilotV3::getVelocityZ(float ownerSpeed, FVector targetLoc, FVector ow
 		thresholdMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(0, AccelerationZThreshold), FVector2D(0.0, 1.0), dist);
 	}
 
-	float direction = (targetLoc.Z + TargetOffset.Z) < ownerLoc.Z ? -1 : 1; // reverse speed adjustment, depending if we're above or below Target+TargetOffset
+	float direction = (offsetTarget.Z) < ownerLoc.Z ? -1 : 1; // reverse speed adjustment, depending if we're above or below Target+TargetOffset
 	float desiredSpeedZ = MaxAccelerationZ * thresholdMultiplier * direction;
 	float easeInValue = FMath::FInterpTo(ownerSpeed, desiredSpeedZ, delta, VelocityAdjustmentSpeedZ);
 
@@ -172,7 +175,7 @@ void UAutoPilotV3::Scan(FVector from, FVector to, float scanRadius, TArray<AActo
 		
 	} else {
 
-		// broadcast change if not already clear
+		// broadcast change if not already blocked
 		if (PathCondition != AutopilotPathCondition::Blocked) {
 			PathCondition = AutopilotPathCondition::Blocked;
 			OnPathConditionChange.Broadcast(PathCondition);
@@ -208,6 +211,8 @@ void UAutoPilotV3::AutoScan() {
 
 	Scan(from, to, DefaultScanRadius, IgnoreList);
 }
+
+#pragma region Scan Utility Methods
 
 TArray<FHitResult> UAutoPilotV3::filterHits(TArray<FHitResult> hits) {
 
@@ -333,3 +338,5 @@ bool UAutoPilotV3::doubleSphereTrace(FVector from, FVector to, float scanRadius,
 
 	return false;
 }
+
+#pragma endregion
