@@ -31,12 +31,11 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Ship Speed", Keywords = "Sets speed ship to a specific (theoretical) value."), Category = "MachRace|Utility")
 	void SetShipSpeed(float speed);
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool EnableOvercharge = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float ShieldHitPoints;
+	float ShieldHitPoints = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float ShieldMaxHitPoints = 500;

@@ -26,7 +26,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get MachRace State", Keywords = "Gets MachRace specific GameState."), Category = "MachRace|System")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Race State", Keywords = "Gets MachRace specific GameState."), Category = "MachRace|System")
 	ARaceGameStateBase* GetState(bool& success);
 
 };

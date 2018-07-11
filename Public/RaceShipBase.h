@@ -5,7 +5,6 @@
 #include "ShipBase.h"
 #include "RaceShipBase.generated.h"
 
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAccelerate, float, SpeedIncrease);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDecelerate, float, SpeedDecrease);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpeedChange);
