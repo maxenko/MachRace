@@ -156,10 +156,10 @@ public:
 	float Level2BossTriggerSpeed = 6000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
-	float Level3TriggerSpeed = 6000;
+	float Level3TriggerSpeed = 12000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
-	float Level3Stage2TriggerSpeed = 12000;
+	float Level3Stage2TriggerSpeed = 15000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
 	float Level3Stage3TriggerSpeed = 18000;
@@ -331,5 +331,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
 	FVector2D Level2RaisedTowerRange = FVector2D(100,500);
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// presentation - camera settings
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraPosition")
+	FVector Level2Stage2CameraPosition = FVector(230, 0, 950);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraRotation")
+	FRotator Level2Stage2CameraRotation = FRotator(-50, -180, 0);
+
+
 
 };

@@ -433,7 +433,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 			// INFINITE HEX (END)
 		} else if (speed > 3100) {
 
-			settings.CameraT.SetTranslation(FVector(275, 0, 220));
+			settings.CameraT.SetTranslation(FVector(275, 0, 250));
 			settings.CameraT.SetRotation(FRotator(-29, -180, 0).Quaternion());
 			settings.Fov = 123;
 		}
@@ -445,8 +445,8 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.InterpSpeed = 1;
 		settings.Fov = 120;
 		settings.HudScale = 1.3;
-		settings.CameraT.SetTranslation(FVector(230, 0, 950));
-		settings.CameraT.SetRotation(FRotator(-45, -180, 0).Quaternion());
+		settings.CameraT.SetTranslation(Level2Stage2CameraPosition);
+		settings.CameraT.SetRotation(Level2Stage2CameraRotation.Quaternion());
 
 	}
 	else if (Stage == GameStage::Labyrinth) {

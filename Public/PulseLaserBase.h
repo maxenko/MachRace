@@ -7,6 +7,7 @@
 #include "RaceActorBase.h"
 #include "ProjectileBase.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "X.h"
 #include "PulseLaserBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPulseFire, FVector, Velocity);
@@ -83,7 +84,9 @@ public:
 		auto direction = (Target->GetActorLocation() + TargetOffset) - EmitOrigin->GetComponentLocation();
 		direction.Normalize();
 
-		return (ProjectileSpeed * direction) + FVector( OwnerPhysicsComponent->GetPhysicsLinearVelocity().X, 0, 0);
+		auto targetYVelocity = FVector(0, UX::GetRootLinearVelocity(Target).Y, 0);
+
+		return (ProjectileSpeed * direction) + FVector( OwnerPhysicsComponent->GetPhysicsLinearVelocity().X, 0, 0) + targetYVelocity;
 													//  ^ only use X, otherwise owners can affect projectile velocity as they (i.e. drones) dodge obstacles
 	}
 };
