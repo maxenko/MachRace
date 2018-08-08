@@ -17,6 +17,19 @@ ADroneFormationBase::ADroneFormationBase(){
 void ADroneFormationBase::BeginPlay(){
 	Super::BeginPlay();
 
+	ResetTimer();
+	//GetWorldTimerManager().SetTimer(spawnTimer, this, &ADroneFormationBase::broadcastDroneSpawn, DroneSpawnFrequence, true, 2.0); // issue spawns every DroneSpawnFrequence seconds
+}
+
+void ADroneFormationBase::ResetTimer() {
+
+	auto w = GetWorld();
+	
+	if (!w) {
+		return;
+	}
+
+	w->GetTimerManager().ClearTimer(spawnTimer);
 	GetWorldTimerManager().SetTimer(spawnTimer, this, &ADroneFormationBase::broadcastDroneSpawn, DroneSpawnFrequence, true, 2.0); // issue spawns every DroneSpawnFrequence seconds
 }
 
@@ -30,23 +43,33 @@ void ADroneFormationBase::Tick(float DeltaTime){
 
 	detectAndProcessChanges();
 
-	if (DrawDebug) {
+	if (ShowDebug) {
 		drawDebug();
+	}
+
+	// enable spawns only if there is an empty column
+
+	EnableSpawns = false;
+	for (int c = 0; c < Columns; ++c) {
+		if (IsColumnEmpty(c)) {
+			EnableSpawns = true;
+		}
 	}
 
 	// if spawns are enabled, fill the empty slots in the formation
 	if (EnableSpawns) {
 		for (auto link : Links) {
 
+			// see if drone is a valid object (if its not, its likely been destroyed)
 			const auto drone = link->Drone;
 				
 			if ( !IsValid( drone ) ){
-				// add to spawn queue
+
+				// gameplay conditions
+				
 				toBeSpawned.AddUnique(link);
 			}
 		}
-
-
 	}
 
 	// clean up null refs
@@ -69,7 +92,7 @@ int32 ADroneFormationBase::getEmptySlotsCount() {
 }
 
 void ADroneFormationBase::drawDebug() {
-
+	/*
 	// sanity check
 	auto w = GetWorld();
 	if (!w) {
@@ -82,6 +105,7 @@ void ADroneFormationBase::drawDebug() {
 	}
 
 	DrawDebugBox(w, GetActorLocation(), Bounds, FColor::Red, false, .08, 0, 3.0);
+	*/
 }
 
 void ADroneFormationBase::updateColumnCounts() {
@@ -350,6 +374,45 @@ bool ADroneFormationBase::AssignClosestDroneIfNoneAreDesignated() {
 	return false;
 }
 
+FDroneFormationSquareIndex ADroneFormationBase::FindDroneIndex(ARaceFormationDroneBase* drone, bool& success) {
+	for (auto idx : Index) {
+		if (idx.Drone == drone) {
+			success = true;
+			return idx;
+		}
+	}
+
+	// on failure to find
+	success = false;
+	return FDroneFormationSquareIndex();
+}
+
+bool ADroneFormationBase::IsColumnEmpty(int columnIndex) {
+	/*
+	TArray<FDroneFormationSquareIndex> column;
+
+	
+	for (auto idx : Index) {
+		if (idx.Column == columnIndex) {
+			if (IsValid(idx.Drone)) {
+				return false;
+			}
+		}
+	}*/
+
+	auto columnIndeces = Index.FilterByPredicate([columnIndex](FDroneFormationSquareIndex i) {
+		bool columnMatch = i.Column == columnIndex;
+		bool droneIsValid = false;
+		if (columnMatch) {
+			droneIsValid = IsValid(i.Drone);
+		}
+
+		return droneIsValid;
+	});
+
+	return columnIndeces.Num() <= 0;
+}
+
 void ADroneFormationBase::cleanDestroyedDrones() {
 
 	for (int32 n = Drones.Num(); n-- > 0;) {
@@ -364,7 +427,7 @@ void ADroneFormationBase::cleanDestroyedDrones() {
 				OnAllDronesDestroyed.Broadcast();
 			}
 
-			if (DrawDebug) {
+			if (ShowDebug) {
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Formation Count: %i"), Count));
 			}
 
@@ -395,7 +458,7 @@ void ADroneFormationBase::cleanDestroyedDrones() {
 
 			ColumnCounts = sizes;
 
-			if (DrawDebug) {
+			if (ShowDebug) {
 				for (int32 i = 0; i < ColumnCounts.Num(); ++i) {
 					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
 						FString::Printf(TEXT("Col: %i, size: %i"), i, ColumnCounts[i]));
@@ -415,7 +478,7 @@ int32 ADroneFormationBase::findLargestColumnSize() {
 		}
 	}
 
-	if (DrawDebug) {
+	if (ShowDebug) {
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Largest col: %i"), largest));
 	}
 

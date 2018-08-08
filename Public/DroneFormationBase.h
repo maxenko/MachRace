@@ -89,18 +89,17 @@ private:
 	int32 findLargestColumnSize();
 	FTimerHandle spawnTimer;
 	void updateColumnCounts();
-
 	void broadcastDroneSpawn();
 	int32 getEmptySlotsCount(); // figures out how many drones are missing from full formation count
 	ARaceFormationDroneBase* findFrontFacingDrone(int32 colIdx);
-	
+
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Debug")
-	bool DrawDebug = false;
+	bool ShowDebug = false;
 
 	/** Target to follow */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
@@ -201,4 +200,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Rediscover Front Facing drones", Keywords = "Find and mark front facing drones in each column."), Category = "MachRace|System")
 	void RediscoverFrontFacingDrones();
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Reset Spawn Timer", Keywords = "Resets spawn drone timer, must be called manually after updating DroneSpawnFrequence to reflect changes."), Category = "MachRace|Gameplay")
+	void ResetTimer();
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Find Drone Index", Keywords = "Scans the Index of drones and returns an index that matches the given drone."), Category = "MachRace|System")
+	FDroneFormationSquareIndex FindDroneIndex(ARaceFormationDroneBase* drone, bool& success);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Is Column Empty?", Keywords = "Scans the Index and returns true if given column is empty."), Category = "MachRace|System")
+	bool IsColumnEmpty(int columnIndex);
 };

@@ -14,7 +14,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIgnition, bool, OnOff);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAccelerationFlash, float, Multiplier);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDecelerationFlash, float, Multiplier);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOutOfLevelBounds);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnExitOfPlayableArea);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEntryOfPlayableArea);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnExploded);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShieldActivated);
 
 UCLASS()
 class MACHRACE_API ARaceShipBase : public AShipBase {
@@ -107,6 +110,25 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnExploded OnExploded;
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnExitOfPlayableArea OnExitOfPlayableArea;
+
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnShieldActivated OnShieldActivated;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Trigger Exit Playable Area", Keywords = "Triggers OnExitOfPlayableArea."), Category = "MachRace|Gameplay")
+	void TriggerExitPlayableArea() {
+		OnExitOfPlayableArea.Broadcast();
+	}
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnEntryOfPlayableArea OnEntryOfPlayableArea;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Trigger Enter Playable Area", Keywords = "Triggers OnExitOfPlayableArea."), Category = "MachRace|Gameplay")
+	void TriggerEnterPlayableArea() {
+		OnEntryOfPlayableArea.Broadcast();
+	}
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Broadcast exploded.", Keywords = "Notifies all subscribers, that ship has exploded."), Category = "MachRace|System")
 	void BroadcastExploded();

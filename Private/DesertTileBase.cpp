@@ -75,25 +75,25 @@ int32 ADesertTileBase::GetObstacleCount() {
 					return 0;
 				}
 				else if (speed < 1200) {
-					return 10;
+					return 16;
 				}
 				else if (speed < 1500) {
-					return 12;
+					return 18;
 				}
 				else if (speed < 1700) {
-					return 13;
+					return 20;
 				}
 				else if (speed < 1800) {
-					return 14;
+					return 16;
 				}
 				else if (speed < 1900) {
-					return 15;
+					return 17;
 				}
 				else if (speed < 2200) {
-					return 10;
+					return 12;
 				}
 				else if (speed < 2600) {
-					return 7;
+					return 9;
 				}
 				else if (speed > 2600) { // boss time!
 					return 0;

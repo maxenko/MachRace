@@ -181,6 +181,11 @@ public:
 	float Level2LaserEffectiveRange = 5500;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
+	float Level2BossLaserFalloff = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
+	float Level2BossLaserEffectiveRange = 20000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
 	float Level3LaserFalloff = 5000;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
 	float Level3LaserEffectiveRange = 7500;
