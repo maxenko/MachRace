@@ -6,7 +6,6 @@
 #include "DroneFormationBase.h"
 
 
-
 // Sets default values
 ADroneFormationBase::ADroneFormationBase(){
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -49,15 +48,15 @@ void ADroneFormationBase::Tick(float DeltaTime){
 
 	// enable spawns only if there is an empty column
 
-	EnableSpawns = false;
+	enableSpawns = false;
 	for (int c = 0; c < Columns; ++c) {
 		if (IsColumnEmpty(c)) {
-			EnableSpawns = true;
+			enableSpawns = true;
 		}
 	}
 
 	// if spawns are enabled, fill the empty slots in the formation
-	if (EnableSpawns) {
+	if (enableSpawns) {
 		for (auto link : Links) {
 
 			// see if drone is a valid object (if its not, its likely been destroyed)
@@ -65,8 +64,6 @@ void ADroneFormationBase::Tick(float DeltaTime){
 				
 			if ( !IsValid( drone ) ){
 
-				// gameplay conditions
-				
 				toBeSpawned.AddUnique(link);
 			}
 		}
@@ -519,6 +516,11 @@ float ADroneFormationBase::FindLogicalFormationOffset() {
 }
 
 void ADroneFormationBase::broadcastDroneSpawn(){
+
+	if (DisableDroneSpawns) {
+		return;
+	}
+
 	if (toBeSpawned.Num() > 0) {
 
 		auto link = toBeSpawned[0];
@@ -536,6 +538,7 @@ void ADroneFormationBase::broadcastDroneSpawn(){
 
 		OnFreeSlotAvailable.Broadcast(link, c, r);
 		toBeSpawned.RemoveAt(0);
+
 	}
 }
 

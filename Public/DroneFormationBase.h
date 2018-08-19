@@ -93,6 +93,8 @@ private:
 	int32 getEmptySlotsCount(); // figures out how many drones are missing from full formation count
 	ARaceFormationDroneBase* findFrontFacingDrone(int32 colIdx);
 
+	bool enableSpawns = false; // runtime flag, to disable drone spawns use DisableDroneSpawns
+
 
 public:	
 	// Called every frame
@@ -112,7 +114,7 @@ public:
 	float AttackTriggerMinYDist = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	bool EnableSpawns = true;
+	bool DisableDroneSpawns = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	int32 Columns = 0; // Y

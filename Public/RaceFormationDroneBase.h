@@ -28,10 +28,13 @@ private:
 
 	FTimerHandle wobbleTimer;
 	FTimerHandle scanForTargetTimer;
+	FTimerHandle abandonTimer;
 	FVector wobbleOffset = FVector::ZeroVector;
 	void generateRandomOffset();
 	bool previousTargetStatus = false;
 	bool previousDesignated = false;
+
+	void triggerAbandon() {	abandoning = true; }
 
 public:	
 	// Called every frame
@@ -68,7 +71,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
 	bool FrontDrone = false;
 
-	/** Wither or not this drone is currently designated to shoot the player.
+	/** Wether or not this drone is currently designated to shoot the player.
 	When Drone loses target, this property gets reset to false. Drone formation will
 	automatically assign this property when there are not designated drones, for example
 	it will assign the closest drone to player.*/
@@ -76,7 +79,7 @@ public:
 	bool DesignatedDrone = false;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Abandon Formation", Keywords = "Mark drone as having abandoned the formation."), Category = "MachRace|Gameplay")
-	void AbandonFormation();
+	void AbandonFormation(float delay);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Is Target Within Cone", Keywords = "Mark drone as having abandoned the formation."), Category = "MachRace|Gameplay")
 	bool IsTargetWithinCone();

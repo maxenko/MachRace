@@ -11,43 +11,42 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTethered, ARaceShipBase*, Ship);
 
 UCLASS()
-class MACHRACE_API ARacePlayerBase : public APawnBase
-{
+class MACHRACE_API ARacePlayerBase : public APawnBase {
 	GENERATED_BODY()
 
-private:
+	private:
 	void trackShip();
 	TArray<FVector> followHistory;
 	void recordFloorTraceToHistory();
-	
-public:	
+
+	public:
 	// Sets default values for this actor's properties
 	ARacePlayerBase();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+
 	// Called every frame
-	virtual void Tick( float DeltaSeconds ) override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Update Camera", Keywords = "Update MachRace camera with gameplay specific settings."), Category = "Presentation|Camera")
-	void UpdateCamera(UCameraComponent* c, UStaticMeshComponent* hud, FTransform t, float fov, float hudScaleMultiplier, float speed);
+		void UpdateCamera(UCameraComponent* c, UStaticMeshComponent* hud, FTransform t, float fov, float hudScaleMultiplier, float speed);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	ARaceShipBase* RaceShip;
+		ARaceShipBase* RaceShip;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	bool IsTethered = false;
+		bool IsTethered = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
-	int32 FollowHistorySize;
+		int32 FollowHistorySize;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Race Ship", Keywords = "Get race ship as RaceShipBase."), Category = "Utility|Engine")
-	ARaceShipBase* GetRaceShip(bool& success);
+		ARaceShipBase* GetRaceShip(bool& success);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Tether Player to Ship", Keywords = "Sets the player to follow its RaceShip."), Category = "Utility|Engine")
-	bool TetherTo(ARaceShipBase* ship);
+		bool TetherTo(ARaceShipBase* ship);
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
-	FOnTethered OnThethered;
+		FOnTethered OnThethered;
 };

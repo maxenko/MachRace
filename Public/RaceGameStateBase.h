@@ -13,6 +13,7 @@ class ARacePlayerBase;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpawnLevel1Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathLevel1Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel2Boss);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRemoveLevel2Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel3Reached);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel3Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel4Reached);
@@ -32,6 +33,7 @@ private:
 	GameStage previousStage;
 	FAtmosphereSettings atmosphereSettings;
 	void SetAtmosphereByStage();
+	bool level2BossSetToBeRemoved = false;
 	
 public:
 
@@ -240,6 +242,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnLevel2Boss OnLevel2Boss;
 
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
+	FOnRemoveLevel2Boss OnRemoveLevel2Boss;
+
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnLevel3Reached OnLevel3Reached;
 
@@ -265,6 +270,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool DroneFormationSpawned = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool Level2BossEnableFiring = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	int32 Level2OnStartTilesToKeepFreeOfObstacles = 3;
@@ -295,6 +303,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool Level2BossDefeated = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	bool SafeToTransitionToLevel3 = false;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Level 1 Boss as Defeated", Keywords = "Sets level one boss as defeated, affecting related state conditions."), Category = "MachRace|Gameplay")
 	void SetLevelOneBossDeafeated();
@@ -349,5 +360,17 @@ public:
 	FRotator Level2Stage2CameraRotation = FRotator(-50, -180, 0);
 
 
+	//////////////////////////////////////////////////////////////////////////
+	// presentation - effects
+	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Effects")
+	float BoostBlurAmountLevel1 = 4.5;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Effects")
+	float BoostBlurAmountLevel2 = 2.5;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "GetStageBoostBlurAmount", Keywords = "Gets amount of boost blue appropriate for this stage."), Category = "MachRace|Gameplay")
+	float GetStageBoostBlurAmount();
 
 };

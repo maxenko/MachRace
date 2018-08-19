@@ -58,19 +58,29 @@ void ARaceFormationDroneBase::Tick(float DeltaTime){
 		}
 	}
 
+	/*
 	// trigger only when drone becomes designated
 	if (previousDesignated != DesignatedDrone) {
 		OnDesignated.Broadcast(DesignatedDrone);
 		previousDesignated = DesignatedDrone;
-	}
+	}*/
 }
 
 void  ARaceFormationDroneBase::AssignPosition(USceneComponent* position) {
 	Position = position;
 }
 
-void ARaceFormationDroneBase::AbandonFormation() {
-	abandoning = true;
+void ARaceFormationDroneBase::AbandonFormation(float delay) {
+
+	auto w = GetWorld();
+
+	if (!w) {
+		return;
+	}
+
+	w->GetTimerManager().ClearTimer(abandonTimer);
+	GetWorldTimerManager().SetTimer(abandonTimer, this, &ARaceFormationDroneBase::triggerAbandon, delay, false);
+	//abandoning = true;
 }
 
 void ARaceFormationDroneBase::generateRandomOffset() {

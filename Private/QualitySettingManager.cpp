@@ -70,7 +70,7 @@ void UQualitySettingManager::ApplyPreset(QualitySetting qs) {
 	auto runCommands = [&](TArray<FString> commands) {
 		for (FString c : commands) {
 
-			executeConsoleCommand(c.Trim().TrimTrailing());
+			executeConsoleCommand(c.TrimStart().TrimEnd());
 
 			if(PrintDebug) {
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, c.TrimStart().TrimEnd());

@@ -173,8 +173,20 @@ void ARaceGameStateBase::MaintainState() {
 
 		// did player reached level 3 speed?
 		if (speed >= Level3TriggerSpeed && !Level3Disable /* has developer disabled level3? */ ) {
-			SetStage(GameStage::Labyrinth);
-			OnLevel3Reached.Broadcast();
+
+			// set up for level 3
+
+			if (SafeToTransitionToLevel3) {
+				SetStage(GameStage::Labyrinth);
+				OnLevel3Reached.Broadcast();
+				return;
+			} else {
+				if (!level2BossSetToBeRemoved) {
+					OnRemoveLevel2Boss.Broadcast();
+					level2BossSetToBeRemoved = true; // do once flag
+				}
+			}
+
 			return;
 		}
 
@@ -800,4 +812,23 @@ bool ARaceGameStateBase::InRaceCollectCC(int32 amount) {
 	// todo: verification routine here, basic stuff like: is this amount consistent with the current stage? speed? 
 
 	return true;
+}
+
+float ARaceGameStateBase::GetStageBoostBlurAmount() {
+	// sanity checks
+	bool shipOk = false;
+	auto ship = GetRaceShip(shipOk);
+
+	if (!shipOk) {
+		return 0;
+	}
+
+	// current ship speed
+	float currentSpeed = ship->GetTheoreticalSpeed();
+
+	if (currentSpeed < 4000) {
+		return BoostBlurAmountLevel1;
+	} else {
+		return BoostBlurAmountLevel2;
+	}
 }
