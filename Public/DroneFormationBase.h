@@ -128,14 +128,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<USceneComponent*> Positions;
 
-	/* Grid index, used by game logic for drone positions / indexes within grid. */
+	/** Grid index, used by game logic for drone positions / indexes within grid. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|Gameplay")
 	TArray<FDroneFormationSquareIndex> Index;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<ARaceFormationDroneBase*> Drones;
 
-	/* Actual links that link drones to the formation. Used for formation decisions when drones are abandoned or reassigned to new formation. */
+	/** Actual links that link drones to the formation. Used for formation decisions when drones are abandoned or reassigned to new formation. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<UDroneToFormationLink*> Links;
 
@@ -143,7 +143,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
 	TArray<int32> ColumnCounts;
 
-	/* Delay between drone spawns when empty slots are available. */
+	/** Delay between drone spawns when empty slots are available. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	float DroneSpawnFrequence = .2;
 

@@ -648,7 +648,7 @@ FControlSettings ARaceGameStateBase::GetControlSettings(float speed) {
 	}
 	else if (Stage == GameStage::InfiniteHex || Stage == GameStage::InfiniteHexBoss) {
 
-		settings.BankingRotationImpulse = .05;
+		settings.BankingRotationImpulse = .3;
 		settings.BankingRotationImpulseMax = 20;
 		settings.BankingSpeedImpulse = 450;
 		settings.LeapImpulse = 8000;
@@ -659,11 +659,11 @@ FControlSettings ARaceGameStateBase::GetControlSettings(float speed) {
 
 	} else if (Stage == GameStage::Labyrinth) {
 
-		settings.BankingRotationImpulse = .1;
+		settings.BankingRotationImpulse = 1.7;
 		settings.BankingRotationImpulseMax = 30;
-		settings.BankingSpeedImpulse = 650;
+		settings.BankingSpeedImpulse = 5000;
 		settings.LeapImpulse = 35000;
-		settings.MaxBankingSpeed = 2500;
+		settings.MaxBankingSpeed = 15000;
 
 	} else if (Stage == GameStage::CitySubmerged) {
 

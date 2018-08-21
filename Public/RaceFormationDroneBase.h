@@ -71,10 +71,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
 	bool FrontDrone = false;
 
-	/** Wether or not this drone is currently designated to shoot the player.
+	/** Whether or not this drone is currently designated to shoot the player.
 	When Drone loses target, this property gets reset to false. Drone formation will
 	automatically assign this property when there are not designated drones, for example
-	it will assign the closest drone to player.*/
+	it will assign the closest drone to player. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	bool DesignatedDrone = false;
 
@@ -107,7 +107,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float ScanInterval = .3;
 
-	/* Designated if the drone has been marked as dead. Which might precede DestroyActor. */
+	/** Designated if the drone has been marked as dead. Which might precede DestroyActor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool Dead = false;
 
