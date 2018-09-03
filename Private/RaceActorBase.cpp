@@ -4,7 +4,7 @@ class ARaceGameStateBase;
 
 #include "MachRace.h"
 #include "RaceActorBase.h"
-#include "CustomExtensions.h"
+#include "X.h"
 #include "RaceGameStateBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -63,13 +63,13 @@ void ARaceActorBase::Tick( float DeltaTime ){
 
 // Called every frame
 ARaceGameStateBase* ARaceActorBase::GetState() {
-	return UCustomExtensions::GetRaceState(GetWorld());
+	return UX::GetRaceState(GetWorld());
 }
 
 
 // Called every frame
 ARaceGameStateBase* ARaceActorBase::GetStateSafe(bool &success){
-	State = UCustomExtensions::GetRaceState(GetWorld());
+	State = UX::GetRaceState(GetWorld());
 
 	if (!State) {
 		success = false;

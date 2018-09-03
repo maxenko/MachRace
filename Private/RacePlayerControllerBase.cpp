@@ -38,7 +38,7 @@ void ARacePlayerControllerBase::Tick(float DeltaSeconds) {
 }
 
 ARaceGameStateBase* ARacePlayerControllerBase::GetState() {
-	return UCustomExtensions::GetRaceState(GetWorld());
+	return UX::GetRaceState(GetWorld());
 }
 
 void ARacePlayerControllerBase::Bank(float alpha) {

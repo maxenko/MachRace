@@ -25,7 +25,7 @@ public:
 	ARaceGameStateBase* State;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Update Camera", Keywords = "Update MachRace camera with gameplay specific settings."), Category = "Presentation|Camera")
-	void UpdateRaceView(UCameraComponent* c, USceneComponent* hud, FTransform t, float fov, FVector targetHudScale, float speed);
+	void UpdateRaceView(UCameraComponent* c, USceneComponent* hud, FTransform t, float fov, FVector targetHudScale, float speed, float bloomIntensity, float bloomThreshold);
 
 
 };

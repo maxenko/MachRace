@@ -139,8 +139,8 @@ void AMachGameStateBase::transitionAtmosphere(AExponentialHeightFog* fog, FAtmos
 	fogC->SetStartDistance(FMath::FInterpTo(fogC->StartDistance, to.FogStartDist, delta, speed));
 	fogC->SetDirectionalInscatteringStartDistance(FMath::FInterpTo(fogC->DirectionalInscatteringStartDistance, to.FogInscatteringStartDist, delta, speed));
 	
-	fogC->SetFogInscatteringColor(UCustomExtensions::InterpLinearColor(fogC->FogInscatteringColor, to.FogInscatteringColor, delta, speed));
-	fogC->SetDirectionalInscatteringColor(UCustomExtensions::InterpLinearColor(fogC->DirectionalInscatteringColor, to.FogInscatteringColorDirectional, delta, speed));
+	fogC->SetFogInscatteringColor(UX::InterpLinearColor(fogC->FogInscatteringColor, to.FogInscatteringColor, delta, speed));
+	fogC->SetDirectionalInscatteringColor(UX::InterpLinearColor(fogC->DirectionalInscatteringColor, to.FogInscatteringColorDirectional, delta, speed));
 
 }
 

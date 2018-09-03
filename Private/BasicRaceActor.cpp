@@ -30,7 +30,7 @@ void ABasicRaceActor::Tick( float DeltaTime )
 
 // Called every frame
 ARaceGameStateBase* ABasicRaceActor::GetState(bool& success) {
-	auto state = UCustomExtensions::GetRaceState(GetWorld());
+	auto state = UX::GetRaceState(GetWorld());
 	if (state) {
 		success = true;
 	} else {

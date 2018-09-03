@@ -5,7 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "RacePlayerBase.h"
-#include "CustomExtensions.h"
+#include "X.h"
 
 
 ARaceGameStateBase::ARaceGameStateBase() {
@@ -395,16 +395,26 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 	settings.InterpSpeed = 1;
 	settings.HudScale = 1;
 
+	settings.BloomIntensity = 0.1;
+	settings.BloomThreshold = 0.2;
+
 	// PRELAUNCH
 	if (Stage == GameStage::Prelaunch) {
 
+		settings.BloomIntensity = 2.5;
+		settings.BloomThreshold = 2.5;
+
 		settings.HudScale = .9;
 		settings.Fov = 120;
-
+		
 		//return settings;
 
 		// DESERT LEVEL 1
 	} else if (Stage == GameStage::Desert) {
+
+
+		settings.BloomIntensity = 1.5;
+		settings.BloomThreshold = 1.5;
 
 		settings.InterpSpeed = 2;
 		settings.HudScale = .9;
@@ -416,6 +426,9 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		// DESERT LEVEL 1 BOSS
 	} else if (Stage == GameStage::DesertBoss) {
 
+		settings.BloomIntensity = 1.5;
+		settings.BloomThreshold = 1.5;
+
 		settings.InterpSpeed = 1;
 		settings.HudScale = 1.2;
 		settings.Fov = 120;
@@ -425,6 +438,9 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		// INFINITE HEX (BEGINNING)
 	} else if (Stage == GameStage::InfiniteHex) {
+
+		settings.BloomIntensity = 1.5;
+		settings.BloomThreshold = 1.5;
 
 		settings.InterpSpeed = .5;
 		settings.Fov = 120;
@@ -455,6 +471,10 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 	} else if (Stage == GameStage::InfiniteHexBoss){
 
 		settings.InterpSpeed = 1;
+
+		settings.BloomIntensity = 1.0;
+		settings.BloomThreshold = 1.0;
+
 		settings.Fov = 120;
 		settings.HudScale = 1.3;
 		settings.CameraT.SetTranslation(Level2Stage2CameraPosition);
@@ -463,15 +483,25 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 	}
 	else if (Stage == GameStage::Labyrinth) {
 
+		settings.InterpSpeed = 3;
+
 		settings.CameraT.SetTranslation(FVector(300, 0, 460));
 		settings.CameraT.SetRotation(FRotator(-32, -180, 0).Quaternion());
 		settings.Fov = 123;
 
+		settings.BloomIntensity = 0.02;
+		settings.BloomThreshold = 0.05;
+
 	} else if (Stage == GameStage::LabyrinthBoss) {
+
+		settings.InterpSpeed = 3;
 
 		settings.CameraT.SetTranslation(FVector(-500, 0, 1200));
 		settings.CameraT.SetRotation(FRotator(-90, -180, 0).Quaternion());
 		settings.Fov = 123;
+
+		settings.BloomIntensity = 0.5;
+		settings.BloomThreshold = 0.5;
 
 	} else if (Stage == GameStage::CitySubmerged) {
 
@@ -594,8 +624,8 @@ void ARaceGameStateBase::transitionAtmosphere(AExponentialHeightFog* fog, FAtmos
 	fogC->SetStartDistance(FMath::FInterpTo(fogC->StartDistance, to.FogStartDist, delta, speed));
 	fogC->SetDirectionalInscatteringExponent(FMath::FInterpTo(fogC->DirectionalInscatteringExponent, to.FogInscatteringExponent, delta, speed));
 	fogC->SetDirectionalInscatteringStartDistance(FMath::FInterpTo(fogC->DirectionalInscatteringStartDistance, to.FogInscatteringStartDist, delta, speed));
-	fogC->SetFogInscatteringColor(UCustomExtensions::InterpLinearColor(fogC->FogInscatteringColor, to.FogInscatteringColor, delta, speed));
-	fogC->SetDirectionalInscatteringColor(UCustomExtensions::InterpLinearColor(fogC->DirectionalInscatteringColor, to.FogInscatteringColorDirectional, delta, speed));
+	fogC->SetFogInscatteringColor(UX::InterpLinearColor(fogC->FogInscatteringColor, to.FogInscatteringColor, delta, speed));
+	fogC->SetDirectionalInscatteringColor(UX::InterpLinearColor(fogC->DirectionalInscatteringColor, to.FogInscatteringColorDirectional, delta, speed));
 
 }
 

@@ -61,7 +61,7 @@ void AHexTilePiece::PostInitializeComponents() {
 
 
 UClass* AHexTilePiece::GetRandomFromWeightMap() {
-	auto wrappedIdx = UCustomExtensions::WrapIdxTo(unwrappedWeightMap.Num() - 1, FMath::Rand());
+	auto wrappedIdx = UX::WrapIdxTo(unwrappedWeightMap.Num() - 1, FMath::Rand());
 	return unwrappedWeightMap[wrappedIdx].Type;
 }
 

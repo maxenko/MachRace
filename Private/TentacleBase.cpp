@@ -2,7 +2,7 @@
 
 #include "MachRace.h"
 #include "TentacleBase.h"
-#include "CustomExtensions.h"
+#include "X.h"
 
 // Sets default values
 ATentacleBase::ATentacleBase() {
@@ -176,7 +176,7 @@ bool ATentacleBase::UpdateSegment(int32 idx) {
 	segment->SetVisibility(true, false);
 	
 	// if tails falls into this index, start mesh at tail position (startPos)
-	if (UCustomExtensions::IsInRange(startPos, segmentStart, segmentEnd)) {
+	if (UX::IsInRange(startPos, segmentStart, segmentEnd)) {
 		meshStart = startPos;
 		
 	// if tentacle starts after this segment ends, there is no need to render this segment
@@ -190,7 +190,7 @@ bool ATentacleBase::UpdateSegment(int32 idx) {
 	}
 
 	// if head falls into this index, start mesh at idx+1 position
-	if (UCustomExtensions::IsInRange(endPos, segmentStart, segmentEnd)) {
+	if (UX::IsInRange(endPos, segmentStart, segmentEnd)) {
 		meshEnd = endPos;
 
 	// if tentacle ends before this segment, there is no need to render this segment

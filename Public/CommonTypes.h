@@ -138,6 +138,25 @@ public:
 	float Fov;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	float BloomIntensity = 0.1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	float BloomThreshold = 0.2;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	float LensFlareIntensity = 0.1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	float LensFlareThreshold = 0.2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	float LensFlareBokenSize = 3.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	FLinearColor LensFlareColor = FLinearColor::White;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
 	FTransform CameraT;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
