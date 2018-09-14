@@ -111,7 +111,7 @@ enum class GameStage : uint8 {
 	InfiniteHexBoss	UMETA(DisplayName = "Infinite Hex Boss"),
 	Labyrinth		UMETA(DisplayName = "Mechanical Labyrinth"),
 	LabyrinthBoss	UMETA(DisplayName = "Mechanical Labyrinth Boss"),
-	CitySubmerged	UMETA(DisplayName = "City Submerged"),
+	Space			UMETA(DisplayName = "Space"),
 };
 
 UENUM(BlueprintType)

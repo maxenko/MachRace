@@ -167,10 +167,7 @@ public:
 	float Level3Stage3TriggerSpeed = 18000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
-	float Level4TriggerSpeed = 21000;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
-	float Level5TriggerSpeed = 25020;
+	float Level4TriggerSpeed = 25038.72;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
 	float Level1LaserFalloff = 2500;
@@ -339,6 +336,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get UnderFade Settings", Keywords = "Get ship underfade settings."), Category = "MachRace|Presentation")
 	FUnderfadeSettings GetUnderFadeSettings();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level3")
+	float Level3SonicBoomMaxOpacity = 0.05;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Sonic Boom Opacity", Keywords = "Get maxium opacity for sonic boom effect. Takes current game state into account."), Category = "MachRace|Presentation")
+	float GetSonicBoomEffectOpacity();
+
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Exponential Fog", Keywords = "Get reference to content Exponential Fog component."), Category = "MachRace|Presentation")
 	AExponentialHeightFog* GetExponentialFog(bool& success);
 
@@ -348,21 +351,35 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
 	FVector2D Level2RaisedTowerRange = FVector2D(100,500);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level4")
+	FTransform Level4PlanetTransform = FTransform::Identity;
+
 
 	//////////////////////////////////////////////////////////////////////////
-	// presentation - 
-
+	// presentation - camera position
 	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraPosition")
-	FVector Level2Stage2CameraPosition = FVector(230, 0, 950);
+	FVector Level2Stage2CameraPosition = FVector(300, 0, 460);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraRotation")
-	FRotator Level2Stage2CameraRotation = FRotator(-50, -180, 0);
+	FRotator Level2Stage2CameraRotation = FRotator(-32, -180, 0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level3|Stage1|CameraPosition")
+	FVector Level3Stage1CameraPosition = FVector(230, 0, 950);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level3|Stage1|CameraRotation")
+	FRotator Level3Stage1CameraRotation = FRotator(-50, -180, 0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level4|CameraPosition")
+	FVector Level4CameraPosition = FVector(230, 0, 950);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level4|CameraRotation")
+	FRotator Level4CameraRotation = FRotator(-50, -180, 0);
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// presentation - effects
+	// presentation - post process effects
 	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Effects")

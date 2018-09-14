@@ -93,7 +93,7 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 
 			SetLevelOneBossDeafeated();
 
-		} else if (newStage == GameStage::CitySubmerged) {
+		} else if (newStage == GameStage::Space) {
 
 			bool shipOk = false;
 			auto ship = GetRaceShip(shipOk);
@@ -104,6 +104,8 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			Level1BossDefeated = true;
 
 			SetLevelOneBossDeafeated();
+
+			OnLevel4Reached.Broadcast();
 		}
 	}
 }
@@ -202,11 +204,11 @@ void ARaceGameStateBase::MaintainState() {
 	}
 
 
-	if (Stage != GameStage::CitySubmerged) {
+	if (Stage != GameStage::Space) {
 
 		// did player reached level 4 speed?
 		if (speed >= Level4TriggerSpeed && !Level4Disable /* has developer disabled level4? */) {
-			SetStage(GameStage::CitySubmerged);
+			SetStage(GameStage::Space);
 			OnLevel4Reached.Broadcast();
 		}
 	}
@@ -468,7 +470,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		//return settings;
 
-	} else if (Stage == GameStage::InfiniteHexBoss){
+	} else if (Stage == GameStage::InfiniteHexBoss) {
 
 		settings.InterpSpeed = 1;
 
@@ -485,8 +487,8 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		settings.InterpSpeed = 3;
 
-		settings.CameraT.SetTranslation(FVector(300, 0, 460));
-		settings.CameraT.SetRotation(FRotator(-32, -180, 0).Quaternion());
+		settings.CameraT.SetTranslation(Level3Stage1CameraPosition);
+		settings.CameraT.SetRotation(Level3Stage1CameraRotation.Quaternion());
 		settings.Fov = 123;
 
 		settings.BloomIntensity = 0.02;
@@ -503,15 +505,16 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.BloomIntensity = 0.5;
 		settings.BloomThreshold = 0.5;
 
-	} else if (Stage == GameStage::CitySubmerged) {
+	} else if (Stage == GameStage::Space) {
 
-		settings.InterpSpeed = 5;
+		settings.InterpSpeed = 3;
+
+		settings.CameraT.SetTranslation(Level4CameraPosition);
+		settings.CameraT.SetRotation(Level4CameraRotation.Quaternion());
 		settings.Fov = 100;
-		settings.HudScale = 2.7;
-		settings.CameraT.SetTranslation(FVector(500, 0, 150));
-		settings.CameraT.SetRotation(FRotator(-12, -180, 0).Quaternion());
 
-		//return settings;
+		settings.BloomIntensity = 0.02;
+		settings.BloomThreshold = 0.05;
 	}
 
 	return settings;
@@ -570,16 +573,16 @@ void ARaceGameStateBase::SetAtmosphereByStage() {
 		settings.FogInscatteringColor = FLinearColor(0.035282, 0.038711, 0.1, 1);
 		settings.FogInscatteringColorDirectional = settings.FogInscatteringColor;
 
-	} else if (Stage == GameStage::CitySubmerged) {
+	} else if (Stage == GameStage::Space) {
 
-		settings.FogDensity = .19;
+		settings.FogDensity = .0;
 		settings.FogHeightFaloff = 0.0001;
 		settings.FogMaxOpacity = 1.0;
 		settings.FogStartDist = 7000;
 		settings.FogInscatteringExponent = 1;
 		settings.FogInscatteringStartDist = 30000.0;
 
-		settings.FogInscatteringColor = FLinearColor(.262717, 0.315326, 0.36, 1);
+		settings.FogInscatteringColor = FLinearColor(0.035282, 0.038711, 0.1, 1);
 		settings.FogInscatteringColorDirectional = FLinearColor(0.1664, 0.192091, 0.26, 1);
 
 	}
@@ -695,11 +698,11 @@ FControlSettings ARaceGameStateBase::GetControlSettings(float speed) {
 		settings.LeapImpulse = 35000;
 		settings.MaxBankingSpeed = 15000;
 
-	} else if (Stage == GameStage::CitySubmerged) {
+	} else if (Stage == GameStage::Space) {
 
-		settings.BankingRotationImpulse = .1;
+		settings.BankingRotationImpulse = 1.8;
 		settings.BankingRotationImpulseMax = 30;
-		settings.BankingSpeedImpulse = 650;
+		settings.BankingSpeedImpulse = 7000;
 		settings.LeapImpulse = 35000*20;
 		settings.MaxBankingSpeed = 60000;
 
@@ -792,10 +795,6 @@ float ARaceGameStateBase::GetNextStageSpeed() {
 
 		return Level4TriggerSpeed;
 
-	} else if (currentSpeed < Level5TriggerSpeed) {
-
-		return Level5TriggerSpeed;
-
 	}
 
 	return -1; // suppress compiler
@@ -861,4 +860,15 @@ float ARaceGameStateBase::GetStageBoostBlurAmount() {
 	} else {
 		return BoostBlurAmountLevel2;
 	}
+}
+
+float ARaceGameStateBase::GetSonicBoomEffectOpacity() {
+
+	float ret = 0.65;
+
+	if (Stage == GameStage::Labyrinth || Stage == GameStage::LabyrinthBoss) {
+		ret = Level3SonicBoomMaxOpacity;
+	}
+
+	return ret;
 }
