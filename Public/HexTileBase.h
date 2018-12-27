@@ -18,7 +18,7 @@ private:
 	bool isWithinThreshold(FVector v); // checks to see if two coordinates are within threshold specified by SpawnThreshold
 	FVector cameraLoc;
 	FVector cameraDir;
-	static FHexTileDistribuition normilizeDistribution(FHexTileDistribuition d);
+static FHexTileDistribuition normilizeDistribution(FHexTileDistribuition d);
 	TArray<EHexTileChance> chances;
 	FHexTileDistribuition weights;
 

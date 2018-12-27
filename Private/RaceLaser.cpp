@@ -74,7 +74,7 @@ bool ARaceLaser::isAutoAimScanDue() {
 }
 
 //////////////////////////////////////////////////////////////////////////
-// handle autoaim logic (sphere trace, looking for closest RaceActorBase with .IsAutomAimTarget == true)
+/// handle autoaim logic (sphere trace, looking for closest RaceActorBase with .IsAutomAimTarget == true)
 //////////////////////////////////////////////////////////////////////////
 bool ARaceLaser::doAutoAimTrace() {
 
@@ -165,8 +165,8 @@ bool ARaceLaser::doAutoAimTrace() {
 }
 
 //////////////////////////////////////////////////////////////////////////
-// always tracing ahead, regardless if laser is firing or not
-// mainly for on/off states between firing as laser cools off and turns on
+/// always tracing ahead, regardless if laser is firing or not
+/// mainly for on/off states between firing as laser cools off and turns on
 //////////////////////////////////////////////////////////////////////////
 bool ARaceLaser::traceAhead() {
 

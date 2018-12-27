@@ -383,7 +383,9 @@ int32 ARaceGameStateBase::GetNextDesertTileN(bool increment) {
 
 	return n;
 }
-
+//////////////////////////////////////////////////////////////////////////
+/// Updates/blends camera settings, interpolated during run time.
+//////////////////////////////////////////////////////////////////////////
 FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 	FCameraSettings settings;
@@ -394,17 +396,19 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		FVector(1, 1, 1)
 	);
 
-	settings.InterpSpeed = 1;
+	settings.InterpSpeed = 3;
 	settings.HudScale = 1;
 
-	settings.BloomIntensity = 0.1;
-	settings.BloomThreshold = 0.2;
+	settings.BloomIntensity = 0.05;
+	settings.BloomThreshold = 0.1;
 
 	// PRELAUNCH
 	if (Stage == GameStage::Prelaunch) {
 
-		settings.BloomIntensity = 2.5;
-		settings.BloomThreshold = 2.5;
+		settings.InterpSpeed = 2;
+
+		settings.BloomIntensity = 0.05;
+		settings.BloomThreshold = 0.05;
 
 		settings.HudScale = .9;
 		settings.Fov = 120;
@@ -414,6 +418,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		// DESERT LEVEL 1
 	} else if (Stage == GameStage::Desert) {
 
+		settings.InterpSpeed = 3;
 
 		settings.BloomIntensity = 1.5;
 		settings.BloomThreshold = 1.5;
@@ -427,6 +432,8 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		// DESERT LEVEL 1 BOSS
 	} else if (Stage == GameStage::DesertBoss) {
+
+		settings.InterpSpeed = 3;
 
 		settings.BloomIntensity = 1.5;
 		settings.BloomThreshold = 1.5;

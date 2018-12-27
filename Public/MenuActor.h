@@ -6,7 +6,7 @@
 #include "MenuActor.generated.h"
 
 UCLASS()
-class MACHRACE_API AMenuActor : public AActor
+class MACHRACE_API AMenuActor : public APawn
 {
 	GENERATED_BODY()
 	
