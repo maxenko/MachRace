@@ -847,11 +847,83 @@ void UX::ZeroWorldTo(UWorld* w, FVector newOrigin) {
 	w->SetNewWorldOrigin(FIntVector(newOrigin.X, newOrigin.Y, newOrigin.Z) + w->OriginLocation);
 }
 
-
 FHitResult UX::TraceSingle(UWorld* w, FVector from, FVector to, TArray<AActor*> ignored) {
 	FHitResult r;
 	FCollisionQueryParams params;
 	params.AddIgnoredActors(ignored);
 	w->LineTraceSingleByChannel(r, from, to, ECollisionChannel::ECC_Visibility);
 	return r;
+}
+
+void UX::SplitArray(TArray<uint8> input, int32 index, bool& success, TArray<uint8>& a, TArray<uint8>& b) {
+
+	if (!input.IsValidIndex(index)) {
+		success = false;
+		return;
+	}
+
+	a.Empty();
+	b.Empty();
+
+	a.Append(input.GetData(), index);
+	input.RemoveAt(0, index);
+	b.Append(input);
+
+	success = true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// IO
+//////////////////////////////////////////////////////////////////////////
+
+FString UX::GetSavePath() {
+	return FPaths::ProjectUserDir();
+}
+
+//If this function cannot find or create the directory, returns false.
+bool UX::TouchDir(const FString& dirPath) {
+
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+
+	// Directory Exists?
+	if (!PlatformFile.DirectoryExists(*dirPath)) {
+		PlatformFile.CreateDirectory(*dirPath);
+
+		if (!PlatformFile.DirectoryExists(*dirPath)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool UX::SaveData(TArray<uint8> data, FString dataName) {
+	auto fileName = dataName + ".race";
+	auto fullPath = UX::GetSavePath() + fileName;
+
+	auto success = FFileHelper::SaveArrayToFile(data, *fullPath);
+	data.Empty();
+
+	return success;
+}
+
+bool UX::LoadData(TArray<uint8>& data, FString dataName) {
+
+	auto fileName = dataName + ".race";
+	auto fullPath = UX::GetSavePath() + fileName;
+
+	IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+	
+	if (!platformFile.FileExists(*fullPath)) {
+		return false;
+	}
+
+	return FFileHelper::LoadFileToArray(data, *fullPath);
+}
+
+bool UX::DataExists(const FString& dataName) {
+	IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+	auto fileName = dataName + ".race";
+	auto fullPath = UX::GetSavePath() + fileName;
+	return platformFile.FileExists(*fullPath);
 }

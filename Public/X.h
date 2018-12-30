@@ -247,12 +247,41 @@ public:
 			FVector2D ZClamp = FVector2D(-999999, 999999)
 		);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Trace Single", Keywords = "Traces single trace by channel.", AutoCreateRefTerm = "ignored"), Category = "MachRace|Utility")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Trace Single", Keywords = "Traces single trace by channel."), Category = "MachRace|Utility")
 	static FHitResult TraceSingle(UWorld* w, FVector from, FVector to, TArray<AActor*> ignored);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Weighted Chance", Keywords = "Returns true or false based on chance within 0-1 range."), Category = "MachRace|Utility")
 	static bool WeightedChance(float chance) {
 		return(FMath::RandRange(0.0f, 1.0f) < FMath::Clamp(chance, 0.0f, 1.0f)) ? false : true;
 	}
-	
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Split Array", Keywords = "Splits array into two parts."), Category = "MachRace|Array")
+	static void SplitArray(TArray<uint8> input, int32 index, bool& success, TArray<uint8>& a, TArray<uint8>& b);
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// IO
+	//////////////////////////////////////////////////////////////////////////
+
+	// get directory of the app/data
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "GetSaveDir", Keywords = "Get save directory outside of game directory."), Category = "MachRace|IO")
+	static FString GetSavePath();
+
+	// touch directory
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "TouchDir", Keywords = "Checks if directory exists, if not attempts to create it, on failure returns false."), Category = "MachRace|IO")
+	static bool TouchDir(const FString& dirPath);
+
+	// touch directory
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "DataExists", Keywords = "Checks if file exists, if not returns false."), Category = "MachRace|IO")
+	static bool DataExists(const FString& dataName);
+
+	// save data to file
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "SaveData", Keywords = "Saves data persistently with .race file extension."), Category = "MachRace|IO")
+	static bool SaveData(TArray<uint8> data, FString dataName);
+
+	// load file data
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "LoadData", Keywords = "Loads data from persistent location with .race file extension."), Category = "MachRace|IO")
+	static bool LoadData(TArray<uint8>& data, FString dataName);
+
+
 };
