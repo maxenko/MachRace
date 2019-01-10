@@ -55,8 +55,13 @@ public:
 	static bool VectorsWithinAngle(FVector a, FVector b, float angle);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Parse DateTime", Keywords = "Parse DateTime in HTTP (RFC 1123) format."), Category = "Machrace|Utility")
-	static bool ParseDateTime(const FString & DateTimeString, FDateTime & OutDateTime) {
+	static bool ParseDateTime(const FString & DateTimeString, FDateTime& OutDateTime) {
 		return FDateTime::ParseHttpDate(DateTimeString, OutDateTime); // pass-through call, as its not exposed to blueprint
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "DateTime to String", Keywords = "Return DateTime in HTTP (RFC 1123) format."), Category = "Machrace|Utility")
+	static FString DateTimeToString(const FDateTime DateTime) {
+		return DateTime.ToHttpDate();
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Total Milliseconds Between", Keywords = "Gets total number of milliseconds between two dates."), Category = "Machrace|Utility")
@@ -108,10 +113,10 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Dist Sans Z", Keywords = "Distance between points without counting Z component."), Category = "MachRace|Utility|Math")
 	static float DistSansZ(FVector from, FVector to);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Motion Blur", Keywords = "Set Motion Blur Camera Player"), Category = Camera)
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Motion Blur", Keywords = "Set Motion Blur Camera Player"), Category = "MachRace|Camera")
 	static void SetMotionBlur(UCameraComponent* cam, float amount, float max);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Lens Flare Intensity", Keywords = "Set lens flare intensity for the given camera."), Category = Camera)
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Lens Flare Intensity", Keywords = "Set lens flare intensity for the given camera."), Category = "MachRace|Camera")
 	static void SetLensFlareIntensity(UCameraComponent* cam, float amount);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "A to B Offset", Keywords = "Get Vector Point Offset Between"), Category = "MachRace|Utility|Math")
@@ -153,31 +158,31 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Wrap Index to Array Length", Keywords = "Places index inside length, with overlapping values wrapped at edges."), Category = "MachRace|Utility|Math")
 	static int32 WrapIdxTo(int32 Len, int32 index);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get substring by percentage of string.", CompactNodeTitle = "SubstrAlpha", Keywords = "Returns a substring of a string at a given alpha position."), Category = String)
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get substring by percentage of string", CompactNodeTitle = "SubstrAlpha", Keywords = "Returns a substring of a string at a given alpha position."), Category = "MachRace|Utility|String")
 	static FText SubstrAlpha(FString s, int32 len, float alpha, bool& isAtRightEdge);
 
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Get Slice", CompactNodeTitle = "SLICE", Keywords = "Get a slice of an array."), Category = "Extensions|Array")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Get Slice", CompactNodeTitle = "SLICE", Keywords = "Get a slice of an array."), Category = "MachRace|Extensions|Array")
 	static TArray<FString> ArraySlice(const TArray<FString>& TargetArray, int32 Index, int32 Size);
 
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Get random sorted range of floats.", Keywords = "Random range of floats, sorted."), Category = "Math|Array")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Get random sorted range of floats", Keywords = "Random range of floats, sorted."), Category = "MachRace|Math|Array")
 	static TArray<float> RandomSortedFloats(int32 Length, float Min, float Max);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Sum array of integers.", Keywords = "Sums a given array of ints."), Category = "Math|Array")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Sum array of integers", Keywords = "Sums a given array of ints."), Category = "MachRace|Math|Array")
 	static int32 SumIntArray(TArray<int32> a);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Random index by weight.", CompactNodeTitle = "RndIdxByWeight", Keywords = "Takes an array of integers representing weights, and picks a random index within the bounds of array based on weight."), Category = "Math|Array")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Random index by weight", CompactNodeTitle = "RndIdxByWeight", Keywords = "Takes an array of integers representing weights, and picks a random index within the bounds of array based on weight."), Category = "MachRace|Math|Array")
 	static int32 PickRandomIdxByWeight(TArray<int32> weights);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Returns array tail.", Keywords = "Return array tail (everything but the first element)."), Category = "Utility|Array")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Returns array tail", Keywords = "Return array tail (everything but the first element)."), Category = "MachRace|Utility|Array")
 	static TArray<int32> Tail(TArray<int32> a);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Url Encode.", Keywords = "Encode text to URL format."), Category = "Utility|Text")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Url Encode", Keywords = "Encode text to URL format."), Category = "MachRace|Utility|Text")
 	static FString UrlEncode(const FString url);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Fake Scores", Keywords = "Get fake scores, use for testing only."), Category = "Machrace|Scores")
 	static TArray<FString> GetFakeScores(TArray<FString> names, float pct, int32 size);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Spaced Random Vectors", Keywords = "Get random vectors that are spaced from each other."), Category = "Math|Vector")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Spaced Random Vectors", Keywords = "Get random vectors that are spaced from each other."), Category = "MachRace|Math|Vector")
 	static TArray<FVector> GetSpacedRandomVectors(
 			UPARAM(DisplayName = "Max Dist Between") float maxDistToEachOther,
 			UPARAM(DisplayName = "Range Min X") float minX,
@@ -190,19 +195,19 @@ public:
 			UPARAM(DisplayName = "Limit of tries") int32 maxTries
 		);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Percentage based on range and falloff.", Keywords = "Gets percentage distance of one vector to another based on area of effect (range) and falloff."), Category = "Math|Vector")
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Percentage based on range and falloff.", Keywords = "Gets percentage distance of one vector to another based on area of effect (range) and falloff."), Category = "MachRace|Math|Vector")
 	static float AffectorWeight(FVector from, FVector to, float range, float faloff);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set camera saturation.", Keywords = "Sets camera saturation in post processing."), Category = Camera)
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set camera saturation.", Keywords = "Sets camera saturation in post processing."), Category = "MachRace|Camera")
 	static void SetSaturation(UCameraComponent* cam, float amount);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set camera vignette.", Keywords = "Sets camera vignette intensity in post processing."), Category = Camera)
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set camera vignette.", Keywords = "Sets camera vignette intensity in post processing."), Category = "MachRace|Camera")
 	static void SetVignetteIntensity(UCameraComponent* cam, float amount);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Level 1 Obstacle count.", Keywords = "Get level 1 obstacle count by speed."), Category = Camera)
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Level 1 Obstacle count.", Keywords = "Get level 1 obstacle count by speed."), Category = "MachRace|Camera")
 	static int32 Level1ObstacleCount(float speed);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Level 1 Cable count.", Keywords = "Get level 1 cable count by speed."), Category = Camera)
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Level 1 Cable count.", Keywords = "Get level 1 cable count by speed."), Category = "MachRace|Camera")
 	static int32 Level1CableCount(float speed);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "SkewedHex", Keywords = "Generate skewed hex grid coordinates."), Category = "MachRace|Utility|Math")

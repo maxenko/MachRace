@@ -426,7 +426,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.InterpSpeed = 2;
 		settings.HudScale = .9;
 		settings.Fov = 110;
-		settings.CameraT.SetTranslation(FVector(300, 0, 120));
+		settings.CameraT.SetTranslation(Level1Stage1CameraPosition);
 
 		//return settings;
 
@@ -441,7 +441,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.InterpSpeed = 1;
 		settings.HudScale = 1.2;
 		settings.Fov = 120;
-		settings.CameraT.SetTranslation(FVector(230, 0, 150));
+		settings.CameraT.SetTranslation(Level1Stage2CameraPosition);
 
 		//return settings;
 

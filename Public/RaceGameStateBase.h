@@ -359,6 +359,12 @@ public:
 	// presentation - camera position
 	//////////////////////////////////////////////////////////////////////////
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level1|Stage1|CameraPosition")
+	FVector Level1Stage1CameraPosition = FVector(275, 0, 135);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level1|Stage2|CameraPosition")
+	FVector Level1Stage2CameraPosition = FVector(230, 0, 150);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraPosition")
 	FVector Level2Stage2CameraPosition = FVector(300, 0, 460);
 
