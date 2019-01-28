@@ -145,13 +145,19 @@ bool ARaceLaser::doAutoAimTrace() {
 		if (firstClosestHit.GetActor()->IsA(ARaceActorBase::StaticClass())) {
 
 			ARaceActorBase* target = Cast<ARaceActorBase>(firstClosestHit.GetActor());
-			if (!target->IsAutoAimTarget) {
+
+			if (!target->IsAutoAimTarget) { // only run when target changes
 				return false;
 			}
 
 			// we must be if we're here
 			autoAimTarget = target;
 			lastAutoAimHit = firstClosestHit;
+
+			if (state) {
+				state->LastAutoAimTarget = target;
+				state->OnAutoAimTargetAcquired.Broadcast(target);
+			}
 
 			if (ShowDebug) {
 				DrawDebugPoint(w, firstClosestHit.ImpactPoint, 50, FColor::White, false, .16, 0);

@@ -253,9 +253,12 @@ FHexTileDistribuition AHexTileBase::normilizeDistribution(FHexTileDistribuition 
 
 	if (sum == 1.0) {
 
+		// if entire sum falls within 0.0 - 1.0 range.
 		return d;
 	
 	} else {
+
+		// otherwise normalize the distribution
 
 		auto a = FVector2D(0, sum);
 		auto b = FVector2D(0, 1);

@@ -125,6 +125,9 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Extent To Size", Keywords = "Convert Box Extent To Size"), Category = "MachRace|Utility|Math")
 	static FVector ExtentToSize(FVector v);
 
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Readjust Vector", Keywords = "Convert Box Extent To Size"), Category = "MachRace|Utility|Math")
+	static FVector ReadjustVector(FVector vec, FVector from, float minDist);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Remap Value", Keywords = "Remap value from one domain to another."), Category = "MachRace|Utility|Math")
 	static float RemapValueToRange(float val, float oldRangeMin, float oldRangeMax, float newRangeMin, float newRangeMax);
 

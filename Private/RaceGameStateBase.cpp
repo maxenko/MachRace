@@ -25,7 +25,7 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			// force to Level1BossTriggerSpeed
 			bool shipOk = false;
 			auto ship = GetRaceShip(shipOk);
-			if (shipOk && ship->GetSpeed() < Level1BossTriggerSpeed) {
+			if (shipOk && ship->GetTheoreticalSpeed() < Level1BossTriggerSpeed) {
 				ship->SetShipSpeed(Level1BossTriggerSpeed);
 			}
 
@@ -44,7 +44,7 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 
 			bool shipOk = false;
 			auto ship = GetRaceShip(shipOk);
-			if (shipOk && ship->GetSpeed() < Level1BossTriggerSpeed) {
+			if (shipOk && ship->GetTheoreticalSpeed() < Level1BossTriggerSpeed) {
 				ship->SetShipSpeed(Level1BossTriggerSpeed);
 			}
 
@@ -57,7 +57,7 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 
 			bool shipOk = false;
 			auto ship = GetRaceShip(shipOk);
-			if (shipOk && ship->GetSpeed() < Level1BossTriggerSpeed) {
+			if (shipOk && ship->GetTheoreticalSpeed() < Level1BossTriggerSpeed) {
 				ship->SetShipSpeed(Level2BossTriggerSpeed);
 				OnLevel2Boss.Broadcast();
 			}
@@ -84,7 +84,7 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			bool shipOk = false;
 			auto ship = GetRaceShip(shipOk);
 
-			ship->SetShipSpeed(Level3Stage3TriggerSpeed+1);
+			ship->SetShipSpeed(Level3Stage2TriggerSpeed+1);
 
 			OnLevel3BossReached.Broadcast();
 
@@ -149,26 +149,6 @@ void ARaceGameStateBase::MaintainState() {
 			return;
 		}
 
-		
-		// are we deploying drone?
-		if ((speed > Level2ObstacleTriggerspeed) && Level2Count > Level2OnStartTilesToKeepFreeOfObstacles) {
-
-			// is there a drone active?
-			if (ActiveEnemies.Num() <= 0) {
-				// if not spawn one
-				OnSpawnEnemy.Broadcast(Stage); // blueprint handles the rest
-
-				// check if this is first time obstacles are enabled (this is when we introduce level 2 guidance drone)
-				if (!Level2GuidanceDroneIntroduced) {
-
-					Level2GuidanceDroneIntroduced = true;
-
-					// trigger one time event (when first drone appears)
-					OnIntroduceDrone.Broadcast();
-				}
-			}
-		}
-
 		return;
 
 	} else if (Stage == GameStage::InfiniteHexBoss) {
@@ -196,7 +176,7 @@ void ARaceGameStateBase::MaintainState() {
 
 	
 	if (Stage == GameStage::Labyrinth) {
-		if (speed >= Level3Stage3TriggerSpeed && speed < Level4TriggerSpeed) {
+		if (speed >= Level3Stage2TriggerSpeed && speed < Level4TriggerSpeed) {
 			SetStage(GameStage::LabyrinthBoss);
 			EnableAutoAim = false;
 			OnLevel3BossReached.Broadcast();
@@ -257,6 +237,7 @@ void ARaceGameStateBase::AddIgnoredByLaserTrace(AActor* actorToIgnore) {
 void ARaceGameStateBase::AddActiveEnemy(AActor* enemy) {
 	ActiveEnemies.Add(enemy);
 }
+
 
 bool ARaceGameStateBase::RemoveActiveEnemy(AActor* enemy) {
 	for (int i = 0; i < ActiveEnemies.Num(); ++i) {
@@ -448,34 +429,25 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		// INFINITE HEX (BEGINNING)
 	} else if (Stage == GameStage::InfiniteHex) {
 
+		// default setting
 		settings.BloomIntensity = 1.5;
 		settings.BloomThreshold = 1.5;
 
 		settings.InterpSpeed = .5;
 		settings.Fov = 120;
 		settings.HudScale = 1.3;
-		settings.CameraT.SetTranslation(FVector(245, 0, 320));
-		settings.CameraT.SetRotation(FRotator(-29, -180, 0).Quaternion());
+		settings.CameraT.SetTranslation(Level2Stage1CameraPosition);
+		settings.CameraT.SetRotation(Level2Stage1CameraRotation.Quaternion());
 
 
-		if (speed < 2000) {
+		if (speed >= Level2ObstacleTriggerspeedThreshold1) {
 
-			//return settings;
+			settings.CameraT.SetTranslation(Level2Stage2CameraPosition);
+			settings.CameraT.SetRotation(Level2Stage2CameraRotation.Quaternion());
 
-		} else if (speed > 2500) {
-
-			settings.CameraT.SetTranslation(FVector(260, 0, 320));
-			settings.Fov = 121.5;
-
-			// INFINITE HEX (END)
-		} else if (speed > 3100) {
-
-			settings.CameraT.SetTranslation(FVector(275, 0, 250));
-			settings.CameraT.SetRotation(FRotator(-29, -180, 0).Quaternion());
-			settings.Fov = 123;
 		}
 
-		//return settings;
+		return settings;
 
 	} else if (Stage == GameStage::InfiniteHexBoss) {
 
@@ -486,8 +458,8 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		settings.Fov = 120;
 		settings.HudScale = 1.3;
-		settings.CameraT.SetTranslation(Level2Stage2CameraPosition);
-		settings.CameraT.SetRotation(Level2Stage2CameraRotation.Quaternion());
+		settings.CameraT.SetTranslation(Level2BossCameraPosition);
+		settings.CameraT.SetRotation(Level2BossCameraRotation.Quaternion());
 
 	}
 	else if (Stage == GameStage::Labyrinth) {
@@ -794,10 +766,6 @@ float ARaceGameStateBase::GetNextStageSpeed() {
 
 		return Level3Stage2TriggerSpeed;
 
-	} else if (currentSpeed < Level3Stage3TriggerSpeed) {
-
-		return Level3Stage3TriggerSpeed;
-
 	} else if (currentSpeed < Level4TriggerSpeed) {
 
 		return Level4TriggerSpeed;
@@ -878,4 +846,74 @@ float ARaceGameStateBase::GetSonicBoomEffectOpacity() {
 	}
 
 	return ret;
+}
+
+AActor* ARaceGameStateBase::GetAutoAimTargetSafe(bool& success) {
+
+	if (UKismetSystemLibrary::IsValid(LastAutoAimTarget)) {
+
+		auto autoAimTarget = Cast<ARaceActorBase>(LastAutoAimTarget); // ARaceActorBase might have additional data
+
+		if (autoAimTarget) { 
+			if (!autoAimTarget->IsAutoAimTarget) { // check to see if this <ARaceActorBase>autoAimTarget is still broadcasting to be targeted (if not it was likely destroyed)
+				success = false;
+				return NULL;
+			}
+		}
+
+		success = true;
+		return LastAutoAimTarget;
+	}
+
+	success = false;
+	return NULL;
+}
+
+bool ARaceGameStateBase::RequestAttackerStatus(ARaceActorBase* requester) {
+
+	if (!UKismetSystemLibrary::IsValid(CurrentAttacker)) {
+
+		CurrentAttacker = requester;
+		return true;
+	}
+
+	return false;
+}
+
+bool ARaceGameStateBase::ReleaseAttackerStatus(ARaceActorBase* attacker) {
+	if (CurrentAttacker == attacker) {
+		CurrentAttacker = NULL;
+		return true;
+	}
+
+	return false;
+}
+
+int32 ARaceGameStateBase::GetLevel3Stage1ObstacleCount() {
+	if (Stage != GameStage::Labyrinth) {
+		return 0;
+	}
+
+	// sanity checks
+	bool shipOk = false;
+	auto ship = GetRaceShip(shipOk);
+
+	if (!shipOk) {
+		return 0;
+	}
+
+	// current ship speed
+	float currentSpeed = ship->GetTheoreticalSpeed();
+
+	if (currentSpeed < 12300) {
+		return 8;
+
+	} else if (currentSpeed < 12600) {
+		return 10;
+
+	} else if (currentSpeed < 18000) {
+		return 11;
+	}
+
+	return 0;
 }

@@ -20,6 +20,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel4Reached);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnEnemy, GameStage, stage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCCAdded, int32, amount);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAutoAimTargetAcquired, AActor*, target);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnIntroduceDrone);
 
 UCLASS()
@@ -70,6 +72,17 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Gameplay")
 	TArray<AActor*> ActiveEnemies;
 
+	AActor* LastAutoAimTarget = NULL;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System|Gameplay")
+	ARaceActorBase* CurrentAttacker = NULL;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Request Attacker Status", Keywords = "Request to become primary attacker."), Category = "MachRace|System")
+	bool RequestAttackerStatus(ARaceActorBase* requester);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Release Attacker Status", Keywords = "Release self from primary attacker status."), Category = "MachRace|System")
+	bool ReleaseAttackerStatus(ARaceActorBase* attacker);
+
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Game Stage", Keywords = "Sets game stage, forces if necessary."), Category = "MachRace|System")
 	void SetStage(GameStage newStage, bool force = false);
 
@@ -112,8 +125,6 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Maintain State", Keywords = "Observe and maintain rules of the game."), Category = "MachRace|Gameplay")
 	void MaintainState();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Control settings", Keywords = "Get controls settings based on game stage and speed."), Category = "MachRace|Controls")
-	FControlSettings GetControlSettings(float speed);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Theoretical Speed Mult", Keywords = "Get theoretical speed multiplier, used to translate physical speed to theoretical."), Category = "MachRace|Engine")
 	float GetTheoreticalSpeedMultiplier() {
@@ -121,52 +132,58 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	// gameplay related - dynamic settings
+	// gameplay related - dynamic settings (things that chance based on game state)
 	//////////////////////////////////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Laser Effective Range", Keywords = "Gets effectrive range of the laser, based on various gameplay conditions."), Category = "MachRace|Gameplay")
 	void GetLaserEffectiveRange(float& effectiveRange, float& faloff);
+
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Control settings", Keywords = "Get controls settings based on game stage and speed."), Category = "MachRace|Controls")
+	FControlSettings GetControlSettings(float speed);
+
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Level3 Obstacle Count", Keywords = "Gets Level 3 Stage 1 obstacle count."), Category = "MachRace|Level3|Gameplay")
+	int32 GetLevel3Stage1ObstacleCount();
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay related - speed(s)
 	//////////////////////////////////////////////////////////////////////////
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level1")
 	float Level1BossTriggerSpeed = 2600;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	float Level2ObstacleTriggerspeed = 2700;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
-	float Level2ObstacleTriggerspeedThreshold1 = 3200;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
+	float Level2ObstacleTriggerspeedThreshold1 = 3000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
-	float Level2ObstacleTriggerspeedThreshold2 = 3800;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
+	float Level2ObstacleTriggerspeedThreshold2 = 3600;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	float Level2ObstacleTriggerspeedThreshold3 = 4400;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	float Level2ObstacleTriggerspeedThreshold4 = 4700;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	float Level2ObstacleTriggerspeedThreshold5 = 5200;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	float Level2DroneSpawnSpeedLimit = 2800;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	float Level2BossTriggerSpeed = 6000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level3")
 	float Level3TriggerSpeed = 12000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
-	float Level3Stage2TriggerSpeed = 15000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level3")
+	float Level3Stage2TriggerSpeed = 18000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
-	float Level3Stage3TriggerSpeed = 18000;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level4")
 	float Level4TriggerSpeed = 25038.72;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
@@ -212,11 +229,11 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 
 	/** If enabled will prevent level 3 triggering. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level3")
 	bool Level3Disable = false;
 
 	/** If enabled will prevent level 4 triggering. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level4")
 	bool Level4Disable = false;
 
 
@@ -254,24 +271,23 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnCCAdded OnCCAdded;
 
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnAutoAimTargetAcquired OnAutoAimTargetAcquired;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get LastAutoAimTarget Safe", Keywords = "Gets last autoaim target, if one exists and is still valid."), Category = "MachRace|Engine")
+	AActor* GetAutoAimTargetSafe(bool& success);
 
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay related - misc triggers / disables / props
 	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	bool Level2GuidanceDroneIntroduced = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	bool WaterEnabled = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool DroneFormationSpawned = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	bool Level2BossEnableFiring = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	int32 Level2OnStartTilesToKeepFreeOfObstacles = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
@@ -295,13 +311,13 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool EnableAutoAim = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level1")
 	bool Level1BossDefeated = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	bool Level2BossDefeated = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level3")
 	bool SafeToTransitionToLevel3 = false;
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Level 1 Boss as Defeated", Keywords = "Sets level one boss as defeated, affecting related state conditions."), Category = "MachRace|Gameplay")
@@ -348,7 +364,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
 	AExponentialHeightFog* ExponentialFog;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2")
 	FVector2D Level2RaisedTowerRange = FVector2D(100,500);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level4")
@@ -366,10 +382,22 @@ public:
 	FVector Level1Stage2CameraPosition = FVector(230, 0, 150);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraPosition")
+	FVector Level2Stage1CameraPosition = FVector(245, 0, 320);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraRotation")
+	FRotator Level2Stage1CameraRotation = FRotator(-29, -180, 0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraPosition")
 	FVector Level2Stage2CameraPosition = FVector(300, 0, 460);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraRotation")
 	FRotator Level2Stage2CameraRotation = FRotator(-32, -180, 0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraPosition")
+	FVector Level2BossCameraPosition = FVector(300, 0, 460);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level2|Stage2|CameraRotation")
+	FRotator Level2BossCameraRotation = FRotator(-32, -180, 0);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level3|Stage1|CameraPosition")
 	FVector Level3Stage1CameraPosition = FVector(230, 0, 950);
@@ -388,10 +416,10 @@ public:
 	// presentation - post process effects
 	//////////////////////////////////////////////////////////////////////////
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level1")
 	float BoostBlurAmountLevel1 = 4.5;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level1")
 	float BoostBlurAmountLevel2 = 2.5;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "GetStageBoostBlurAmount", Keywords = "Gets amount of boost blue appropriate for this stage."), Category = "MachRace|Gameplay")

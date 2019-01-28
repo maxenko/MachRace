@@ -872,6 +872,23 @@ void UX::SplitArray(TArray<uint8> input, int32 index, bool& success, TArray<uint
 	success = true;
 }
 
+FVector UX::ReadjustVector(FVector vec, FVector from, float minDist) {
+
+	auto dist = FVector::Distance(vec, from);
+
+	if (dist >= minDist) {
+		// already at minimum distance
+		return vec;
+	} else {
+
+		// space out the vector
+
+		auto direction = (vec - from).GetSafeNormal();
+
+		return (vec + (direction * (minDist - dist)));
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 // IO
 //////////////////////////////////////////////////////////////////////////
