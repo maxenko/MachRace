@@ -15,6 +15,9 @@ ATurretBase::ATurretBase() {
 // Called when the game starts or when spawned
 void ATurretBase::BeginPlay() {
 	Super::BeginPlay();
+
+	TurretBaseOriginalTransform = TurretBase->GetRelativeTransform();
+	TurretBodyOriginalTransform = TurretBody->GetRelativeTransform();
 }
 
 // Called every frame
@@ -22,8 +25,17 @@ void ATurretBase::Tick( float DeltaTime ) {
 	Super::Tick( DeltaTime );
 
 	if (EnableTracking) {
+
 		TrackingAim = track(DeltaTime);
-		auto total = fadeDecals(DeltaTime);
+
+		if(EnableDecals) {
+			auto total = fadeDecals(DeltaTime);
+		}
+
+	} else {
+		if ( !FMath::IsNearlyEqual(returnToOriginalRotationDelta, 0.0f, 0.001f)) {
+			returnToOriginalRotationDelta = returnToOriginalRotation(DeltaTime);
+		}
 	}
 }
 
@@ -31,7 +43,7 @@ float ATurretBase::track(float delta) {
 
 	bool found;
 	auto loc = getTargetWorldPosition(found);
-	float targetAcquired = 0; // 1 is acquired, 0 means not
+	float targetAcquired = 0; // return value: 1 is acquired, 0 means not
 
 	if (found) {
 
@@ -56,6 +68,24 @@ float ATurretBase::track(float delta) {
 	}
 
 	return targetAcquired;
+}
+
+float ATurretBase::returnToOriginalRotation(float delta) {
+
+	auto currentRotBase = TurretBase->RelativeRotation;
+	auto rotBase = FMath::RInterpTo(currentRotBase, TurretBaseOriginalTransform.Rotator(), delta, TrackingSpeed);
+	rotateBaseToTarget(rotBase);
+
+	auto currentRotBody = TurretBody->RelativeRotation;
+	auto rotBody = FMath::RInterpTo(currentRotBody, TurretBodyOriginalTransform.Rotator(), delta, TrackingSpeed);
+	rotateBodyToTarget(rotBody);
+
+	
+	auto distBase = FVector::Dist(currentRotBase.Vector(), TurretBaseOriginalTransform.Rotator().Vector());
+	auto distBody = FVector::Dist(currentRotBody.Vector(), TurretBodyOriginalTransform.Rotator().Vector());
+
+	// return avg sum of overall progress, 0 means it has returned to original rotation
+	return (distBase + distBody) / 2;
 }
 
 FRotator ATurretBase::getTargetLookAtRot(FVector targetLoc) {
@@ -113,6 +143,7 @@ void ATurretBase::rotateBodyToTarget(FRotator rot) {
 }
 
 
+
 TArray<FHitResult> ATurretBase::Fire() {
 
 	// only fire if we have some projectile origins
@@ -142,7 +173,10 @@ TArray<FHitResult> ATurretBase::Fire() {
 
 		if (isAHit) {
 			hits.Add(hit);
-			SpawnTrailDecal(hit);
+
+			if (EnableDecals) {
+				SpawnTrailDecal(hit);
+			}
 		}
 
 		if (DrawDebug) {
@@ -155,26 +189,29 @@ TArray<FHitResult> ATurretBase::Fire() {
 	return hits;
 }
 
+#pragma optimize("", off)
 int ATurretBase::fadeDecals(float delta) {
 
 	for (int i = 0; i < decals.Num(); ++i ) {
 
-		auto d = decals[i];
-
-		if (!d || d->IsPendingKill() || !d->IsValidLowLevel() ) {
-			decals.RemoveAt(i);
+		if (i < decals.Num()) { // check again because we shrink
 			continue;
 		}
 
-		auto newScale = d->GetComponentScale();
+		if (!IsValid(decals[i])) {
+			decals.RemoveAt(i);
+			decals.Shrink();
+			continue;
+		}
+
+		auto newScale = decals[i]->GetComponentScale();
 		newScale.Z = FMath::FInterpTo(newScale.Z, 0.0001, delta, TraceFadeSpeed);
-		d->SetWorldScale3D(newScale);
+		decals[i]->SetWorldScale3D(newScale);
 	}
 
-	decals.Shrink();
 	return decals.Num();
 }
-
+#pragma optimize("", on)
 
 void ATurretBase::SpawnTrailDecal(FHitResult hit) {
 
@@ -201,4 +238,3 @@ void ATurretBase::SpawnTrailDecal(FHitResult hit) {
 
 	previousHit = hit;
 }
-

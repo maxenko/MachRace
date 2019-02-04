@@ -108,6 +108,8 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 			OnLevel4Reached.Broadcast();
 		}
 	}
+
+	OnOnStageChange.Broadcast(previousStage, newStage);
 }
 
 void  ARaceGameStateBase::SetLevelOneBossDeafeated() {
@@ -133,9 +135,11 @@ void ARaceGameStateBase::MaintainState() {
 
 	// level 1 rules
 	if (Stage == GameStage::Desert && speed >= Level1BossTriggerSpeed && !Level1BossDefeated) {
-		PreviousStage = GameStage::Desert;
-		Stage = GameStage::DesertBoss;
+		SetStage(GameStage::DesertBoss);
+		//PreviousStage = GameStage::Desert;
+		//Stage = GameStage::DesertBoss;
 		OnSpawnLevel1Boss.Broadcast();
+		//OnOnStageChange.Broadcast(previousStage, Stage);
 		return;
 	}
 

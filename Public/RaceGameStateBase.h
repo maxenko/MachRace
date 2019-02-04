@@ -18,6 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel3Reached);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel3Boss);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevel4Reached);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnEnemy, GameStage, stage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStageChange, GameStage, previousStage, GameStage, newStage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCCAdded, int32, amount);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAutoAimTargetAcquired, AActor*, target);
@@ -240,6 +241,9 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay related - gameplay events
 	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
+	FOnStageChange OnOnStageChange;
 
 	UPROPERTY(BlueprintAssignable, Category = "MachRace|Gameplay")
 	FOnSpawnLevel1Boss OnSpawnLevel1Boss;

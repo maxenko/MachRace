@@ -21,8 +21,15 @@ private:
 
 	void rotateBaseToTarget(FRotator rot);
 	void rotateBodyToTarget(FRotator rot);
+	
 	float track(float delta);
+	float returnToOriginalRotation(float delta);
+	float returnToOriginalRotationDelta = 1.0f;
+
 	int fadeDecals(float);
+
+	FTransform TurretBaseOriginalTransform = FTransform::Identity;
+	FTransform TurretBodyOriginalTransform = FTransform::Identity;
 
 
 public:	
@@ -60,18 +67,20 @@ public:
 	void SpawnTrailDecal(FHitResult hit);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret|Operation")
-	bool EnableTracking;
+	bool EnableTracking = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret|Debug")
-	bool DrawDebug;
+	bool DrawDebug = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret|Operation")
-	float TrackingSpeed;
+	float TrackingSpeed = 1.0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Turret|Operation")
 	float TrackingAim;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Turret|Presentation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret|Presentation")
 	float TraceFadeSpeed = 1;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret|Presentation")
+	bool EnableDecals = true;
 };
