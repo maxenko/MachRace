@@ -481,9 +481,9 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		settings.InterpSpeed = 3;
 
-		settings.CameraT.SetTranslation(FVector(-500, 0, 1200));
-		settings.CameraT.SetRotation(FRotator(-90, -180, 0).Quaternion());
-		settings.Fov = 123;
+		settings.CameraT.SetTranslation(Level3Stage2CameraPosition);
+		settings.CameraT.SetRotation(Level3Stage2CameraRotation.Quaternion());
+		settings.Fov = Level3Stage2CameraFOV;
 
 		settings.BloomIntensity = 0.5;
 		settings.BloomThreshold = 0.5;
@@ -853,6 +853,11 @@ float ARaceGameStateBase::GetSonicBoomEffectOpacity() {
 }
 
 AActor* ARaceGameStateBase::GetAutoAimTargetSafe(bool& success) {
+
+	if (!LastAutoAimTarget) {
+		success = false;
+		return NULL;
+	}
 
 	if (UKismetSystemLibrary::IsValid(LastAutoAimTarget)) {
 

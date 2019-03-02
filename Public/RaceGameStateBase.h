@@ -376,7 +376,7 @@ public:
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// presentation - camera position
+	// presentation - camera state
 	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level1|Stage1|CameraPosition")
@@ -408,6 +408,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level3|Stage1|CameraRotation")
 	FRotator Level3Stage1CameraRotation = FRotator(-50, -180, 0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level3|Stage2|CameraPosition")
+	FVector Level3Stage2CameraPosition = FVector(-500, 0, 1200);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level3|Stage2|CameraRotation")
+	FRotator Level3Stage2CameraRotation = FRotator(-90, -180, 0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level3|Stage2|CameraFOV")
+	float Level3Stage2CameraFOV = 120.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level4|CameraPosition")
 	FVector Level4CameraPosition = FVector(230, 0, 950);

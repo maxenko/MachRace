@@ -68,7 +68,7 @@ void ARacePlayerControllerBase::Bank(float alpha) {
 	auto finalImpulse = FVector(0, controls.BankingSpeedImpulse * multiplier, 0);
 	ship->Bank(finalImpulse);
 
-	ship->Spin(FVector(controls.BankingRotationImpulse*-negOrPos,0,0), 0/*controls.BankingRotationImpulseMax*/);
+	//ship->Spin(FVector(controls.BankingRotationImpulse*-negOrPos,0,0), 0/*controls.BankingRotationImpulseMax*/);
 }
 
 ARaceShipBase* ARacePlayerControllerBase::GetShip(bool &success) {

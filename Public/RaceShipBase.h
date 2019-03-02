@@ -142,8 +142,9 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Bank", Keywords = "Banks ship."), Category = "MachRace|System")
 	void Bank(FVector impulse);
 
+	/*
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Spin", Keywords = "Spin ship."), Category = "MachRace|System")
-	FVector Spin(FVector impulse, float maxX = 0);
+	FVector Spin(FVector impulse, float maxX = 0);*/
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Yaw", Keywords = "Yaw ship."), Category = "MachRace|System")
 	float Yaw(bool direction);

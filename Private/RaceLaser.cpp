@@ -14,6 +14,28 @@ ARaceLaser::ARaceLaser() {
 }
 
 
+// Called every frame
+void ARaceLaser::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+
+	// always trace
+	traceAhead();
+
+	if (!BeamPath) {
+		buildBeam();
+	} else if (IsFiring) {
+		updateBeam();
+	}
+
+	if (beamMesh) {
+		beamMesh->SetVisibility(IsFiring);
+	}
+
+	// update look at rotation between From and To (as it may shift), useful for various effects on the laser to align.
+	LaserLookAtRot = UKismetMathLibrary::FindLookAtRotation(From, To);
+}
+
+
 void ARaceLaser::buildBeam() {
 
 	// we need mesh component before we proceed 
@@ -189,9 +211,10 @@ bool ARaceLaser::traceAhead() {
 	FHitResult hit;
 	ECollisionChannel channel = ECollisionChannel::ECC_Visibility;
 
-	auto actorLoc = GetActorLocation();
-	From = FromMarker ? FromMarker->GetComponentLocation() : actorLoc; // figure out where laser is originating from
+
+	From = FromMarker ? FromMarker->GetComponentLocation() : GetActorLocation(); // figure out where laser is originating from
 	To = From + Direction;
+
 	bool block = false; // whether trace hit anything or not
 	bool isAutoAimedTrace = false; // whether or not this trace is hitting auto-aim target. For instance its isn't when player is just shooting straight and hitting actors not marked as 'IsAutoaimTarget.
 
@@ -282,29 +305,6 @@ bool ARaceLaser::traceAhead() {
 // Called when the game starts or when spawned
 void ARaceLaser::BeginPlay() {
 	Super::BeginPlay();
-}
-
-
-// Called every frame
-void ARaceLaser::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-
-	// always trace
-	traceAhead();
-
-	if (!BeamPath) {
-		buildBeam();
-	}
-	else if (IsFiring) {
-		updateBeam();
-	}
-
-	if (beamMesh) {
-		beamMesh->SetVisibility(IsFiring);
-	}
-
-	// update look at rotation between From and To (as it may shift), useful for various effects on the laser to align.
-	LaserLookAtRot = UKismetMathLibrary::FindLookAtRotation(From, To);
 }
 
 

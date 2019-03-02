@@ -222,7 +222,7 @@ void ARaceShipBase::Bank(FVector impulse) {
 
 	if (rootOk) {
 
-		// add lateral impulse
+		// add lateral impulse (move in Y)
 		physVol->AddImpulse(impulse,NAME_None,true);
 
 		if (impulse.Y > 0) {
@@ -263,15 +263,15 @@ float ARaceShipBase::Yaw(bool direction) {
 	return GetActorRotation().Yaw;
 }
 
-
+/*
 FVector ARaceShipBase::Spin(FVector impulse, float maxX) {
 	bool rootOk = false;
 	auto physVol = getRootAsPrimitive(rootOk);
 	auto finalImpulse = FVector::ZeroVector;
 
 	if (rootOk) {
-		auto currentImpulse = physVol->GetPhysicsAngularVelocityInRadians();
-		if (maxX == 0 || FMath::Abs( currentImpulse.X ) < maxX) {
+		auto currentAngVelocity = physVol->GetPhysicsAngularVelocityInRadians();
+		if (maxX == 0 || FMath::Abs(currentAngVelocity.X ) < maxX) {
 			physVol->AddAngularImpulseInRadians(impulse, NAME_None, true);
 		}
 		finalImpulse = physVol->GetPhysicsAngularVelocityInRadians();
@@ -281,7 +281,7 @@ FVector ARaceShipBase::Spin(FVector impulse, float maxX) {
 
 	return finalImpulse;
 }
-
+*/
 
 float ARaceShipBase::GetTheoreticalSpeed() {
 
