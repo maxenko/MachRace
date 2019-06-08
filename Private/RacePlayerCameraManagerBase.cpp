@@ -1,7 +1,7 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "RacePlayerCameraManagerBase.h"
+#include "MachRace.h"
 #include "RaceActorBase.h"
 #include "X.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -43,9 +43,10 @@ void ARacePlayerCameraManagerBase::UpdateRaceView(UCameraComponent* c, USceneCom
 
 	auto delta = GetWorld()->GetDeltaSeconds();
 
+	/*** camera location ***/
+	auto iT = UKismetMathLibrary::TInterpTo(c->GetRelativeTransform(), t, delta, speed);
 
 	/*** fov ***/
-	auto iT = UKismetMathLibrary::TInterpTo(c->GetRelativeTransform(), t, delta, speed);
 	auto iFov = FMath::FInterpTo(c->FieldOfView, fov, delta, speed);
 
 
@@ -63,6 +64,8 @@ void ARacePlayerCameraManagerBase::UpdateRaceView(UCameraComponent* c, USceneCom
 	/*** hud ***/
 	auto currentHudScale = hud->GetRelativeTransform().GetScale3D();
 	auto iHudScale = FMath::VInterpTo(currentHudScale, targetHudScale, delta, speed);
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Z: %f"), iT.GetLocation().Z));
 
 	c->SetFieldOfView(iFov);
 	c->SetRelativeTransform(iT);

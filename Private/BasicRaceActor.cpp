@@ -1,7 +1,7 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "BasicRaceActor.h"
+#include "MachRace.h"
 #include "RaceActorBase.h"
 #include "RaceShipBase.h"
 

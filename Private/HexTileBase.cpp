@@ -1,9 +1,9 @@
 // Copyright 2015 - Max Enko
 
+#include "HexTileBase.h"
 #include "MachRace.h"
 #include "DrawDebugHelpers.h"
 #include "RaceShipBase.h"
-#include "HexTileBase.h"
 #include "Kismet/KismetMathLibrary.h"
 
 

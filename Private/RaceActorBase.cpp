@@ -2,8 +2,8 @@
 
 class ARaceGameStateBase;
 
-#include "MachRace.h"
 #include "RaceActorBase.h"
+#include "MachRace.h"
 #include "X.h"
 #include "RaceGameStateBase.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -36,7 +36,7 @@ void ARaceActorBase::Tick( float DeltaTime ){
 	Super::Tick( DeltaTime );
 
 	if (KillSelfIfBehindCamera) {
-		if (GEngine) {
+		if (GEngine) {  
 
 			auto w = GetWorld();
 

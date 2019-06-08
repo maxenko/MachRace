@@ -1,9 +1,10 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "PawnBase.h"
-
+#include "MachRace.h"
+#include "X.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Camera/CameraComponent.h"
 
 
 // Sets default values
@@ -14,6 +15,19 @@ APawnBase::APawnBase()
 
 }
 
+// Called every frame
+ARaceGameStateBase* APawnBase::GetState() {
+	return UX::GetRaceState(GetWorld());
+}
+
+
+
+void APawnBase::PostInitializeComponents() {
+	Super::PostInitializeComponents();
+	State = GetState(); // only available in BeginPlay in BP
+}
+
+
 void APawnBase::UpdateCamera(UCameraComponent* c, UStaticMeshComponent* hud, FTransform t, float fov, float hudScaleMultiplier, float speed) {
 
 	if (!c) {
@@ -22,10 +36,10 @@ void APawnBase::UpdateCamera(UCameraComponent* c, UStaticMeshComponent* hud, FTr
 
 	auto delta = GetWorld()->GetDeltaSeconds();
 	auto iT = UKismetMathLibrary::TInterpTo(c->GetRelativeTransform(), t, delta, speed);
-	auto iFov = UKismetMathLibrary::FInterpTo(c->FieldOfView, fov, delta, speed);
+	auto iFov = FMath::FInterpTo(c->FieldOfView, fov, delta, speed);
 
 	auto currentHudScale = hud->GetRelativeTransform().GetScale3D();
-	auto iHudScale = UKismetMathLibrary::VInterpTo(currentHudScale, currentHudScale*hudScaleMultiplier, delta, speed);
+	auto iHudScale = FMath::VInterpTo(currentHudScale, currentHudScale*hudScaleMultiplier, delta, speed);
 
 	c->SetFieldOfView(iFov);
 	c->SetRelativeTransform(iT);

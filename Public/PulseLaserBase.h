@@ -8,6 +8,7 @@
 #include "ProjectileBase.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "X.h"
+#include "Sound/SoundCue.h"
 #include "PulseLaserBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPulseFire, FVector, Velocity);

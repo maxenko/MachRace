@@ -4,6 +4,7 @@
 
 #include "GameFramework/Actor.h"
 #include "RaceActorBase.h"
+#include "Components/DecalComponent.h"
 #include "TurretBase.generated.h"
 
 UCLASS()

@@ -2,10 +2,10 @@
 
 #pragma once
 
+#include "RaceFormationDroneBase.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "RaceActorBase.h"
-#include "RaceFormationDroneBase.h"
 #include "DroneFormationBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridUpdate);

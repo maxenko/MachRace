@@ -1,8 +1,8 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "RaceShipBase.h"
-#include "CustomExtensions.h"
+#include "MachRace.h"
+//#include "CustomExtensions.h"
 #include "X.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -81,32 +81,40 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 
 		auto stage = state->Stage;
 
-		if (stage == GameStage::Desert || stage == GameStage::DesertBoss ) { // stages where ship hovers
+		// maintain same Z position as ship has now
+		if (MinDistFromGround == -1) {
+			
+			SetActorLocation(GetActorLocation());
 
-			// interp to target distance from ground (which could be changing frame to frame)
-			MinDistFromGroundCurrent = FMath::FInterpTo(MinDistFromGroundCurrent, MinDistFromGround, DeltaSeconds, ShipHoverRealignmentSpeed);
+		} else {
 
-			FHitResult hit;
-			CheckGroundDist(hit);
+			if (stage == GameStage::Desert || stage == GameStage::DesertBoss) { // stages where ship hovers
 
-			if (hit.IsValidBlockingHit()) {
+				// interp to target distance from ground (which could be changing frame to frame)
+				MinDistFromGroundCurrent = FMath::FInterpTo(MinDistFromGroundCurrent, MinDistFromGround, DeltaSeconds, ShipHoverRealignmentSpeed);
 
-				if (hit.Actor->ActorHasTag("Floor")){ // only adjust to actual desert floor, not various objects on the floor
+				FHitResult hit;
+				CheckGroundDist(hit);
 
-					FVector actorLoc = GetActorLocation();
-					FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGroundCurrent);
-					SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
+				if (hit.IsValidBlockingHit()) {
+
+					if (hit.Actor->ActorHasTag("Floor")) { // only adjust to actual desert floor, not various objects on the floor
+
+						FVector actorLoc = GetActorLocation();
+						FVector targetPos = FVector(actorLoc.X, actorLoc.Y, hit.Location.Z + MinDistFromGroundCurrent);
+						SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
+					}
 				}
+
+			} else { // stages where ship doesn't hover (it readjusts back to default hover value)
+
+				FVector actorLoc = GetActorLocation();
+				MinDistFromGroundCurrent = FMath::FInterpTo(actorLoc.Z, MinDistFromGround, DeltaSeconds, ShipHoverRealignmentSpeed);
+
+				// fade to target hover height from current Z
+				FVector targetPos = FVector(actorLoc.X, actorLoc.Y, MinDistFromGroundCurrent);
+				SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
 			}
-
-		} else { // stages where ship doesn't hover (it readjusts back to default hover value)
-
-			FVector actorLoc = GetActorLocation();
-			MinDistFromGroundCurrent = FMath::FInterpTo(actorLoc.Z, MinDistFromGround, DeltaSeconds, ShipHoverRealignmentSpeed);
-
-			// fade to target hover height from current Z
-			FVector targetPos = FVector(actorLoc.X, actorLoc.Y, MinDistFromGroundCurrent);
-			SetActorLocation(FMath::VInterpTo(actorLoc, targetPos, DeltaSeconds, GroundFollowSpeed));
 		}
 	}
 }
@@ -363,4 +371,80 @@ void ARaceShipBase::TriggerIgnition(bool onOff) {
 
 void ARaceShipBase::BroadcastExploded() {
 	OnExploded.Broadcast();
+}
+
+
+
+void ARaceShipBase::SetShipSpeed(float speed) {
+	UPrimitiveComponent* root = Cast<UPrimitiveComponent>(GetRootComponent());
+
+	if (root && GetState()) {
+
+		FVector newV = FVector(
+
+			-speed / GetState()->GetTheoreticalSpeedMultiplier(),
+			root->GetPhysicsAngularVelocityInRadians().Y,
+			root->GetPhysicsAngularVelocityInRadians().Z
+
+		);
+
+		root->SetPhysicsLinearVelocity(newV, false);
+	}
+}
+
+void ARaceShipBase::ChargeShield(float amount) {
+
+	float plusCharge = (ShieldHitPoints + amount);
+
+	// are we going to max out shield?
+	if (plusCharge > ShieldMaxHitPoints) {
+
+		// add overflow to overcharge
+		ShieldHitPoints = ShieldMaxHitPoints;
+
+		if (EnableOvercharge) {
+			OverchargeTotal += (plusCharge - ShieldMaxHitPoints);
+		}
+
+	}
+	else {
+		ShieldHitPoints = plusCharge;
+	}
+
+	ShieldHitPoints = FMath::Clamp<float>(ShieldHitPoints + amount, 0, ShieldMaxHitPoints);
+
+	OnShieldCharge.Broadcast();
+
+	OnShieldActivity.Broadcast();
+}
+
+void ARaceShipBase::DepleteShield(float amount) {
+
+	ShieldHitPoints = FMath::Clamp<float>(ShieldHitPoints - amount, 0, ShieldMaxHitPoints);
+
+	OnShieldDeplete.Broadcast();
+
+	if (ShieldHitPoints == 0) {
+		OnShieldDepleted.Broadcast();
+	}
+
+	OnShieldActivity.Broadcast();
+}
+
+int32 ARaceShipBase::GetOverchargeCount() {
+	float wholes = (OverchargeTotal - FMath::Fmod(OverchargeTotal, ShieldMaxHitPoints)) / ShieldMaxHitPoints;
+	return (int32)wholes;
+}
+
+int32 ARaceShipBase::ResetOverchargeCount() {
+	auto was = GetOverchargeCount();
+	OverchargeTotal = 0;
+	return was;
+}
+
+void ARaceShipBase::TakeDeltaDamage(float delta, float dmgAmount) {
+
+	float dmg = delta * dmgAmount;
+
+	DepleteShield(dmg);
 }

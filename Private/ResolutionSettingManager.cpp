@@ -1,8 +1,8 @@
 // Copyright 2015 - Max Enko
 
+#include "ResolutionSettingManager.h"
 #include "MachRace.h"
 #include "X.h"
-#include "ResolutionSettingManager.h"
 
 
 // Sets default values for this component's properties

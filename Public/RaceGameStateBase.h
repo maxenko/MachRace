@@ -108,6 +108,11 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get next desert tile N", Keywords = "Gets next desert tile number based on Level1Index."), Category = "MachRace|Controls")
 	int32 GetNextDesertTileN(bool increment);
 
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Reset Desert Tile Count", Keywords = "Resets tile count to given number. Defaults to 0."), Category = "MachRace|Controls")
+	void ResetDesertTileCount(int to = 0) {
+		Level1Index = 0;
+	}
+
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get next desert tile N", Keywords = "Gets next desert tile number based on Level1Index."), Category = "MachRace|Controls")
 	int32 CountHexTile() {
 		Level2Count++; 
@@ -303,6 +308,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
 	float TopSpeed = 0;
 
+	UPROPERTY(BlueprintReadOnly, Category = "MachRace|Gameplay")
+	float TopXVelocity = 0;
+
 	UPROPERTY(BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool DisableObstacles = false;
 
@@ -378,6 +386,13 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// presentation - camera state
 	//////////////////////////////////////////////////////////////////////////
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level1|Stage1|CameraRotation")
+	FRotator Level1Stage1CameraRotation = FRotator(-29, -180, 0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level1|Stage2|CameraRotation")
+	FRotator Level1Stage2CameraRotation = FRotator(-29, -180, 0);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Presentation|Level1|Stage1|CameraPosition")
 	FVector Level1Stage1CameraPosition = FVector(275, 0, 135);

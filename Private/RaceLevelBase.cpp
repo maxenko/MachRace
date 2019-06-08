@@ -1,8 +1,7 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "RaceLevelBase.h"
-
+#include "MachRace.h"
 
 // Sets default values
 ARaceLevelBase::ARaceLevelBase(){

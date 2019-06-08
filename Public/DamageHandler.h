@@ -54,6 +54,12 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Health", Keywords = "Set Health to specific value."), Category = "MachRace|Gameplay")
 	void SetHealth(float amount);
 
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Max Health", Keywords = "Set Max Health to specific value."), Category = "MachRace|Gameplay")
+	void SetMaxHealth(float amount);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Pct Health", Keywords = "Get percentage of overall health."), Category = "MachRace|Gameplay")
+	float GetPctOfOverallHealth() { return Health / MaxHealth; }
+
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Register Component For Damage", Keywords = "Register component to be tracked for damage."), Category = "MachRace|Gameplay")
 	void RegisterComponentForDamage(USceneComponent* c, float initialHealth);
 

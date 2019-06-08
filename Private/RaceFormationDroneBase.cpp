@@ -1,7 +1,7 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "RaceFormationDroneBase.h"
+#include "MachRace.h"
 #include "X.h"
 #include "RaceShipBase.h"
 

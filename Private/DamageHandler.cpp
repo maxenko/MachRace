@@ -1,8 +1,9 @@
 // Copyright 2015 - Max Enko
 
+#include "DamageHandler.h"
 #include "MachRace.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "DamageHandler.h"
+
 
 // Sets default values for this component's properties
 UDamageHandler::UDamageHandler() {
@@ -68,7 +69,11 @@ float UDamageHandler::AddHealth(float amount) {
 }
 
 void UDamageHandler::SetHealth(float amount){
-	Health = MaxHealth = FMath::Clamp(amount, 0.f, 999999.f);
+	Health = FMath::Clamp(amount, 0.f, 999999.f);
+}
+
+void UDamageHandler::SetMaxHealth(float amount) {
+	MaxHealth = FMath::Clamp(amount, 0.f, 999999.f);
 }
 
 // Called when the game starts

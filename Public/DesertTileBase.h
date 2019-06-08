@@ -21,9 +21,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "MachRace|System|Gameplay")
 	DesertTileType TileType;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Instancer", Keywords = "Gets MachRace instancer, same as Sate->GetInstancer."), Category = "MachRace|Utility")
-	ARaceContentInstancer* GetInstancer(bool& success);
-
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Obstacle Count", Keywords = "Get obstacle count based on speed of the ship."), Category = "MachRace|System")
 	int32 GetObstacleCount();
 };

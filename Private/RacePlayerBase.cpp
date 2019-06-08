@@ -1,9 +1,10 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "RacePlayerBase.h"
+#include "MachRace.h"
 
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -34,31 +35,6 @@ void ARacePlayerBase::Tick( float DeltaTime ){
 		this->trackShip();
 
 	}
-}
-
-void ARacePlayerBase::UpdateCamera(UCameraComponent* c, UStaticMeshComponent* hud, FTransform t, float fov, float hudScaleMultiplier, float speed) {
-
-	if (!c) {
-		return;
-	}
-
-	auto delta = GetWorld()->GetDeltaSeconds();
-	auto iT = UKismetMathLibrary::TInterpTo(c->GetRelativeTransform(), t, delta, speed);
-	auto iFov = FMath::FInterpTo(c->FieldOfView, fov, delta, speed);
-
-	auto currentHudScale = hud->GetRelativeTransform().GetScale3D();
-	auto iHudScale = FMath::VInterpTo(currentHudScale, currentHudScale*hudScaleMultiplier, delta, speed);
-
-	c->SetFieldOfView(iFov);
-	c->SetRelativeTransform(iT);
-	hud->SetRelativeTransform(
-		FTransform(
-			hud->GetRelativeTransform().GetRotation(),
-			hud->GetRelativeTransform().GetTranslation(),
-			iHudScale
-		)
-	);
-
 }
 
 ARaceShipBase* ARacePlayerBase::GetRaceShip(bool& success) {

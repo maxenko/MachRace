@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "VaRestPlugin.h"
 #include "CommonTypes.h"
 #include "RaceGameStateBase.h"
 #include "X.generated.h"
@@ -27,6 +28,11 @@ public:
 
 	static int32 GetYDirMult(FVector a, FVector b) {
 		return a.Y < b.Y ? -1 : 1;
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "FromInt64", Keywords = "Get int32 from int64.."), Category = "Machrace|Utility")
+	static int32 FromInt64(int64 i64) {
+		return (int32)i64;
 	}
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Y Dist.", Keywords = "Get distance between vectors using Y axis only."), Category = "Machrace|Utility")
@@ -182,8 +188,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Url Encode", Keywords = "Encode text to URL format."), Category = "MachRace|Utility|Text")
 	static FString UrlEncode(const FString url);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Fake Scores", Keywords = "Get fake scores, use for testing only."), Category = "Machrace|Scores")
-	static TArray<FString> GetFakeScores(TArray<FString> names, float pct, int32 size);
+	//UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Fake Scores", Keywords = "Get fake scores, use for testing only."), Category = "Machrace|Scores")
+	//static TArray<FString> GetFakeScores(TArray<FString> names, float pct, int32 size);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Spaced Random Vectors", Keywords = "Get random vectors that are spaced from each other."), Category = "MachRace|Math|Vector")
 	static TArray<FVector> GetSpacedRandomVectors(
@@ -260,7 +266,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Weighted Chance", Keywords = "Returns true or false based on chance within 0-1 range."), Category = "MachRace|Utility")
 	static bool WeightedChance(float chance) {
-		return(FMath::RandRange(0.0f, 1.0f) < FMath::Clamp(chance, 0.0f, 1.0f)) ? false : true;
+		float rnd = FMath::RandRange(0.0f, 1.0f);
+		return( rnd < FMath::Clamp(chance, 0.0f, 1.0f) ) ? true : false;
 	}
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Split Array", Keywords = "Splits array into two parts."), Category = "MachRace|Array")
@@ -268,7 +275,7 @@ public:
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// IO
+	// IO : Storage
 	//////////////////////////////////////////////////////////////////////////
 
 	// get directory of the app/data

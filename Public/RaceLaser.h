@@ -33,6 +33,8 @@ private:
 public:	
 
 	ARaceLaser();
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay specific properties
@@ -45,7 +47,7 @@ public:
 	FVector DefaultDirection = FVector(-1, 0, 0);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Direction = FVector(-50000,0,0);
+	FVector Direction = FVector(-999999,0,0);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	float AutoAimRadius = 600;
@@ -131,19 +133,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
 	int32 AutoAimScanInterval = 100;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	TArray<AActor*> CalculatedTargets;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Apply Calculated Damage", Keywords = "This function will apply damage to any CalculatedTargets (targets which are not damaged by ray-tracing but by calculating their positions instead). Returns position of the first target."), Category = "MachRace|Gameplay")
+	bool ApplyCalculatedDamage(float baseDamage, TSubclassOf<UDamageType> dmgType, FVector& hitLoc);
 
 	//////////////////////////////////////////////////////////////////////////
 	// gameplay
 	//////////////////////////////////////////////////////////////////////////
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float CalculatedDamageYDist = 150;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Calculated Damage Amount", Keywords = "Gets calculated damage based on distance and faloff."), Category = "MachRace|Gameplay")
 	float GetCalculatedDamageAmount(float effectiveRange, float falloff, float damage, float distance);
-
-
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	
-	// Called every frame
-	virtual void Tick( float DeltaSeconds ) override;
 
 };

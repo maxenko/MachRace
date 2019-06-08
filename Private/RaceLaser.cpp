@@ -1,7 +1,7 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "RaceLaser.h"
+#include "MachRace.h"
 #include "DrawDebugHelpers.h"
 #include "X.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -11,6 +11,11 @@ ARaceLaser::ARaceLaser() {
 
 	bIgnoresOriginShifting = false;
 	PrimaryActorTick.bCanEverTick = true;
+}
+
+void ARaceLaser::BeginPlay() {
+	Super::BeginPlay();
+	AddTickPrerequisiteActor(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 }
 
 
@@ -301,13 +306,6 @@ bool ARaceLaser::traceAhead() {
 	return block;
 }
 
-
-// Called when the game starts or when spawned
-void ARaceLaser::BeginPlay() {
-	Super::BeginPlay();
-}
-
-
 float ARaceLaser::GetCalculatedDamageAmount(float effectiveRange, float falloff, float damage, float distance) {
 
 	float fullDamageDist = FMath::Clamp(effectiveRange - falloff, 0.0f, TNumericLimits<float>::Max());
@@ -324,4 +322,51 @@ float ARaceLaser::GetCalculatedDamageAmount(float effectiveRange, float falloff,
 
 	// out of range;
 	return 0.0f;
+}
+
+bool ARaceLaser::ApplyCalculatedDamage(float baseDamage, TSubclassOf<UDamageType> dmgType, FVector& hitLoc) {
+
+	// no targets?
+
+	if (CalculatedTargets.Num() <= 0) {
+		hitLoc = FVector::ZeroVector;
+		return false;
+	}
+	else {
+
+		// clean up first (remove all NonValid actors)
+		for (auto target : CalculatedTargets) {
+			if (!IsValid(target)) {
+				CalculatedTargets.Remove(target);
+			}
+		}
+
+		CalculatedTargets.Shrink();
+	}
+
+	// some targets?
+
+	for (auto target : CalculatedTargets) {
+
+		if (!IsValid(target)) {
+			continue;
+		}
+
+		auto selfLoc = GetActorLocation();
+		auto targetLoc = target->GetActorLocation();
+
+		if (UX::GetYDist(targetLoc, selfLoc) <= CalculatedDamageYDist) {
+
+			// direction
+			auto dir = targetLoc - selfLoc;
+			auto hit = FHitResult(selfLoc, targetLoc);
+
+			UGameplayStatics::ApplyPointDamage(target, baseDamage, dir, hit, this->GetInstigatorController(), this, dmgType);
+
+			return true;
+		}
+	}
+
+	hitLoc = FVector::ZeroVector;
+	return false;
 }

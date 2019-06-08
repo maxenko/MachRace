@@ -1,7 +1,9 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "RacePlayerControllerBase.h"
+#include "MachRace.h"
+#include "X.h"
+
 
 ARacePlayerControllerBase::ARacePlayerControllerBase() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -63,12 +65,9 @@ void ARacePlayerControllerBase::Bank(float alpha) {
 	if (ship->GetTheoreticalBankingSpeed() >= controls.MaxBankingSpeed) {
 		return;
 	}
-	auto negOrPos = alpha < 0 ? -1 : 1;
-	auto multiplier = BankingCurve->GetFloatValue(FMath::Abs(alpha)) * negOrPos;
-	auto finalImpulse = FVector(0, controls.BankingSpeedImpulse * multiplier, 0);
-	ship->Bank(finalImpulse);
 
-	//ship->Spin(FVector(controls.BankingRotationImpulse*-negOrPos,0,0), 0/*controls.BankingRotationImpulseMax*/);
+	auto finalImpulse = FVector(0, controls.BankingSpeedImpulse * alpha, 0);
+	ship->Bank(finalImpulse);
 }
 
 ARaceShipBase* ARacePlayerControllerBase::GetShip(bool &success) {

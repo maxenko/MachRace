@@ -1,7 +1,8 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "MoveWith.h"
+#include "MachRace.h"
+
 
 
 // Sets default values for this component's properties

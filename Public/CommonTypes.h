@@ -3,7 +3,6 @@
 #pragma once
 #include "CommonTypes.generated.h"
 
-
 USTRUCT(BlueprintType)
 struct FBufferedSpawnLinearDirective {
 	GENERATED_USTRUCT_BODY()
@@ -312,4 +311,10 @@ UENUM(BlueprintType)
 enum class AutopilotIntent : uint8 {
 	DodgeObstacles			UMETA(DisplayName = "DodgeObstacles"),			// completely blocked
 	ResumeNonDodgeBehavior	UMETA(DisplayName = "ResumeNonDodgeBehavior"),	// no obstacles whatsoever
+};
+
+UENUM(BlueprintType)
+enum class MachRaceInputType : uint8 {
+	KeyboardInput			UMETA(DisplayName = "KeyboardInput"),	// completely blocked
+	JoystickInput			UMETA(DisplayName = "JoystickInput"),	// no obstacles whatsoever
 };

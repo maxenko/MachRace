@@ -1,7 +1,7 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "TurretBase.h"
+#include "MachRace.h"
 //#include "ObjectBase.h"
 #include "Kismet/GameplayStatics.h"
 

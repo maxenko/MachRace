@@ -1,9 +1,15 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "X.h"
+#include "MachRace.h"
+#include "SodiumUE4.h"
 #include "Algo/Reverse.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GenericPlatformHttp.h"
+#include "Internationalization.h"
+#include "RaceShipBase.h"
+
+
 
 FVector UX::GetRootLinearVelocity(AActor* target) {
 	auto targetRoot = Cast<UPrimitiveComponent>(target->GetRootComponent());
@@ -596,6 +602,7 @@ FString UX::UrlEncode(const FString url) {
 	return FGenericPlatformHttp::UrlEncode(url);
 }
 
+/*
 TArray<FString> UX::GetFakeScores(TArray<FString> names, float pct, int32 size) {
 
 	TArray<FString> scores;
@@ -623,7 +630,7 @@ TArray<FString> UX::GetFakeScores(TArray<FString> names, float pct, int32 size) 
 		return UX::ArraySlice(scores, pageStart, size);
 	}
 
-}
+}*/
 
 TArray<FVector> UX::GetSpacedRandomVectors(float maxDistToEachOther, float minX, float maxX, float minY, float maxY, float minZ, float maxZ, int32 count, int32 maxTries) {
 

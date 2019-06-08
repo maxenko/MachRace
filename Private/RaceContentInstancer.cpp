@@ -1,7 +1,7 @@
 // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "RaceContentInstancer.h"
+#include "MachRace.h"
 #include "RaceActorBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 

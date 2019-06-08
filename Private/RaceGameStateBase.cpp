@@ -1,11 +1,15 @@
  // Copyright 2015 - Max Enko
 
-#include "MachRace.h"
 #include "RaceGameStateBase.h"
+#include "MachRace.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "RacePlayerBase.h"
 #include "X.h"
+#include "Engine/Engine.h"
+#include "Engine/ExponentialHeightFog.h"
+#include "CommonTypes.h"
+#include "Components/ExponentialHeightFogComponent.h"
 
 
 ARaceGameStateBase::ARaceGameStateBase() {
@@ -219,7 +223,8 @@ void ARaceGameStateBase::Tick(float DeltaTime) {
 	if (shipOk) {
 		float speed = ship->GetTheoreticalSpeed();
 		if (speed > TopSpeed) {
-			TopSpeed = speed;
+			TopSpeed = speed; // theoretical speed
+			TopXVelocity = ship->GetSpeed();// physics speed
 		}
 	}
 
@@ -368,6 +373,8 @@ int32 ARaceGameStateBase::GetNextDesertTileN(bool increment) {
 
 	return n;
 }
+
+
 //////////////////////////////////////////////////////////////////////////
 /// Updates/blends camera settings, interpolated during run time.
 //////////////////////////////////////////////////////////////////////////
@@ -397,6 +404,8 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		settings.HudScale = .9;
 		settings.Fov = 120;
+
+		settings.CameraT.SetTranslation(Level1Stage1CameraPosition);
 		
 		//return settings;
 
@@ -410,8 +419,9 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		settings.InterpSpeed = 2;
 		settings.HudScale = .9;
-		settings.Fov = 110;
+		settings.Fov = 100;
 		settings.CameraT.SetTranslation(Level1Stage1CameraPosition);
+		settings.CameraT.SetRotation(Level1Stage1CameraRotation.Quaternion());
 
 		//return settings;
 
@@ -427,6 +437,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.HudScale = 1.2;
 		settings.Fov = 120;
 		settings.CameraT.SetTranslation(Level1Stage2CameraPosition);
+		settings.CameraT.SetRotation(Level1Stage2CameraRotation.Quaternion());
 
 		//return settings;
 
@@ -460,7 +471,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 		settings.BloomIntensity = 1.0;
 		settings.BloomThreshold = 1.0;
 
-		settings.Fov = 120;
+		settings.Fov = 140;
 		settings.HudScale = 1.3;
 		settings.CameraT.SetTranslation(Level2BossCameraPosition);
 		settings.CameraT.SetRotation(Level2BossCameraRotation.Quaternion());
@@ -494,7 +505,7 @@ FCameraSettings ARaceGameStateBase::GetCameraSettings(float speed) {
 
 		settings.CameraT.SetTranslation(Level4CameraPosition);
 		settings.CameraT.SetRotation(Level4CameraRotation.Quaternion());
-		settings.Fov = 100;
+		settings.Fov = 75;
 
 		settings.BloomIntensity = 0.02;
 		settings.BloomThreshold = 0.05;
@@ -601,7 +612,7 @@ void ARaceGameStateBase::transitionAtmosphere(AExponentialHeightFog* fog, FAtmos
 		return;
 	}
 
-	auto fogC = fog->GetComponent();
+	UExponentialHeightFogComponent* fogC = fog->GetComponent();
 	auto delta = world->GetDeltaSeconds();
 
 	fogC->SetFogDensity(FMath::FInterpTo(fogC->FogDensity, to.FogDensity, delta, speed));
@@ -805,6 +816,11 @@ void ARaceGameStateBase::GetLaserEffectiveRange(float& effectiveRange, float& fa
 		falloff = Level3LaserFalloff;
 		effectiveRange = Level3LaserEffectiveRange;
 		return;
+	} else if (Stage == GameStage::Space ) {
+
+		falloff = 0;
+		effectiveRange = FLT_MAX;
+		return;
 	}
 
 	falloff = DefaultLaserFalloff;
@@ -859,7 +875,7 @@ AActor* ARaceGameStateBase::GetAutoAimTargetSafe(bool& success) {
 		return NULL;
 	}
 
-	if (UKismetSystemLibrary::IsValid(LastAutoAimTarget)) {
+	if (LastAutoAimTarget->IsValidLowLevel()) {
 
 		auto autoAimTarget = Cast<ARaceActorBase>(LastAutoAimTarget); // ARaceActorBase might have additional data
 

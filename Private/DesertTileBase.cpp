@@ -1,8 +1,8 @@
 // Copyright 2015 - Max Enko
 
+#include "DesertTileBase.h"
 #include "MachRace.h"
 #include "RaceShipBase.h"
-#include "DesertTileBase.h"
 
 
 // Sets default values
@@ -21,19 +21,6 @@ void ADesertTileBase::BeginPlay() {
 	if (state){
 		state->AddIgnoredByLaserTrace(this);
 	}
-}
-
-
-ARaceContentInstancer* ADesertTileBase::GetInstancer(bool& success) {
-	auto state = GetState();
-
-	if (state) {
-		success = false;
-		return NULL;
-	}
-
-	auto instancer = state->GetInstancer(success);
-	return  instancer;
 }
 
 int32 ADesertTileBase::GetObstacleCount() {
