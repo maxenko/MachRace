@@ -52,6 +52,8 @@ void ARaceActorBase::Tick( float DeltaTime ){
 						FVector loc = pcm->GetCameraLocation();
 						float bufferedThisLocX = GetActorLocation().X - KillSelfIfBehindCameraAdditoonalBufferDistanceX;
 						if (loc.X < bufferedThisLocX || FVector::Distance(loc, GetActorLocation()) >= 499999.0) {
+
+							DestroyChildren();
 							Destroy();
 						}
 					}
