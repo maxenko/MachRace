@@ -43,6 +43,12 @@ public:
 	float TopSpeed = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|SaveData")
+	int RankedRaceCount = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|SaveData")
+	int UnrankedRaceCount = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|SaveData")
 	int64 Balance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|SaveData")

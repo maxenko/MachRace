@@ -13,48 +13,6 @@ ARaceShipBase::ARaceShipBase() {
 }
 
 
-void ARaceShipBase::decayLateralMovement(float delta) {
-	bool rootOk = false;
-	auto physVol = getRootAsPrimitive(rootOk);
-
-	if (!rootOk) {
-		return;
-	}
-
-	auto velocity		= physVol->GetPhysicsLinearVelocity();
-	auto newLaterSpeed	= FMath::FInterpTo(velocity.Y, 0, delta, 5);
-	velocity.Y			= newLaterSpeed;
-	physVol->SetPhysicsLinearVelocity(velocity);
-	OnBank.Broadcast(0);
-}
-
-
-// todo: replace this with UX implementation
-void ARaceShipBase::decayRotationToZero(float delta) {
-
-	bool rootOk = false;
-	auto physVol = getRootAsPrimitive(rootOk);
-
-	if (!rootOk) {
-		return;
-	}
-
-	// stop all rotation
-	if (physVol->GetPhysicsAngularVelocityInRadians() != FVector::ZeroVector) {
-		physVol->SetPhysicsAngularVelocityInRadians(FVector::ZeroVector);
-	}
-
-	physVol->SetWorldRotation(FMath::RInterpTo(physVol->GetComponentRotation(), FRotator(0, 0, 0), delta, 5));
-}
-
-
-// Called when the game starts or when spawned
-void ARaceShipBase::BeginPlay() {
-	Super::BeginPlay();
-	MinDistFromGroundCurrent = MinDistFromGround;
-}
-
-
 // Called every frame
 void ARaceShipBase::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
@@ -74,6 +32,22 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 		}
 	}
 
+	// trigger mach	speed changes
+	auto theoreticalSpeed = GetTheoreticalSpeed();
+	auto mach = FMath::DivideAndRoundDown((int32)theoreticalSpeed, (int32)MACH_SPEED);
+
+	if (previousMach != mach) {
+		previousMach = mach;
+		OnMachSpeedChange.Broadcast(mach);
+	}
+
+	// trigger overcharge update
+	auto overchargeCount = FMath::DivideAndRoundDown((int32)OverchargeTotal, (int32)ShieldMaxHitPoints);
+
+	if (previousOverchargeCount != overchargeCount) {
+		previousOverchargeCount = overchargeCount;
+		OnOverchargeAdded.Broadcast();
+	}
 
 	// hovering
 	auto state = GetState();
@@ -117,6 +91,48 @@ void ARaceShipBase::Tick(float DeltaSeconds) {
 			}
 		}
 	}
+}
+
+
+void ARaceShipBase::decayLateralMovement(float delta) {
+	bool rootOk = false;
+	auto physVol = getRootAsPrimitive(rootOk);
+
+	if (!rootOk) {
+		return;
+	}
+
+	auto velocity = physVol->GetPhysicsLinearVelocity();
+	auto newLaterSpeed = FMath::FInterpTo(velocity.Y, 0, delta, 5);
+	velocity.Y = newLaterSpeed;
+	physVol->SetPhysicsLinearVelocity(velocity);
+	OnBank.Broadcast(0);
+}
+
+
+// todo: replace this with UX implementation
+void ARaceShipBase::decayRotationToZero(float delta) {
+
+	bool rootOk = false;
+	auto physVol = getRootAsPrimitive(rootOk);
+
+	if (!rootOk) {
+		return;
+	}
+
+	// stop all rotation
+	if (physVol->GetPhysicsAngularVelocityInRadians() != FVector::ZeroVector) {
+		physVol->SetPhysicsAngularVelocityInRadians(FVector::ZeroVector);
+	}
+
+	physVol->SetWorldRotation(FMath::RInterpTo(physVol->GetComponentRotation(), FRotator(0, 0, 0), delta, 5));
+}
+
+
+// Called when the game starts or when spawned
+void ARaceShipBase::BeginPlay() {
+	Super::BeginPlay();
+	MinDistFromGroundCurrent = MinDistFromGround;
 }
 
 

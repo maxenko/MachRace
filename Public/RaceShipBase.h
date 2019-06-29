@@ -37,6 +37,7 @@ private:
 	void decayLateralMovement(float delta);
 	void decayRotationToZero(float delta);
 	int32 previousMach = 0;
+	int32 previousOverchargeCount = 0;
 	void changeSpeed(float by);
 	bool level1IsShipOutOfBounds(AActor* tile);
 
@@ -99,6 +100,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
 	FOnShieldActivity OnShieldActivity;
+	 
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "MachRace|Gameplay")
+	FOnOverchargeAdded OnOverchargeAdded;
 
 
 
