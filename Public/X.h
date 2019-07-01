@@ -6,6 +6,14 @@
 #include "VaRestPlugin.h"
 #include "CommonTypes.h"
 #include "RaceGameStateBase.h"
+#include "MachRace.h"
+#include "SodiumUE4.h"
+#include "Algo/Reverse.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "GenericPlatformHttp.h"
+#include "Internationalization.h"
+#include "Kismet/GameplayStatics.h"
+#include "RaceShipBase.h"
 #include "X.generated.h"
 
 /**
@@ -42,13 +50,19 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get X Dist.", Keywords = "Get distance between vectors using X axis only."), Category = "Machrace|Utility")
-		static float GetXDist(FVector a, FVector b) {
+	static float GetXDist(FVector a, FVector b) {
 		a.Y = a.Z = b.Y = b.Z = 0;
 		return FVector::Dist(a, b);
 	}
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get XY Dist.", Keywords = "Get distance between vectors using X axis only."), Category = "Machrace|Utility")
+	static float GetXYDist(FVector a, FVector b) {
+		a.Z = b.Z = 0;
+		return FVector::Dist(a, b);
+	}
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Z Dist.", Keywords = "Get distance between vectors using Z axis only."), Category = "Machrace|Utility")
-		static float GetZDist(FVector a, FVector b) {
+	static float GetZDist(FVector a, FVector b) {
 		a.X = a.Y = b.X = b.Y = 0;
 		return FVector::Dist(a, b);
 	}
@@ -94,6 +108,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Get Y Dist Actors", Keywords = "Gets distance between two actors but only in Y axis."), Category = "Machrace|Utility")
 	static float GetYDistBetweenActors(AActor* a, AActor* b);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Has Actors Within Distance", Keywords = "Returns true if any actors of certain type are found within distance of given actor."), Category = "Machrace|Utility")
+	static bool HasActorsWithinDist(TSubclassOf<AActor> ActorClass, float distance, AActor* from);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Has Actors Within Distance From Vector", Keywords = "Returns true if any actors of certain type are found within distance of given coordinate."), Category = "Machrace|Utility")
+	static bool HasActorsWithinDistFromVec(const UObject* WorldContextObject, TSubclassOf<AActor> ActorClass, float distance, FVector from);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "Cull Array", Keywords = "Takes an array, and removes number of items at random indexes."), Category = "Machrace|Utility")
 	static TArray<UObject*> CullAtRandom(TArray<UObject*> a, int32 numberToCull );

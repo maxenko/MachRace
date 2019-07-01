@@ -124,6 +124,9 @@ void  ARaceGameStateBase::SetLevelOneBossDeafeated() {
 // Called when the game starts or when spawned
 void ARaceGameStateBase::BeginPlay() {
 	Super::BeginPlay();
+
+	// initialize delta history to all 0.0's
+	deltaTimeHistory.Init(0, DeltaTimeHistorySize);
 }
 
 void ARaceGameStateBase::MaintainState() {
@@ -201,11 +204,23 @@ void ARaceGameStateBase::MaintainState() {
 		}
 	}
 }
-
+#pragma optimize("", off)
 // Called every frame
 void ARaceGameStateBase::Tick(float DeltaTime) {
 
 	Super::Tick(DeltaTime);
+
+	// keep track of delta time history
+	if (deltaTimeHistory.Num() != DeltaTimeHistorySize) {
+		deltaTimeHistory.Init(0, DeltaTimeHistorySize);
+	}
+
+	// reset counter when over limit
+	if (fpsIndexCounter >= (DeltaTimeHistorySize-1)) {
+		fpsIndexCounter = 0;
+	}
+
+	deltaTimeHistory[++fpsIndexCounter] = DeltaTime;
 
 	// trigger stage change updated settings
 	if (previousStage != Stage) {
@@ -238,7 +253,7 @@ void ARaceGameStateBase::Tick(float DeltaTime) {
 	ActiveEnemies.RemoveAll(removeInvalids); // remove invalid enemy actors
 	IgnoredByLaserTrace.RemoveAll(removeInvalids); // remove invalid ignored by laser actors
 }
-
+#pragma optimize("", on)
 void ARaceGameStateBase::AddIgnoredByLaserTrace(AActor* actorToIgnore) {
 	IgnoredByLaserTrace.Add(actorToIgnore);	
 }
@@ -941,4 +956,14 @@ int32 ARaceGameStateBase::GetLevel3Stage1ObstacleCount() {
 	}
 
 	return 0;
+}
+
+float ARaceGameStateBase::GetAverageFps() {
+	float sum = 0.0;
+
+	for (int32 i = 0; i < deltaTimeHistory.Num(); ++i) {
+		sum += deltaTimeHistory[i];
+	}
+
+	return 1000.0/((sum / ((float)deltaTimeHistory.Num()))*1000.0);
 }

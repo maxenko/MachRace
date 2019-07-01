@@ -37,6 +37,10 @@ private:
 	FAtmosphereSettings atmosphereSettings;
 	void SetAtmosphereByStage();
 	bool level2BossSetToBeRemoved = false;
+
+	// delta time history
+	TArray<float> deltaTimeHistory;
+	int32 fpsIndexCounter = 0;
 	
 public:
 
@@ -51,6 +55,9 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// machrace system related
 	//////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(BlueprintReadWrite, Category = "MachRace|System")
+	int32 DeltaTimeHistorySize = 10;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "MachRace|System")
 	TArray<AActor*> IgnoredByLaserTrace;
@@ -452,5 +459,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DisplayName = "GetStageBoostBlurAmount", Keywords = "Gets amount of boost blue appropriate for this stage."), Category = "MachRace|Gameplay")
 	float GetStageBoostBlurAmount();
+
+	//////////////////////////////////////////////////////////////////////////
+	// statistics
+	//////////////////////////////////////////////////////////////////////////
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Average FPS", Keywords = "Claculates average of internal DeltaTime history, returns average FPS (not deltatime)."), Category = "MachRace|Statistics")
+	float GetAverageFps();
 
 };

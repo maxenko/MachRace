@@ -1,15 +1,6 @@
 // Copyright 2015 - Max Enko
 
 #include "X.h"
-#include "MachRace.h"
-#include "SodiumUE4.h"
-#include "Algo/Reverse.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "GenericPlatformHttp.h"
-#include "Internationalization.h"
-#include "RaceShipBase.h"
-
-
 
 FVector UX::GetRootLinearVelocity(AActor* target) {
 	auto targetRoot = Cast<UPrimitiveComponent>(target->GetRootComponent());
@@ -950,4 +941,41 @@ bool UX::DataExists(const FString& dataName) {
 	auto fileName = dataName + ".race";
 	auto fullPath = UX::GetSavePath() + fileName;
 	return platformFile.FileExists(*fullPath);
+}
+
+bool UX::HasActorsWithinDist(TSubclassOf<AActor> ActorClass, float distance, AActor* from) {
+	// ...
+	TArray<AActor*> actors;
+	UGameplayStatics::GetAllActorsOfClass(from, ActorClass, actors);
+
+	for (AActor* a : actors) {
+
+		/*
+		if (a->GetClass() != ActorClass) {
+			continue;
+		}*/
+
+		if (a->GetDistanceTo(from) <= distance) {
+			return true;
+		}
+		
+	}
+	return false;
+}
+
+bool UX::HasActorsWithinDistFromVec(const UObject* WorldContextObject, TSubclassOf<AActor> ActorClass, float distance, FVector from) {
+	
+	TArray<AActor*> actors;
+	UGameplayStatics::GetAllActorsOfClass(WorldContextObject, ActorClass, actors);
+
+	for (AActor* a : actors) {
+
+		float dist = UX::GetXYDist(from, a->GetActorLocation());
+
+		if ( dist <= distance) {
+			return true;
+		}
+
+	}
+	return false;
 }
