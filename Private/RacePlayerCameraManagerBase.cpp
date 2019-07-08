@@ -35,7 +35,7 @@ void ARacePlayerCameraManagerBase::Tick(float DeltaTime){
 	Super::Tick(DeltaTime);
 }
 
-void ARacePlayerCameraManagerBase::UpdateRaceView(UCameraComponent* c, USceneComponent* hud, FTransform t, float fov, FVector targetHudScale, float speed, float bloomIntensity, float bloomThreshold) {
+void ARacePlayerCameraManagerBase::UpdateRaceView(UCameraComponent* c, FTransform t, float fov, FVector targetHudScale, float speed, float bloomIntensity, float bloomThreshold) {
 
 	if (!c) {
 		return;
@@ -60,15 +60,18 @@ void ARacePlayerCameraManagerBase::UpdateRaceView(UCameraComponent* c, USceneCom
 	c->PostProcessSettings.BloomIntensity = iBloomIntensity;
 	c->PostProcessSettings.BloomThreshold = iBloomThreshold;
 
+	c->SetFieldOfView(iFov);
+	c->SetRelativeTransform(iT);
 
+	
 	/*** hud ***/
+	/*
 	auto currentHudScale = hud->GetRelativeTransform().GetScale3D();
 	auto iHudScale = FMath::VInterpTo(currentHudScale, targetHudScale, delta, speed);
 
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Z: %f"), iT.GetLocation().Z));
 
-	c->SetFieldOfView(iFov);
-	c->SetRelativeTransform(iT);
+
 	hud->SetRelativeTransform(
 		FTransform(
 			hud->GetRelativeTransform().GetRotation(),
@@ -76,4 +79,5 @@ void ARacePlayerCameraManagerBase::UpdateRaceView(UCameraComponent* c, USceneCom
 			iHudScale
 		)
 	);
+	*/
 }
