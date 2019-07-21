@@ -188,7 +188,16 @@ public:
 	float Column = .01;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
-	float Standard = .955;
+	float RotatingColumn = .01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Press = .01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Destructible = .01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
+	float Standard = .935;
 };
 
 
@@ -268,7 +277,9 @@ enum class EHexTileChance : uint8
 	Decelerator,
 	Column,
 	Collectable,
-	ICBM
+	ICBM,
+	RotatingColumn,
+	Press
 };
 
 

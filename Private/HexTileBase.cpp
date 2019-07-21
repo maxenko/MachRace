@@ -52,6 +52,8 @@ void AHexTileBase::BeginPlay() {
 	distribute(EHexTileChance::ICBM, d.ICBM);
 	distribute(EHexTileChance::Standard, d.Standard);
 	distribute(EHexTileChance::Column, d.Column);
+	distribute(EHexTileChance::RotatingColumn, d.RotatingColumn);
+	distribute(EHexTileChance::Press, d.Press);
 
 }
 
@@ -185,61 +187,44 @@ FHexTileDistribuition AHexTileBase::GenerateDistributionMap() {
 
 		if (speed < state->Level2ObstacleTriggerspeed) {
 
-			d.Decelerators = .02;
-			d.Accelerators = .03;
-			d.Collectables = .004;
-			d.ICBM		   = .000;
-			d.Column	   = .000;
+			d = state->L2ObstacleWeightsLessThanTriggerSpeed;
 		
-		}else if (speed >= state->Level2ObstacleTriggerspeed) { // check RaceGameStateBase.cpp where this is also used in tandem
+		}else if (speed >= state->Level2ObstacleTriggerspeed) {
 
-			if (speed < state->Level2ObstacleTriggerspeedThreshold1) {
-				d.Decelerators = .04;
-				d.Accelerators = .06;
-				d.Collectables = .005;
-				d.ICBM = .005;
-				d.Column = .02;
-			}
-			else if (speed < state->Level2ObstacleTriggerspeedThreshold2) {
-				d.Decelerators = .04;
-				d.Accelerators = .06;
-				d.Collectables = .005;
-				d.ICBM = .003;
-				d.Column = .015;
-			}
-			else if (speed < state->Level2ObstacleTriggerspeedThreshold3) {
-				d.Decelerators = .04;
-				d.Accelerators = .06;
-				d.Collectables = .005;
-				d.ICBM = .002;
-				d.Column = .01;
-			}
-			else if (speed < state->Level2ObstacleTriggerspeedThreshold4) {
-				d.Decelerators = .04;
-				d.Accelerators = .06;
-				d.Collectables = .005;
-				d.ICBM = .002;
-				d.Column = .008;
-			}
-			else if (speed < state->Level2ObstacleTriggerspeedThreshold5) {
-				d.Decelerators = .04;
-				d.Accelerators = .06;
-				d.Collectables = .005;
-				d.ICBM = .001;
-				d.Column = .005;
-			}
+			if (speed < state->Level2ObstacleTriggerspeedThreshold2) {
 
+				d = state->L2ObstacleWeightsLessThanThreshold1;
+			
+			} else if (speed < state->Level2ObstacleTriggerspeedThreshold3) {
+
+				d = state->L2ObstacleWeightsLessThanThreshold2;
+
+			} else if (speed < state->Level2ObstacleTriggerspeedThreshold4) {
+
+				d = state->L2ObstacleWeightsLessThanThreshold3;
+
+			} else if (speed < state->Level2ObstacleTriggerspeedThreshold5) {
+				
+				d = state->L2ObstacleWeightsLessThanThreshold4;
+
+			} else if (speed >= state->Level2ObstacleTriggerspeedThreshold5) {
+
+				d = state->L2ObstacleWeightsLessThanThreshold5;
+			}
 
 			return adjust(d);
 		}
 
 	} else {
 
-		d.Decelerators = .00;
-		d.Accelerators = .00;
-		d.Collectables = .00;
-		d.ICBM = 0.0;
-		d.Column = 0.0;
+		d.Decelerators		= .00;
+		d.Accelerators		= .00;
+		d.Collectables		= .00;
+		d.ICBM				= .00;
+		d.Column			= .00;
+		d.RotatingColumn	= .00;
+		d.Press				= .00;
+		d.Destructible		= .00;
 		return adjust(d);
 
 	}

@@ -5,6 +5,11 @@
 #include "CoreMinimal.h"
 #include "CommonTypes.h"
 #include "Components/ActorComponent.h"
+
+#include "MachRace.h"
+#include "X.h"
+#include "DrawDebugHelpers.h"
+
 #include "AutoPilotV3.generated.h"
 
 
@@ -13,6 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPathConditionChange, AutopilotPat
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MACHRACE_API UAutoPilotV3 : public UActorComponent {
 	GENERATED_BODY()
+
 
 protected:
 	// Called when the game starts
@@ -41,6 +47,7 @@ public:
 
 	// Sets default values for this component's properties
 	UAutoPilotV3();
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Debug
@@ -79,6 +86,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Navigation", meta = (ToolTip = "Offset at which to follow the target."))
 	FVector TargetOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Animation", meta = (ToolTip = "Bob range, Z axis only."))
+	float BobRangeZ = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Animation", meta = (ToolTip = "Current Bob target value."))
+	float CurrentBobZ = 0;
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -128,6 +141,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "MachRace|Gameplay|Navigation", meta = (DisplayName = "Find Path", Keywords = "Runs the scan when ScanAutomatically is enabled."))
 	void AutoScan();
+
+	UFUNCTION(BlueprintCallable, Category = "MachRace|Gameplay|Navigation", meta = (DisplayName = "Flip CurrentBobZ", Keywords = "Flip CurrentBobZ to the other extreme."))
+	void FlipBobZTarget();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System|Navigation")
 	TArray<AActor*> IgnoreList;

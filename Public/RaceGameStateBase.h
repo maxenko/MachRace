@@ -166,6 +166,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level1")
 	float Level1BossTriggerSpeed = 2600;
 
+	/////////////////////// level 2 //////////////////////////////////////////
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	float Level2ObstacleTriggerspeed = 2700;
 
@@ -190,14 +192,46 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
 	float Level2BossTriggerSpeed = 6000;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2")
+	float Level2DroneProjectileExplosionRadiusY = 400;
+
+	/////////////////////// level 2 - obstacle weight settings ///////////////
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2|ObstacleWeights", Meta = (DisplayName = "Less Than Trigger Speed"))
+	FHexTileDistribuition L2ObstacleWeightsLessThanTriggerSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2|ObstacleWeights", Meta = (DisplayName = "Less Than Threshold 1"))
+	FHexTileDistribuition L2ObstacleWeightsLessThanThreshold1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2|ObstacleWeights", Meta = (DisplayName = "Less Than Threshold 2"))
+	FHexTileDistribuition L2ObstacleWeightsLessThanThreshold2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2|ObstacleWeights", Meta = (DisplayName = "Less Than Threshold 3"))
+	FHexTileDistribuition L2ObstacleWeightsLessThanThreshold3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2|ObstacleWeights", Meta = (DisplayName = "Less Than Threshold 4"))
+	FHexTileDistribuition L2ObstacleWeightsLessThanThreshold4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level2|ObstacleWeights", Meta = (DisplayName = "Less Than Threshold 5"))
+	FHexTileDistribuition L2ObstacleWeightsLessThanThreshold5;
+
+	/////////////////////// level 3 //////////////////////////////////////////
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level3")
 	float Level3TriggerSpeed = 12000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level3")
 	float Level3Stage2TriggerSpeed = 18000;
 
+	/////////////////////// level 3 //////////////////////////////////////////
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Level4")
 	float Level4TriggerSpeed = 25038.72;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// laser gameplay related - speed(s)
+	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay|Settings|Laser")
 	float Level1LaserFalloff = 2500;
