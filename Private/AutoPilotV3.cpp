@@ -1,11 +1,6 @@
 // Copyright 2015 - Max Enko
 
 #include "AutoPilotV3.h"
-#include "MachRace.h"
-#include "X.h"
-#include "DrawDebugHelpers.h"
-
-
 
 // Sets default values for this component's properties
 UAutoPilotV3::UAutoPilotV3() {
@@ -14,11 +9,11 @@ UAutoPilotV3::UAutoPilotV3() {
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-
 // Called when the game starts
 void UAutoPilotV3::BeginPlay() {
 	Super::BeginPlay();
-	
+
+	CurrentBobZ = BobRangeZ; // init
 }
 
 // Called every frame
@@ -104,7 +99,7 @@ float UAutoPilotV3::getVelocityZ(float ownerSpeed, FVector targetLoc, FVector ow
 	if (!AlignWithTargetInZ) {
 		return 0.0;
 	}
-	auto offsetTarget = targetLoc + TargetOffset;
+	auto offsetTarget = targetLoc + TargetOffset + FVector(0,0,CurrentBobZ);
 
 	float dist = UX::GetZDist(offsetTarget, ownerLoc);
 
@@ -342,3 +337,7 @@ bool UAutoPilotV3::doubleSphereTrace(FVector from, FVector to, float scanRadius,
 }
 
 #pragma endregion
+
+void UAutoPilotV3::FlipBobZTarget() {
+	CurrentBobZ = -CurrentBobZ;
+}
