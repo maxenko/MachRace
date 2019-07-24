@@ -3,6 +3,7 @@
 #pragma once
 
 #include "RaceActorBase.h"
+#include "ShipData.h"
 #include "RaceShipBase.generated.h"
 
 
@@ -55,6 +56,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Ship Speed", Keywords = "Sets speed ship to a specific (theoretical) value."), Category = "MachRace|Utility")
 	void SetShipSpeed(float speed);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	UShipData* ShipData = NULL;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Gameplay")
 	bool EnableOvercharge = false;

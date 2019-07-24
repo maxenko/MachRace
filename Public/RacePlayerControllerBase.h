@@ -10,6 +10,8 @@ UCLASS()
 class MACHRACE_API ARacePlayerControllerBase : public APlayerController {
 	GENERATED_BODY()
 
+private:
+	bool tickLogicOkToRun = false;
 
 public:
 
@@ -20,6 +22,12 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
+	ARaceGameStateBase* State = NULL;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MachRace|System")
+	ARaceShipBase* Ship = NULL;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|Engine")
 	UCurveFloat* BankingCurve;
