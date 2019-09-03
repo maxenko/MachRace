@@ -83,10 +83,56 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-	float MinDistFromGround = 150;
+	float MinDistFromGroundPrelaunch = -1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-	float GroundFollowSpeed = 10;
+	float MinDistFromGroundLevel1 = 135;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float MinDistFromGroundLevel1Boss = 135;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float MinDistFromGroundLevel2 = 150;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float MinDistFromGroundLevel2Boss = 150;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float MinDistFromGroundLevel3 = 150;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float MinDistFromGroundLevel3Boss = 150;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float MinDistFromGroundLevel4 = 150;
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float GroundFollowSpeedPrelaunch = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float GroundFollowSpeedLevel1 = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float GroundFollowSpeedLevel1Boss = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float GroundFollowSpeedLevel2 = 200;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float GroundFollowSpeedLevel2Boss = 200;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float GroundFollowSpeedLevel3 = 200;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float GroundFollowSpeedLevel3Boss = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float GroundFollowSpeedLevel4 = 50;
+
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	float MaxBankingYaw = 4.5;
@@ -99,6 +145,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	float ShipHoverRealignmentSpeed = .6;
+
 
 
 	//////////////////////////////////////////////////////////////////////////

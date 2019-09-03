@@ -49,7 +49,7 @@ float UDamageHandler::TakeDamage(AActor* DamagedActor, float Damage, AController
 			Health = 0;
 			auto o = GetOwner();
 			if (o) {
-				OnActorDestroyed.Broadcast(o);
+				OnActorDestroyed.Broadcast(o, HitLocation);
 			}
 			
 		} else {

@@ -7,7 +7,7 @@
 #include "DamageHandler.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnComponentDestroyedSignature, USceneComponent*, component);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorDestroyedSignature, AActor*, actor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorDestroyedSignature, AActor*, actor, FVector, LastHitLocation);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnComponentDamageSignature, USceneComponent*, component, float, health);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorDamageSignature, float, HealthLeft);
 
