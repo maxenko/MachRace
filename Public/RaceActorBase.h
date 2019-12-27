@@ -62,5 +62,33 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add Child", Keywords = "Adds to internal Children array, which can be cleaned up by calling Destroy Children"), Category = "MachRace|Engine")
 	void AddChild(AActor* a);
-	
+
+	//////////////////////////////////////////////////////////////////////////
+	// Pooling
+	//////////////////////////////////////////////////////////////////////////
+
+	/** Event signals when actor was resurrected from the pool. Reset logic should be handled manually in blueprint. */
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Pool BeginPlay", Keywords = "When resurrected from pool."), Category = "MachRace|System")
+	void ReceivePoolBeginPlay();
+
+	/** Event signals for Actor to return to the pool (which should be handled manually in blueprint). */
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Return To Pool", Keywords = "When returned to pool."), Category = "MachRace|System")
+	void ReceiveReturnToPool();
+
+	/** Event that clears the pool of specific type of actor. */
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Destroyed by Pool Clear"), Category = "MachRace|System")
+	void ReceiveDestroyedByPoolClear();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MachRace|System")
+	bool Pooled = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MachRace|System")
+	int32 TimesPooled = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	bool IsAPoolActor = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MachRace|System")
+	FVector PoolHideLocation = FVector(0,0,-100000);
+
 };

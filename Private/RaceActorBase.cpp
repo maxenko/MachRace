@@ -9,7 +9,6 @@ class ARaceGameStateBase;
 #include "Kismet/KismetSystemLibrary.h"
 
 
-
 // Sets default values
 ARaceActorBase::ARaceActorBase(){
 	PrimaryActorTick.bCanEverTick = true;
@@ -53,8 +52,18 @@ void ARaceActorBase::Tick( float DeltaTime ){
 						float bufferedThisLocX = GetActorLocation().X - KillSelfIfBehindCameraAdditoonalBufferDistanceX;
 						if (loc.X < bufferedThisLocX || FVector::Distance(loc, GetActorLocation()) >= 499999.0) {
 
-							DestroyChildren();
-							Destroy();
+							if (IsAPoolActor) {
+
+								this->ReceiveReturnToPool();
+								TimesPooled++;
+
+							} else {
+
+								DestroyChildren();
+								Destroy();
+
+							}
+
 						}
 					}
 				}

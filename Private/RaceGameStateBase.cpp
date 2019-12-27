@@ -18,6 +18,14 @@ ARaceGameStateBase::ARaceGameStateBase() {
 	SetAtmosphereByStage();
 }
 
+// Called when the game starts or when spawned
+void ARaceGameStateBase::BeginPlay() {
+	Super::BeginPlay();
+
+	// initialize delta history to all 0.0's
+	deltaTimeHistory.Init(0, DeltaTimeHistorySize);
+}
+
 void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 	PreviousStage = Stage;
 	Stage = newStage;
@@ -119,14 +127,6 @@ void ARaceGameStateBase::SetStage(GameStage newStage, bool force) {
 void  ARaceGameStateBase::SetLevelOneBossDeafeated() {
 	Level1BossDefeated = true;
 	OnDeathLevel1Boss.Broadcast();
-}
-
-// Called when the game starts or when spawned
-void ARaceGameStateBase::BeginPlay() {
-	Super::BeginPlay();
-
-	// initialize delta history to all 0.0's
-	deltaTimeHistory.Init(0, DeltaTimeHistorySize);
 }
 
 void ARaceGameStateBase::MaintainState() {
@@ -547,10 +547,11 @@ void ARaceGameStateBase::SetAtmosphereByStage() {
 
 	} else if (Stage == GameStage::InfiniteHex) {
 
-		settings.FogDensity = 0.7;
-		settings.FogHeightFaloff = .0001;
+		settings.FogDensity = 0.6;
+		settings.FogHeightFaloff = .5;
 		settings.FogMaxOpacity = 1;
-		settings.FogStartDist = 1850;
+		//settings.FogStartDist = 1850;
+		settings.FogStartDist = 4700;
 		settings.FogInscatteringExponent = 10;
 		settings.FogInscatteringStartDist = 1900;
 

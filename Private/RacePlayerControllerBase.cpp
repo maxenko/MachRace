@@ -12,14 +12,6 @@ ARacePlayerControllerBase::ARacePlayerControllerBase() {
 // Called when the game starts or when spawned
 void ARacePlayerControllerBase::BeginPlay() {
 	Super::BeginPlay();
-
-	State = GetState();
-	if (State) {
-		auto shipOk = false;
-		Ship = State->GetRaceShip(shipOk);
-
-		tickLogicOkToRun = shipOk;
-	}
 }
 
 
@@ -27,19 +19,30 @@ void ARacePlayerControllerBase::BeginPlay() {
 void ARacePlayerControllerBase::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 
-	if (!tickLogicOkToRun) {
-		return;
-	}
-
-	// if no lateral input is being received, decay lateral movement to 0
-								// if neither are down						// if both are down
-	Ship->EnableLateralDecay = (!InputRightEnabled && !InputLeftEnabled) || (InputRightEnabled && InputLeftEnabled);
-
-	if (Ship->EnableLateralDecay) {
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("delta: %f"), DeltaSeconds));
+	// if there is no hard reference to ship, keep trying to get it (todo: maybe wise to move this to a timer since this is running every frame)
+	if (!Ship) {
+		State = GetState();
+		if (State) {
+			auto shipOk = false;
+			Ship = State->GetRaceShip(shipOk);
+			if (!shipOk) {
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ARacePlayerControllerBase::Tick(..) Trying to find SHIP...!"));
+			}
+			
+		}
 	} else {
-		Ship->Yaw(!InputRightEnabled);
+		// if no lateral input is being received, decay lateral movement to 0
+								// if neither are down						// if both are down
+		Ship->EnableLateralDecay = (!InputRightEnabled && !InputLeftEnabled) || (InputRightEnabled && InputLeftEnabled);
+
+		if (Ship->EnableLateralDecay) {
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("delta: %f"), DeltaSeconds));
+		} else {
+			Ship->Yaw(!InputRightEnabled);
+		}
 	}
+
+
 }
 
 ARaceGameStateBase* ARacePlayerControllerBase::GetState() {
@@ -47,6 +50,11 @@ ARaceGameStateBase* ARacePlayerControllerBase::GetState() {
 }
 
 void ARacePlayerControllerBase::Bank(float alpha) {
+
+	if (!Ship) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ARacePlayerControllerBase::Bank(..) Ship is NULL!"));
+		return;
+	}
 
 	auto speed = Ship->GetTheoreticalSpeed();
 	auto bankingImpulse = Ship->ShipData->GetBankingSpeedImpulse(State->Stage);

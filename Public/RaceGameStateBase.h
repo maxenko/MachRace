@@ -56,6 +56,9 @@ public:
 	// machrace system related
 	//////////////////////////////////////////////////////////////////////////
 
+	//UPROPERTY(BlueprintReadOnly, Category = "MachRace|System")
+	//ARacePool* Pool = NULL;
+
 	UPROPERTY(BlueprintReadWrite, Category = "MachRace|System")
 	int32 DeltaTimeHistorySize = 10;
 	
